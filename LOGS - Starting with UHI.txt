@@ -1,0 +1,25 @@
+16/11/2025:
+ - Crosschecked data for 31st October and found promising links between train arrival times and checkout times
+ - Filtered out data for emirates stations
+ - Write script to see train times and arrival time
+ - found discrepancy in train arrival data from rta 
+ - Sent email asking for clarification
+ - Got to know clusters in incoming trains are overlapping so its hard to predict which trains the people get off from.
+
+TO DO: Look to refine approach, wait for response from email, look for new
+
+-----
+
+19/11/2025:
+- Researched into new  ideas to go to
+- Landed on urban heat island idea
+- created a project report outlining key goals of the project
+- Identified key clients that would use the project including RTA, Muncipality, and citizens.
+- Researched about overture to get building heights for citizen part of the project to calculate building shade to compute the most comfortable path.
+- Understood the approach of temporal downscaling.
+- Identified key points to focus on in the code-level implementation.
+
+------
+
+20/11/2025:
+- 
