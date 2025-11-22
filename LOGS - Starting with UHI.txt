@@ -21,5 +21,6 @@ TO DO: Look to refine approach, wait for response from email, look for new
 
 ------
 
-20/11/2025:
+22/11/2025:
+- Analyzed Landsat 8-9 OLI/TIRS Collection 2 Level-2 data and went through structure and files to ensure it contains all the necessary details
 - 
