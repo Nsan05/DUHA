@@ -32,4 +32,12 @@ TO DO: Look to refine approach, wait for response from email, look for new
 - Found out that the satellite flies diagonally over dubai and hence gives an incomplete view over the land and surrounding area.
 - Researched for alternative approached also considering the 375m option with the additional information like - 'Heat from the air itself (upwelling radiance).Heat reflected off the air back to the ground (downwelling radiance).'
 - Switched to VIIRS again with 750m resolution
-- 
+
+------
+
+26/11/2025:
+- Troubleshooted issue of git push being too large
+- Changed datasets onto Onedrive and git ignored the large files
+
+-----
+
