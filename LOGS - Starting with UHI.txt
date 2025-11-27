@@ -21,5 +21,23 @@ TO DO: Look to refine approach, wait for response from email, look for new
 
 ------
 
-20/11/2025:
-- 
+22/11/2025:
+- Analyzed Landsat 8-9 OLI/TIRS Collection 2 Level-2 data and went through structure and files to ensure it contains all the necessary details
+
+------
+23/11/2025:
+- Switched from VIIRS to ECO_L2_LSTE due to data not being readily available through NASA Earth data
+- Went through the ECOSTRESS images to identify accurate images that cover the area of Dubai in the two different time intervals of afternoon and night.
+- Identified the coordinate data is missing and also need the ECO_L1B_GEO data for the image
+- Found out that the satellite flies diagonally over dubai and hence gives an incomplete view over the land and surrounding area.
+- Researched for alternative approached also considering the 375m option with the additional information like - 'Heat from the air itself (upwelling radiance).Heat reflected off the air back to the ground (downwelling radiance).'
+- Switched to VIIRS again with 750m resolution
+
+------
+
+26/11/2025:
+- Troubleshooted issue of git push being too large
+- Changed datasets onto Onedrive and git ignored the large files
+
+-----
+
