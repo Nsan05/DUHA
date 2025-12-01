@@ -41,3 +41,19 @@ TO DO: Look to refine approach, wait for response from email, look for new
 
 -----
 
+30/11/2025:
+- Started looking into the Sentinel-2 MSI dataset and exploring if there are any better options.
+- Performed validation on the dataset to ensure that it contains the data that we need
+- Analyzed OSM data
+- Analyzed the overture dataset, identified ways to make the maximum use of the data available.
+- Found that the height data in Overture is not too much and is missing for many of the buildings.
+- Looking into alternatives with GHS and Dubai Pulse Datasets
+----
+
+1/12/2025:
+- Explored the Dubai Munciplaity dm_building_summary_information-open but couldn't go ahead with it as there is no link between the building id and the actual location coordinates.
+- Explored DM and DLD Datasets but was unsuccessful in finding a link between building id and location data.
+- Found the makhani number data from https://www.makani.ae/ and found that it can be searched using the parcel_id but only one at a time. 
+- Created a small script to send requests one at a time keeping this as a last fall back in case extra data cannot be obtained.
+- Submitted a data request to GeoDubai to obtain the heights of buildings more easily.
+- Generated documentation for all the datasets covered so far so that all the datasets are properly accounted for.
