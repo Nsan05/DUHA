@@ -57,3 +57,11 @@ TO DO: Look to refine approach, wait for response from email, look for new
 - Created a small script to send requests one at a time keeping this as a last fall back in case extra data cannot be obtained.
 - Submitted a data request to GeoDubai to obtain the heights of buildings more easily.
 - Generated documentation for all the datasets covered so far so that all the datasets are properly accounted for.
+- Explored what datasets to look into to identify priority.
+- Identified the dm_community-open dataset to know the proper boundaries for each sector within Dubai.
+- Identified the Dubai census data with population within each sector to further model the priority of each sector.
+- Also included metro monthly ridership data to include the presence of metro stations within the priority as well while ranking the sectors.
+
+-----
+
+
