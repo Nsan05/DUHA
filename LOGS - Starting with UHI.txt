@@ -60,8 +60,15 @@ TO DO: Look to refine approach, wait for response from email, look for new
 - Explored what datasets to look into to identify priority.
 - Identified the dm_community-open dataset to know the proper boundaries for each sector within Dubai.
 - Identified the Dubai census data with population within each sector to further model the priority of each sector.
-- Also included metro monthly ridership data to include the presence of metro stations within the priority as well while ranking the sectors.
+- Also included metro monthly ridership data to include the presence of metro stations within the priority as well, while ranking the sectors.
 
 -----
+
+7/12/2025:
+- Finalized base project report overview
+- Added most of the features that are decided so far so that the approach is documented and easy to refer in the future.
+- Added both the data analysis document (that has been worked on for the past two weeks) and the report to GitLab, leaving everything ready to start implementation completely.
+
+------
 
 
