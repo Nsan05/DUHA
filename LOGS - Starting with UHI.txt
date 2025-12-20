@@ -70,5 +70,6 @@ TO DO: Look to refine approach, wait for response from email, look for new
 - Added both the data analysis document (that has been worked on for the past two weeks) and the report to GitLab, leaving everything ready to start implementation completely.
 
 ------
-
+20/12/2025:
+- Looked into research papers that talk about downscaling and explored different approaches to do the same.
 
