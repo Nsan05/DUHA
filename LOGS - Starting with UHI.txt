@@ -73,3 +73,12 @@ TO DO: Look to refine approach, wait for response from email, look for new
 20/12/2025:
 - Looked into research papers that talk about downscaling and explored different approaches to do the same.
 
+-----
+26/12/2025:
+- Explored different models that can be used to perform downscaling and those that can be used to learn the patterns amongst the features.
+- Experimented with different test code implementation structures to perform downscaling effectively.
+- Explored a multi model approach (a deep CNN super-resolution model purely for spatial sharpening, and a separate regression model for feature interpretation) and a single model approach for both.
+-----
+
+
+
