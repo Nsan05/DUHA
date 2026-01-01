@@ -80,5 +80,14 @@ TO DO: Look to refine approach, wait for response from email, look for new
 - Explored a multi model approach (a deep CNN super-resolution model purely for spatial sharpening, and a separate regression model for feature interpretation) and a single model approach for both.
 -----
 
+31/12/2025:
+- Set a proper timeline for the rest of the project implementation and the development of an initial MVP.
+- Identified and finalized the Coordinate Reference System and reference grid (Landsat) to finalize the spatial representation.
+- Installed QGIS to work on the kml files and apply urban mask.
+- Fixed regexp issues to add additional fields to the attributes table in the kml file in qgis.
+------
 
+1/1/2026:
+- Exported finished geojson file consisting of only the necessary fields from the original kml file using QGIS.
+- 
 
