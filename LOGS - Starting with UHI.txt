@@ -89,5 +89,7 @@ TO DO: Look to refine approach, wait for response from email, look for new
 
 1/1/2026:
 - Exported finished geojson file consisting of only the necessary fields from the original kml file using QGIS.
+- Finalized proper features that would be learnt in the model and how to handle the presence of water features and prevent the dominance of execessively sandy regions.
+- Identified and finalized rough version of the full pipeline to follow for the development of the MVP.
 - 
 
