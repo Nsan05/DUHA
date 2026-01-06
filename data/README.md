@@ -22,7 +22,8 @@ data/
 │   ├── viirs/
 │   │   ├── daytime/   <-- Place VIIRS .h5 or .tif files here
 │   │   └── metadata/
-│   └── osm/           <-- Place .pbf or .shp files for Dubai here
+│   ├── osm/           <-- Place .pbf or .shp files for Dubai here
+│   └── boundaries/    <-- Place urban_dubai_communities.geojson here
 ```
 
 ## Data Manifest
@@ -31,3 +32,4 @@ data/
 - **Landsat 8/9**: Collection 2 Level 2 Surface Temperature (Band 10).
 - **VIIRS**: VNP21 Land Surface Temperature (Daytime).
 - **OSM**: OpenStreetMap vector data (Roads, Buildings, Water).
+- **Boundaries**: Dubai urban community shapefiles/GeoJSON.
