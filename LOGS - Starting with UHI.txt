@@ -89,7 +89,7 @@ TO DO: Look to refine approach, wait for response from email, look for new
 
 1/1/2026:
 - Exported finished geojson file consisting of only the necessary fields from the original kml file using QGIS.
-- Finalized proper features that would be learnt in the model and how to handle the presence of water features and prevent the dominance of execessively sandy regions.
+- Finalized proper features that would be learnt in the model and how to handle the presence of water features and prevent the dominance of excessively sandy regions.
 - Identified and finalized rough version of the full pipeline to follow for the development of the MVP.
 
 
@@ -97,6 +97,7 @@ TO DO: Look to refine approach, wait for response from email, look for new
 
 06/01/2026:
 - Planned out next phase of the MVP
-- Finalised on a better file structure for the upcoming phase.
+- Finalized on a better file structure for the upcoming phase.
+- Downloaded 5 Sentinel2 dates having cloud cover <10% and adjusted the readme to include the drive link containing the data.
 - 
 

@@ -1,1 +1,31 @@
+# System files
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.ipynb_checkpoints/
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Large Data Directories
+# We ignore the contents but keep the folder structure
+data/raw/*
+!data/raw/.gitkeep
+data/intermediate/*
+!data/intermediate/.gitkeep
+data/final/*
+!data/final/.gitkeep
+
+# Ignore locally generated outputs
+outputs/figures/*
+!outputs/figures/.gitkeep
+
+# Ignore user-specific notebooks or scraps
+notebooks/*.ipynb
+!notebooks/phase1_qc/.gitkeep
+
+
 Preliminary Datasets/ 
