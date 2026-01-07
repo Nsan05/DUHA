@@ -8,10 +8,10 @@ Notes: Data obtained during peak heat months of July, August and early September
 
 ## VIIRS VNP21 (Daytime)
 
-Source:
-Dates:
-Number of scenes:
-Notes:
+Source: NASA Earthdata
+Dates: July - mid-September 2025
+Number of scenes: 33
+Notes: Daytime (~13:30 local) scenes only; summer period; multiple scenes used to reduce noise via averaging. Coastal pixels partially masked due to land–water mixing.
 
 ## Landsat LST
 

@@ -99,5 +99,10 @@ TO DO: Look to refine approach, wait for response from email, look for new
 - Planned out next phase of the MVP
 - Finalized on a better file structure for the upcoming phase.
 - Downloaded 5 Sentinel2 dates having cloud cover <10% and adjusted the readme to include the drive link containing the data.
+
+----
+
+07/01/2026:
+- Analyzed VIIRS data from nasa earthdata and indivusally analyzed and picked good data from August to September.
 - 
 
