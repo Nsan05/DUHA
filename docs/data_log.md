@@ -1,6 +1,6 @@
 ## Sentinel-2
 
-Source: browser.dataspace.copernicus.eu
+Source: Copernicus
 Dates: 2025-07-16, 2025-07-21, 2025-08-05, 2025-08-12, 2025-08-14
 Scene IDs: T40RBN, T40RCN, T40RCP, T39RZH
 Cloud %: <10%
@@ -15,9 +15,10 @@ Notes: Daytime (~13:30 local) scenes only; summer period; multiple scenes used t
 
 ## Landsat LST
 
-Source:
-Dates:
-Notes:
+Source: USGS EarthExplorer
+Dates: 2025-07-03, 2025-07-19, 2025-08-04, 2025-08-12, 2025-08-28
+Number of scenes: 5
+Notes: It gives the spatial pattern of how hot different parts of the city are relative to each other during the day, at high resolution.
 
 ## OSM
 
