@@ -22,10 +22,15 @@ Notes: It gives the spatial pattern of how hot different parts of the city are r
 
 ## OSM
 
-Download date:
-Source:
+Source: OpenStreetMap via OSMnx  
+Query date: 2026-01-07  
+Features: Building footprints and road network  
+Query geometry: Urban Dubai community boundary  
+Notes: Data will be queried once and saved locally during processing to ensure reproducibility.
 
 ## Urban Boundaries
 
-Source:
-Version:
+Source: dm_communities-open (Dubai Pulse)
+Format: GeoJSON
+File: urban_dubai_communities.geojson
+Notes: Clipped to urban Dubai using the original kml file from Dubai Pulse.

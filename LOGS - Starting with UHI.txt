@@ -105,5 +105,7 @@ TO DO: Look to refine approach, wait for response from email, look for new
 07/01/2026:
 - Analyzed VIIRS data from nasa earthdata and indivusally analyzed and picked good data from August to September.
 - Analyzed Landsat data and acquired good data to work with.
+- Analyzed OSM and dubai communities having the urban clip applied.
+- Finalized Data choices for the MVP
 
 
