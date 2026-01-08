@@ -108,4 +108,9 @@ TO DO: Look to refine approach, wait for response from email, look for new
 - Analyzed OSM and dubai communities having the urban clip applied.
 - Finalized Data choices for the MVP
 
+-----
+
+08/01/2025:
+- Finalized the CRS as Projected CRS, EPSG:32640.
+- 
 
