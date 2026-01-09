@@ -115,4 +115,10 @@ TO DO: Look to refine approach, wait for response from email, look for new
 - Decided to use 30m Landsat grid as the master grid that the other datasets can snap onto. (Used 30m because its not too detailed but still captures decent detail, its flexible to work with the other datasets that we are using and it's consistent with other research as well).
 - The master grid is created so that we have a default "cookie-cutter" style item that would impose the same resolution and CRS on all the data which makes it easier to process.
 - New TIF file is generated which contains It contains CRS (EPSG:32640), Pixel size (30 m × 30 m), Pixel alignment (origin), Raster extent (bounds), Shape (width × height)
+
+
+-----
+09/01/2026:
+- Explored affine objects tells you how to convert pixel coordinates into real world coordinates
+- Created the urban mask tif file that follows the mater grid style raster from the geojson file.
 - 
