@@ -41,8 +41,6 @@ def create_urban_mask():
     # 3. Dissolve into Single Polygon
     # This prevents boundary overlaps and simplifies rasterization
     print("       Dissolving polygons into single urban shape...")
-    # 'dissolve' returns a GeoDataFrame with one row (the union of all geoms)
-    # We assign a constant column to dissolve on
     gdf['dissolve_id'] = 1
     dissolved_gdf = gdf.dissolve(by='dissolve_id')
     
@@ -50,7 +48,7 @@ def create_urban_mask():
     print("\n[INFO] Rasterizing...")
     
     # rasterize() expects a list of (geometry, value) tuples
-    # We use '1' for inside urban area
+    # '1' for inside urban area
     shapes = ((geom, 1) for geom in dissolved_gdf.geometry)
     
     mask_array = rasterize(

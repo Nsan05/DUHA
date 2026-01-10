@@ -22,3 +22,16 @@ Type: Binary Raster (1=Urban, 0=Background)
 Source: `urban_dubai_communities.geojson` (Dissolved)  
 Path: `data/intermediate/masks/urban_mask_30m.tif`  
 Note: Urban extent is defined by dissolving all community boundary polygons into a single urban geometry and rasterising this geometry onto the 30 m master grid. Pixels inside the urban extent are assigned a value of 1, and all other pixels are assigned 0.
+
+## Sentinel-2 Derived Grids (30m)
+
+These files represent the median physical properties of the surface over the observation period, aggregated from 10m to 30m.
+
+| Feature    | Filename         | Description                             | Logic                                                                                 |
+| :--------- | :--------------- | :-------------------------------------- | :------------------------------------------------------------------------------------ |
+| **NDVI**   | `ndvi_30m.tif`   | Vegetation Density (-1 to 1)            | `(NIR - Red) / (NIR + Red)`                                                           |
+| **Albedo** | `albedo_30m.tif` | Broadband Surface Reflectivity (0 to 1) | Weighted Spectral IntegrationΣ (Weight_i \* Band_i) based on Solar Irradiance (ESUN). |
+| **NDWI**   | `ndwi_30m.tif`   | Water Index (-1 to 1)                   | `(Green - NIR) / (Green + NIR)`                                                       |
+| **BSI**    | `bsi_30m.tif`    | Bare Soil Index (-1 to 1)               | `((SWIR1 + Red) - (NIR + Blue)) / ((SWIR1 + Red) + (NIR + Blue))`                     |
+
+**Processing Note**: These were generated using a Median Composite of all cloud-free pixels from the available Sentinel-2 scenes.

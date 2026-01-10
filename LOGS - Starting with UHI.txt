@@ -121,4 +121,33 @@ TO DO: Look to refine approach, wait for response from email, look for new
 09/01/2026:
 - Explored affine objects tells you how to convert pixel coordinates into real world coordinates
 - Created the urban mask tif file that follows the mater grid style raster from the geojson file.
+- Moved on to sentinel data processing.
+- Manual data processing too slow.
+- Optimisation done:
+
+1. The "Windowed" Approach (RAM Optimization)
+Problem: You have 15 massive satellite images. Loading them all into RAM requires >30GB. Your computer would crash.
+Solution: We cut the city into small 2km squares (Windows).
+Action: The script loads only the data for one square, processes it, saves it, clears RAM, and moves to the next square. It never holds more than ~100MB in memory at once.
+
+2. Granule Filtering (Speed Optimization 1)
+Problem: Sentinel-2 splits the world into tiles (Granules). For any given 2km square in Dubai, maybe only 1 or 2 Granules actually cover it. The others are miles away.
+Naïve way: Try to read from all 15 files every time (Slow!).
+Our way: We defined a "Bounding Box" for every Granule. Before processing a square, we ask: "Which granules actually touch this square?" If the answer is "None", we skip it instantly.
+
+3. Urban Mask Check (Speed Optimization 2)
+Problem: A huge chunk of the map is just empty desert or sea (Background).
+Optimization: Before doing any heavy math, we check your urban_mask_30m.tif.
+Logic: "Is this square entirely '0' (Background)?"
+Yes: Skip it immediately.
+No: Process it.
+Result: We skipped ~60% of the work (all the desert blocks), finishing in minutes instead of hours.
+
+- SCL values chosen to ensure that only necessary pixels are being processed.
+- Since most standard formulas (like Liang 2000 or Bonafoni 2016) were calibrated using data from Europe or North America, the Weighted Spectral Integration method was used to find albedo.
+
+-----
+
+10/01/2025:
+- Added a test script for verification of the tif files and cross checked it within QGIS as well.
 - 
