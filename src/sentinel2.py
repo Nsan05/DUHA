@@ -81,6 +81,8 @@ def get_windowed_reprojection(src_path, master_meta, window_10m):
     
     # when we reproject (align them), the 10m grid form ours should match the 10m of our master grid perfectly
     # 1 is hardcoded to always choose the first layer of the passed src (which will always jsut be one)
+    # The original data may be skewed and not matching the coordinates and refercnce system of the target file. We reporject so that it does match
+    # It almost never fully aligns so we do resmapling to fix that 
     with rasterio.open(src_path) as src:
         dst_arr = np.zeros((window_10m.height, window_10m.width), dtype='float32')
         reproject(
@@ -100,6 +102,7 @@ def get_windowed_scl(src_path, master_meta, window_10m):
     tf_10m_global = rasterio.Affine(mt[0]/3, mt[1], mt[2], mt[3], mt[4]/3, mt[5])
     window_tf = tf_10m_global * rasterio.Affine.translation(window_10m.col_off, window_10m.row_off)
     
+
     with rasterio.open(src_path) as src:
         dst_arr = np.zeros((window_10m.height, window_10m.width), dtype='uint8')
         reproject(
