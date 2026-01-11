@@ -143,11 +143,41 @@ Yes: Skip it immediately.
 No: Process it.
 Result: We skipped ~60% of the work (all the desert blocks), finishing in minutes instead of hours.
 
-- SCL values chosen to ensure that only necessary pixels are being processed.
-- Since most standard formulas (like Liang 2000 or Bonafoni 2016) were calibrated using data from Europe or North America, the Weighted Spectral Integration method was used to find albedo.
-
 -----
 
 10/01/2025:
+- SCL values chosen to ensure that only necessary pixels are being processed.
+- Since most standard formulas (like Liang 2000 or Bonafoni 2016) were calibrated using data from Europe or North America, the Weighted Spectral Integration method was used to find albedo.
 - Added a test script for verification of the tif files and cross checked it within QGIS as well.
-- 
+
+----
+
+11/01/2025:
+- Moved onto the next step of generating a sand mask.
+- Choosing the thresholds as 0.15 for NDVI (https://www.usgs.gov/special-topics/remote-sensing-phenology/science/ndvi-foundation-remote-sensing-phenology#:~:text=The%20Normalized%20Difference%20Vegetation%20Index%20(NDVI)%20is,vegetation**%20High%20values%2C%20approximately%200.6%20to%200.9) 
+
+- Researched on ideal thresholds to choose to create the sand mask and the indices to use.
+
+- Researched NDWI values (https://eos.com/make-an-analysis/ndwi/, https://www.e3s-conferences.org/articles/e3sconf/pdf/2025/12/e3sconf_aere2025_02002.pdf) and decided on -0.05 to avoid any damp/irrigated soil.
+
+- Researched BSI values (https://www.researchgate.net/publication/348870669_An_Analysis_of_Bare_Soil_Occurrence_in_Arable_Croplands_for_Remote_Sensing_Topsoil_Applications/figures?lo=1) - used threshold as 0.05 [eventhough normal tipping point is 0] to have some buffer in terms of constructions sites or things like that.
+
+- Researched Albedo values (https://www.eupave.eu/wp-content/uploads/FACT-SHEET-High-albedo-v26062020.pdf, 
+https://www.researchgate.net/publication/359382211_Albedo_Change_Mechanism_of_Asphalt_Concrete_Surfaces#:~:text=For%20asphalt%20pavements%2C%20for%20example,historical%20city%20center.%20...) and decided to use it with threshold 0.25. 
+
+- Identified sand readings in creek harbor due the shallow water and turbidity. Looking for ways to fix it.
+- Added Albedo as a fix to the problem. 
+- After trail/error and checking the results with the actual map used these as the values for the sand mask. - 
+TH_NDWI = -0.07   # Strict Water Exclusion
+TH_NDVI = 0.15    # Vegetation Exclusion
+TH_BSI = 0.08     # Bare soil index
+TH_ALBEDO = 0.25  # Sand has higher reflectivity.
+
+
+
+
+
+
+ 
+
+

@@ -23,6 +23,14 @@ Source: `urban_dubai_communities.geojson` (Dissolved)
 Path: `data/intermediate/masks/urban_mask_30m.tif`  
 Note: Urban extent is defined by dissolving all community boundary polygons into a single urban geometry and rasterising this geometry onto the 30 m master grid. Pixels inside the urban extent are assigned a value of 1, and all other pixels are assigned 0.
 
+### Sand Mask (Control Variable)
+
+- **Purpose**: Identify natural bare soil/sand surfaces to control for their distinct thermal behavior.
+- **File**: `data/intermediate/masks/sand_mask_30m.tif`
+- **Logic**: `(Urban==1) & (NDWI < -0.07) & (NDVI < 0.15) & (BSI > 0.08) & (Albedo > 0.25)`
+- **Stats**: Covers ~34.47% of the Urban Area.
+- **Note**: Albedo (>0.25) strongly filters out water; BSI (>0.08) ensures high confidence in soil content.
+
 ## Sentinel-2 Derived Grids (30m)
 
 These files represent the median physical properties of the surface over the observation period, aggregated from 10m to 30m.
