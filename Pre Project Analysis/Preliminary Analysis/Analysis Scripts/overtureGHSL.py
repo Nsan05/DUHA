@@ -12,7 +12,7 @@ min_x, min_y = 54.9, 24.8
 max_x, max_y = 55.6, 25.3
 
 # PATH TO YOUR GHSL CSV
-csv_path = r'C:\Users\nithi\Desktop\Uni_Stuff\Y3\FYP\Preliminary Datasets\GHS_OBAT_CSV_ARE_E2020_R2024A_V1_0\GHS_OBAT_CSV_ARE_E2020_R2024A_V1_0.csv'
+csv_path = r"C:\Users\nithi\Desktop\Uni_Stuff\Y3\FYP\Pre Project Analysis\Preliminary Datasets\GHS_OBAT_CSV_ARE_E2020_R2024A_V1_0\GHS_OBAT_CSV_ARE_E2020_R2024A_V1_0.csv"
 
 print(f"🏗️ Combining Overture Maps (Geometry) with GHSL (Height)...")
 
