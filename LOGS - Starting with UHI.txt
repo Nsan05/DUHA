@@ -185,7 +185,11 @@ The Solution: Create a temporary grid that is 10x higher resolution (3m). We dra
 - Had an initial vesion of the code set up using assumptions for road width.
 - Anlaysed the script outputs to ensure that they are covering all the present features.
 - Looked into ways to overcome the hardcoded initial assumption regarding the roads now that the script gives proper outputs with the first implementation.
-
+- Started over to not complicate building and road logic so that both can be handled independently.
+- Found that some of the buildings are not covered in the osm dataset.
+- Decided to use overture instead of osm since it has better coverage.
+- Got the bounds of our master grid and converted it to overture coordinates and downloaded data for that area.
+- 
 
 
 
