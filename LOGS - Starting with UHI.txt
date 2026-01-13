@@ -119,7 +119,18 @@ TO DO: Look to refine approach, wait for response from email, look for new
 
 -----
 09/01/2026:
-- Explored affine objects tells you how to convert pixel coordinates into real world coordinates
+- Explored affine objects tells you how to convert pixel coordinates into real world coordinates those 6 numbers are:
+Scale X: How wide is one pixel? (e.g., 30 meters)
+
+Shear X: Is the map tilted? (Usually 0)
+
+Origin X: Where does the map start (West edge)?
+
+Shear Y: Is the map tilted? (Usually 0)
+
+Scale Y: How tall is one pixel? (Usually -30 meters, because maps go "down" from North).
+
+Origin Y: Where does the map start (North edge)?
 - Created the urban mask tif file that follows the mater grid style raster from the geojson file.
 - Moved on to sentinel data processing.
 - Manual data processing too slow.
@@ -189,6 +200,22 @@ The Solution: Create a temporary grid that is 10x higher resolution (3m). We dra
 - Found that some of the buildings are not covered in the osm dataset.
 - Decided to use overture instead of osm since it has better coverage.
 - Got the bounds of our master grid and converted it to overture coordinates and downloaded data for that area.
+
+------
+
+13/01/2026:
+- Completed the building.py script to get all the building data.
+- Comparison Results (Urban Mask Only): 📊
+
+Overture Maps: 314,348 buildings
+OpenStreetMap: 235,319 buildings
+Verdict: Overture gives +79,029 more buildings (~33% increase). This confirms that using Overture was the right choice, as it includes both OSM data and additional Microsoft/Esri AI-detected footprints, filling in many gaps.
+
+- Delved into reason why we need both reprojection and transform:
+reprojection: gives proper coordinates on where things are positioned.
+transform: the transform is used to convert those coordinates into what pixel in the new grid the data corresponds to.
+
+- Finalized building script
 - 
 
 
