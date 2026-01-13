@@ -216,6 +216,7 @@ reprojection: gives proper coordinates on where things are positioned.
 transform: the transform is used to convert those coordinates into what pixel in the new grid the data corresponds to.
 
 - Finalized building script
+- Tried to explore other alternatives to get accurate road widths rather than simply assuming.
 - 
 
 
