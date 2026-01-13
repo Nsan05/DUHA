@@ -4,7 +4,10 @@ import glob
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent.parent
-INPUT_DIR = BASE_DIR / "data" / "intermediate" / "sentinel2_30m"
+INPUT_DIRS = [
+    BASE_DIR / "data" / "intermediate" / "sentinel2_30m",
+    BASE_DIR / "data" / "intermediate" / "urban_form"
+]
 MASK_FILE = BASE_DIR / "data" / "intermediate" / "masks" / "urban_mask_30m.tif"
 
 def verify_rasters():
@@ -18,17 +21,25 @@ def verify_rasters():
     
     print(f"Urban Mask Pixels: {urban_pixels_count:,.0f} / {total_pixels:,.0f} ({urban_pixels_count/total_pixels*100:.2f}%)")
     print("-" * 100)
-    print(f"{'Filename':<20} | {'Valid Pixels':<12} | {'Raw %':<8} | {'Urban Coverage %':<18} | {'Stats (Mean)'}")
+    print(f"{'Filename':<25} | {'Valid Pixels':<12} | {'Raw %':<8} | {'Urban Coverage %':<18} | {'Stats (Mean)'}")
     print("-" * 100)
     
-    files = list(INPUT_DIR.glob("*.tif"))
+    files = []
+    for d in INPUT_DIRS:
+        files.extend(list(d.glob("*.tif")))
     
     for f in files:
         with rasterio.open(f) as src:
             data = src.read(1)
             
-            # Mask out nodata (-9999) and NaNs
-            valid_mask = (data != -9999) & (~np.isnan(data))
+            # Dynamic Nodata Handling
+            nodata_val = src.nodata
+            if nodata_val is not None:
+                valid_mask = (data != nodata_val) & (~np.isnan(data))
+            else:
+                # Fallback if no nodata defined (assume only NaN is invalid)
+                valid_mask = ~np.isnan(data)
+                
             valid_count = np.sum(valid_mask)
             
             # Intersection: Valid Data AND Inside Urban Mask

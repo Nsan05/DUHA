@@ -209,7 +209,7 @@ def main():
         'transform': rasterio.Affine(*meta['transform']),
         'count': 1,
         'dtype': 'float32',
-        'nodata': -1.0,  # Explicit Nodata
+        'nodata': np.nan,  # Standard NaN for float data
         'compress': 'lzw',
         'tiled': True
     }
@@ -238,8 +238,7 @@ def main():
                     
                     # 3. Apply Mask (Set outside pixels to NODATA)
                     # urban_mask is 1 (Urban) / 0 (Outside)
-                    # Density is 0.0 to 1.0. Nodata is -1.0
-                    density_arr[urban_mask == 0] = -1.0
+                    density_arr[urban_mask == 0] = np.nan
                     
                     dst.write(density_arr, window=win, indexes=1)
                     
