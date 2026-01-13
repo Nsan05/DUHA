@@ -115,8 +115,62 @@ def analyze_stats(gdf):
         
     return gdf
 
+
+def impute_widths(gdf):
+    logger.info("-" * 40)
+    logger.info("PART 2: IMPUTATION & WIDTH CALCULATION")
+    logger.info("-" * 40)
+    
+    # 1. Calc Medians
+    medians = gdf.groupby('highway')['lanes_clean'].median()
+    
+    # Fill NaN medians with a global fallback (e.g. 2 lanes / 7m)
+    # If a class is completely missing (like 'tertiary_link' maybe), it needs a default.
+    GLOBAL_DEFAULT = 2.0
+    medians = medians.fillna(GLOBAL_DEFAULT)
+    
+    logger.info("LEARNED MEDIANS (Lanes):")
+    for cls, val in medians.items():
+        logger.info(f"  {cls:<20}: {val:.1f}")
+        
+    # 2. Impute
+    # Create 'lanes_final'
+    def fill_lanes(row):
+        if pd.notna(row['lanes_clean']):
+            return row['lanes_clean']
+        else:
+            hw = row['highway']
+            if hw in medians:
+                return medians[hw]
+            return GLOBAL_DEFAULT
+            
+    gdf['lanes_final'] = gdf.apply(fill_lanes, axis=1)
+    
+    # 3. Calculate Width
+    # Standard: 3.5m per lane
+    LANE_WIDTH_M = 3.5
+    gdf['width_m'] = gdf['lanes_final'] * LANE_WIDTH_M
+    
+    # 4. Caps
+    MIN_WIDTH = 6.0   # Min 6m (approx 2 lanes narrow)
+    MAX_WIDTH = 60.0  # Max 60m (Sheikh Zayed Road max)
+    
+    # Apply Caps
+    gdf['width_m'] = gdf['width_m'].clip(lower=MIN_WIDTH, upper=MAX_WIDTH)
+    
+    # Stats
+    logger.info("-" * 40)
+    logger.info("WIDTH STATISTICS:")
+    logger.info(f"Min Width: {gdf['width_m'].min()}m")
+    logger.info(f"Max Width: {gdf['width_m'].max()}m")
+    logger.info(f"Mean Width: {gdf['width_m'].mean():.2f}m")
+    
+    return gdf
+
 if __name__ == "__main__":
     poly = load_urban_polygon()
     roads = fetch_and_filter_roads(poly)
     roads = analyze_stats(roads)
-    # Not saving yet, just Part 1 confirmation
+    roads = impute_widths(roads)
+    
+
