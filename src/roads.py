@@ -38,12 +38,18 @@ def fetch_and_filter_roads(urban_poly):
     
     # 1. Download Graph
     # simplify=True cleans up the graph topology
+    # Note: simple download returns WGS84
     G = ox.graph_from_polygon(urban_poly, network_type='drive', simplify=True)
-    logger.info(f"Graph downloaded. Nodes: {len(G.nodes)}, Edges: {len(G.edges)}")
+    logger.info(f"Graph downloaded (WGS84). Nodes: {len(G.nodes)}, Edges: {len(G.edges)}")
+    
+    # 1b. Project Graph IMMEDIATELY
+    # This avoids all the headaches of reprojecting 100k lines later
+    logger.info(f"Projecting graph to {TARGET_CRS}...")
+    G_proj = ox.project_graph(G, to_crs=TARGET_CRS)
     
     # 2. Convert to GeoFrames
     # edges=True gets the line segments
-    gdf_nodes, gdf_edges = ox.graph_to_gdfs(G)
+    gdf_nodes, gdf_edges = ox.graph_to_gdfs(G_proj)
     
     # 3. Filter Columns (Keep only what we need)
     # 'highway' is the class, 'lanes' is the width info
@@ -60,7 +66,7 @@ def fetch_and_filter_roads(urban_poly):
 
 def analyze_stats(gdf):
     logger.info("-" * 40)
-    logger.info("PART 1 ANALYSIS: RAW DATA STATISTICS")
+    logger.info("ANALYSIS: RAW DATA STATISTICS")
     logger.info("-" * 40)
     
     total = len(gdf)
@@ -118,7 +124,7 @@ def analyze_stats(gdf):
 
 def impute_widths(gdf):
     logger.info("-" * 40)
-    logger.info("PART 2: IMPUTATION & WIDTH CALCULATION")
+    logger.info("IMPUTATION & WIDTH CALCULATION")
     logger.info("-" * 40)
     
     # 1. Calc Medians
@@ -167,10 +173,53 @@ def impute_widths(gdf):
     
     return gdf
 
+
+def create_road_polygons(gdf, urban_poly):
+    logger.info("-" * 40)
+    logger.info("BUFFER & CLIP GEOMETRY")
+    logger.info("-" * 40)
+    # 1. Reproject (Already done in Step 1, but good to check)
+    logger.info(f"Geometry CRS: {gdf.crs}")
+
+    urban_poly_proj = gpd.GeoSeries([urban_poly], crs="EPSG:4326").to_crs(TARGET_CRS)[0]
+    
+    # 2. Buffer
+    logger.info("Buffering lines to polygons...")
+    
+    # buffer() returns a GeoSeries - This extends out the line to both ways
+    buffered_series = gdf.apply(lambda row: row.geometry.buffer(row['width_m'] / 2, cap_style=1), axis=1)
+
+    # Set geometry
+    gdf['geometry'] = buffered_series
+    gdf.set_geometry('geometry', inplace=True, crs=TARGET_CRS)
+    
+    # 3. Dissolve
+    logger.info("Dissolving overlapping roads...")
+    union_geom = gdf.unary_union
+    
+    if union_geom.is_empty:
+        logger.error("CRITICAL: unary_union returned EMPTY geometry!")
+        return None
+
+    road_surface = gpd.GeoSeries([union_geom], crs=TARGET_CRS)
+    
+    # 4. Clip to Urban Mask
+    logger.info("Clipping to Urban Boundaries...")
+    
+    # Check intersection - incase if the buffer pushed any roads out of the border
+    final_surface = road_surface.intersection(urban_poly_proj)
+    
+    # Calculate Area Stats
+    total_area_km2 = final_surface.area.sum() / 1e6
+    logger.info(f"Total Paved Road Surface: {total_area_km2:.2f} km²")
+    
+    return final_surface
+
 if __name__ == "__main__":
     poly = load_urban_polygon()
     roads = fetch_and_filter_roads(poly)
     roads = analyze_stats(roads)
     roads = impute_widths(roads)
-    
+    road_surface = create_road_polygons(roads, poly)
+
 
