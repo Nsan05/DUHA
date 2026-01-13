@@ -217,7 +217,17 @@ transform: the transform is used to convert those coordinates into what pixel in
 
 - Finalized building script
 - Tried to explore other alternatives to get accurate road widths rather than simply assuming.
-- 
+- Analysed the roads that have lane data and those that dont to compare with the road kml file found on dubai pulse to see if it might be helpful.
+- Using adaptive buffering that is getting data that already exists in terms on lanes and trying to get the median of that data to get the number of lanes in roads that dont have the lane tag. (https://github.com/pasquierjb/GIS_RS_utils/blob/master/Download%20and%20rasterize%20OSM%20data.ipynb)
+
+- Highway Class	Total Segments	Missing Lanes	Data Quality	Strategy
+Motorway	465	0 (0%)	🌟 Perfect	Use exact lanes
+Primary	3,497	0 (0%)	🌟 Perfect	Use exact lanes
+Secondary	4,862	0 (0%)	🌟 Perfect	Use exact lanes
+Tertiary	15,029	6,438 (43%)	⚠️ Mixed	Use lanes if present, else Impute
+Residential	90,094	81,902 (91%)	🔴 Poor	Mostly Impute (Safe assumption: ~2 lanes)
+
+-
 
 
 
