@@ -43,3 +43,20 @@ These files represent the median physical properties of the surface over the obs
 | **BSI**    | `bsi_30m.tif`    | Bare Soil Index (-1 to 1)               | `((SWIR1 + Red) - (NIR + Blue)) / ((SWIR1 + Red) + (NIR + Blue))`                     |
 
 **Processing Note**: These were generated using a Median Composite of all cloud-free pixels from the available Sentinel-2 scenes.
+
+## Urban Form Grids (30m)
+
+These metrics quantify the physical structure of the city, generated via **Sub-pixel Super-sampling (10x)** to ensure accurate fractional coverage (0.00 - 1.00) even at 30m resolution.
+
+| Feature              | Filename                   | Description                                      | Methodology                                                                                              |
+| :------------------- | :------------------------- | :----------------------------------------------- | :------------------------------------------------------------------------------------------------------- |
+| **Building Density** | `building_density_30m.tif` | Fraction of pixel covered by building footprints | Source: **Overture Maps**. Vector-to-Raster with 10x super-sampling for fractional accuracy.             |
+| **Road Density**     | `road_density_30m.tif`     | Fraction of pixel covered by paved road surface  | Source: **OSM** (`network_type='drive'`). Widths imputed from lane counts + class medians. 10x sampling. |
+
+**Methodology Note**:
+
+- **Building Density**: Derived from high-precision Overture Maps footprints.
+- **Road Density**: Derived from OpenStreetMap centerlines (Drive network).
+  - **Width Estimation**: Observed `lanes` \* 3.5m. Missing lanes imputed using local median lane count per `highway` class.
+  - **Buffering**: Centerlines buffered by `width / 2` to create realistic surface polygons.
+  - **Clip**: Strictly clipped to the `urban_dubai_communities` boundary.
