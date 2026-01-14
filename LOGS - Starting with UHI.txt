@@ -227,7 +227,13 @@ Secondary	4,862	0 (0%)	🌟 Perfect	Use exact lanes
 Tertiary	15,029	6,438 (43%)	⚠️ Mixed	Use lanes if present, else Impute
 Residential	90,094	81,902 (91%)	🔴 Poor	Mostly Impute (Safe assumption: ~2 lanes)
 
--
+- Created buffer polygons for all the roads.
+- Created the 30m raster with super resolution from 3m in a similar way as it was done in the buildings script.
+
+----
+14/01/2026:
+- Noticed that a few of the inner roads were missing from the raster generated but verified that these were not present in OSM and are inner roads alone.
+- 
 
 
 

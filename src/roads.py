@@ -4,6 +4,12 @@ import pandas as pd
 from pathlib import Path
 import logging
 import sys
+import numpy as np
+import rasterio
+from rasterio.features import rasterize
+from rasterio.transform import from_origin
+from rasterio.windows import Window
+from shapely.geometry import box
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -13,6 +19,8 @@ logger = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).parent.parent
 MASK_FILE = BASE_DIR / "data" / "raw" / "boundaries" / "urban_dubai_communities.geojson"
 GRID_META_FILE = BASE_DIR / "data" / "intermediate" / "grids" / "reference_grid_meta.json"
+RASTER_MASK_FILE = BASE_DIR / "data" / "intermediate" / "masks" / "urban_mask_30m.tif"
+OUTPUT_RASTER = BASE_DIR / "data" / "intermediate" / "urban_form" / "road_density_30m.tif"
 
 # Target CRS
 TARGET_CRS = "EPSG:32640"
@@ -215,11 +223,130 @@ def create_road_polygons(gdf, urban_poly):
     
     return final_surface
 
+def rasterize_roads(road_surface, urban_poly):
+    logger.info("-" * 40)
+    logger.info("RASTERIZATION (Super-Sampling)")
+    logger.info("-" * 40)
+    
+    # Ensure Output Directory Exists
+    OUTPUT_RASTER.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Open the Mask to get Grid Definition
+    with rasterio.open(RASTER_MASK_FILE) as src:
+        profile = src.profile.copy()
+        transform = src.transform
+        width = src.width
+        height = src.height
+        
+        # Update Profile for Float Density
+        profile.update(
+            dtype=rasterio.float32,
+            count=1,
+            nodata=np.nan,
+            compress='lzw'
+        )
+        
+        # Prepare Output
+        logger.info(f"Creating {OUTPUT_RASTER} ({width}x{height})...")
+        
+        # Super-Sampling Factor
+        FACTOR = 10 
+        
+        with rasterio.open(OUTPUT_RASTER, 'w', **profile) as dst:
+            
+            # Create windows (blocks) to process
+            # 2048 seems like a good chunk size
+            block_size = 1024
+            windows = []
+            for j in range(0, height, block_size):
+                for i in range(0, width, block_size):
+                    # Calculate window size handling edges
+                    w = min(block_size, width - i)
+                    h = min(block_size, height - j)
+                    windows.append(Window(i, j, w, h))
+            
+            total_windows = len(windows)
+            logger.info(f"Processing {total_windows} windows with {FACTOR}x super-sampling...")
+            
+            for idx, win in enumerate(windows):
+                if idx % 10 == 0:
+                    logger.info(f" Window {idx+1}/{total_windows}...")
+                
+                # 1. Define Window Bounds
+                win_transform = src.window_transform(win)
+                win_bounds = rasterio.windows.bounds(win, transform)
+                # Box for filtering (buffer slightly to catch edge cases)
+                win_box = box(*win_bounds)
+                
+                # 2. Check overlap
+                # road_surface is a GeoSeries. intersects returns a Series of bools.
+                # if the road surface doesnt intersect w the window box, then we will just store 0s masked to urban dubai 
+                if not road_surface.intersects(win_box).any():
+                    # No roads here -> Write NaNs or 0s regarding mask
+
+                    mask_data = src.read(1, window=win)
+                    out_arr = np.full(mask_data.shape, 0.0, dtype=np.float32)
+                    out_arr[mask_data == 0] = np.nan
+                    dst.write(out_arr, window=win, indexes=1)
+                    continue
+                
+                # 3. Super-Sampling
+                # Create High-Res Grid for this window
+                super_w = win.width * FACTOR
+                super_h = win.height * FACTOR
+                
+                # Super Transform
+                super_transform = win_transform * win_transform.scale(1/FACTOR, 1/FACTOR)
+                
+                # Rasterize Geometry onto Super Grid
+                # We need a single geometry or list of geometries for rasterize()
+                # road_surface is a GeoSeries. intersection() returns a GeoSeries.
+                local_series = road_surface.intersection(win_box)
+                
+                # Filter out pure empty parts
+                local_series = local_series[~local_series.is_empty]
+                
+                if local_series.empty:
+                    mask_data = src.read(1, window=win)
+                    out_arr = np.full(mask_data.shape, 0.0, dtype=np.float32)
+                    out_arr[mask_data == 0] = np.nan
+                    dst.write(out_arr, window=win, indexes=1)
+                    continue
+                
+                # Prepare shapes for rasterize: list of (geometry, value)
+                shapes = [(geom, 1) for geom in local_series]
+                
+                # Rasterize (Binary: 1=Road, 0=Empty)
+                super_arr = rasterize(
+                    shapes,
+                    out_shape=(super_h, super_w),
+                    transform=super_transform,
+                    fill=0,
+                    dtype=np.uint8,
+                    all_touched=False # Standard center-point for super-pixels is fine
+                )
+                
+                # 4. Downsample (Mean)
+                # Reshape to (H, Factor, W, Factor) and take mean
+                reshaped = super_arr.reshape(win.height, FACTOR, win.width, FACTOR)
+                density = reshaped.mean(axis=(1, 3)).astype(np.float32)
+                
+                # 5. Apply Urban Mask
+                mask_data = src.read(1, window=win)
+                density[mask_data == 0] = np.nan
+                
+                # 6. Write
+                dst.write(density, window=win, indexes=1)
+                
+    logger.info("Done! Road Density Raster saved.")
+
 if __name__ == "__main__":
     poly = load_urban_polygon()
     roads = fetch_and_filter_roads(poly)
     roads = analyze_stats(roads)
     roads = impute_widths(roads)
     road_surface = create_road_polygons(roads, poly)
+    if road_surface is not None:
+        rasterize_roads(road_surface, poly)
 
 
