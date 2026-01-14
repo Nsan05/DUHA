@@ -234,6 +234,11 @@ Residential	90,094	81,902 (91%)	🔴 Poor	Mostly Impute (Safe assumption: ~2 lan
 14/01/2026:
 - Noticed that a few of the inner roads were missing from the raster generated but verified that these were not present in OSM and are inner roads alone.
 - Updated the spatial_config file to add all the details done.
+- Moved onto brainstorming for the water mask creation.
+- Anlaysed NDWI values. [0,2 – 1 – Water surface,
+0.0 – 0,2 – Flooding, humidity,
+-0,3 – 0.0 – Moderate drought, non-aqueous surfaces,
+-1 – -0.3 – Drought, non-aqueous surfaces]
 - 
 
 
