@@ -31,6 +31,13 @@ Note: Urban extent is defined by dissolving all community boundary polygons into
 - **Stats**: Covers ~34.47% of the Urban Area.
 - **Note**: Albedo (>0.25) strongly filters out water; BSI (>0.08) ensures high confidence in soil content.
 
+### Water Mask
+
+- **Purpose**: Identify open water bodies (Creek, Canals, Coast) to exclude them from heat analysis.
+- **File**: `data/intermediate/masks/water_mask_30m.tif` (Binary 0/1)
+- **Logic**: `(NDWI > 0) AND (Urban Mask == 1)`
+- **Stats**: ~3.15% of Urban Area.
+
 ## Sentinel-2 Derived Grids (30m)
 
 These files represent the median physical properties of the surface over the observation period, aggregated from 10m to 30m.

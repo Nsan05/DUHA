@@ -16,11 +16,11 @@ URBAN_MASK_FILE = BASE_DIR / "data" / "intermediate" / "masks" / "urban_mask_30m
 OUTPUT_FILE = BASE_DIR / "data" / "intermediate" / "masks" / "water_mask_30m.tif"
 
 # Scientific Threshold (Open Water > 0.1)
-WATER_THRESHOLD = 0.1
+WATER_THRESHOLD = 0
 
 def load_urban_mask():
     """
-    STEP 2: Load the Urban Boundary Mask.
+    Load the Urban Boundary Mask.
     Acts as the 'Cookie Cutter' or spatial context.
     """
     logger.info("-" * 40)
@@ -48,7 +48,7 @@ def load_urban_mask():
 
 def generate_water_candidates():
     """
-    STEP 3: Load NDWI and Threshold.
+    Load NDWI and Threshold.
     Identifies 'Physically Water' pixels purely based on spectral signal.
     """
     logger.info("-" * 40)
@@ -77,7 +77,60 @@ def generate_water_candidates():
         
         return water_candidates
 
+def create_final_mask(urban_mask, water_candidates):
+    """
+    Spatial Intersection (Clip).
+    Logic: Water AND Urban.
+    """
+    logger.info("-" * 40)
+    logger.info("SPATIAL INTERSECTION (Clip)")
+    logger.info("-" * 40)
+    
+    # Logical AND
+    final_mask = np.logical_and(urban_mask, water_candidates)
+    
+    # Stats
+    final_count = np.sum(final_mask)
+    urban_count = np.sum(urban_mask)
+    
+    logger.info(f"Final Water Pixels (Inside Urban): {final_count:,}")
+    logger.info(f"Urban Water Fraction: {final_count/urban_count*100:.2f}%")
+    
+    return final_mask
+
+def save_water_mask(mask, profile):
+    """
+    Save Output.
+    """
+    logger.info("-" * 40)
+    logger.info("SAVING MASK")
+    logger.info("-" * 40)
+    
+    # Ensure Output Directory Exists
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Update Profile for Boolean/Binary output
+    profile.update(
+        dtype=rasterio.uint8,
+        count=1,
+        nodata=0, # 0 is land, so nodata=0 is ambiguous but fine for binary masks usually. Or 255.
+                  # User requested {0, 1}. Let's stick to 0=Land/Background.
+        compress='lzw'
+    )
+    
+    # Convert bool to uint8
+    mask_uint8 = mask.astype(rasterio.uint8)
+    
+    with rasterio.open(OUTPUT_FILE, 'w', **profile) as dst:
+        dst.write(mask_uint8, 1)
+        
+    logger.info(f"Saved to {OUTPUT_FILE}")
+
 if __name__ == "__main__":
     # Execute Step 2 & 3
     urban_mask, profile = load_urban_mask()
     water_candidates = generate_water_candidates()
+    
+    # Execute Step 4 & 5
+    final_mask = create_final_mask(urban_mask, water_candidates)
+    save_water_mask(final_mask, profile)

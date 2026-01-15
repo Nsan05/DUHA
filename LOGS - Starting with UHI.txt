@@ -239,9 +239,17 @@ Residential	90,094	81,902 (91%)	🔴 Poor	Mostly Impute (Safe assumption: ~2 lan
 0.0 – 0,2 – Flooding, humidity,
 -0,3 – 0.0 – Moderate drought, non-aqueous surfaces,
 -1 – -0.3 – Drought, non-aqueous surfaces]
+- Noticed that the creek is not being picked up in the mask.
+
+
+----
+
+15/01/2026:
+- Looked into possible reasons for the water not being properly masked in the output and possible fixes for the problem.
+- Looked into an approach by switching to MNDWI for better water body capture.
+- Switched to Mndwi for the mask since its better at differentiating between water bodies and urban areas and the shadows caused by them. Consturction sites and falttended sand reflects green and NIR almost equally. But if water contains silt, it reflects NIR, which would result in a high negative value.
+- Changed the ndwi index to mndwi which is better for handing urban water bodies as the SWIR value is much higher for sand and lesser for water.
+- Chose to keep NDWI in as well as it preserves moisture due to vegetation and other factors as well and not just water.
 - 
-
-
- 
 
 
