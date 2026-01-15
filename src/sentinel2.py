@@ -163,9 +163,11 @@ def process_block(window_10m, relevant_granules, master_meta):
         ndwi = (b3 - b8) / (b3 + b8 + 1e-6)
         # BSI = ((SWIR1 + Red) - (NIR + Blue)) / ((SWIR1 + Red) + (NIR + Blue))
         bsi = ((b11 + b4) - (b8 + b2)) / ((b11 + b4) + (b8 + b2) + 1e-6)
+        # MNDWI = (Green - SWIR1) / (Green + SWIR1)
+        mndwi = (b3 - b11) / (b3 + b11 + 1e-6)
         albedo = (0.2266*b2) + (0.1236*b3) + (0.1573*b4) + (0.3417*b8) + (0.1170*b11) + (0.0338*b12)
     
-    results = {'ndvi': ndvi, 'albedo': albedo, 'ndwi': ndwi, 'bsi': bsi}
+    results = {'ndvi': ndvi, 'albedo': albedo, 'ndwi': ndwi, 'bsi': bsi, 'mndwi': mndwi}
     outputs_30m = {}
     
     for k, arr in results.items():
@@ -211,7 +213,7 @@ def main_process():
     }
     
     files = {}
-    for name in ['ndvi', 'albedo', 'ndwi', 'bsi']:
+    for name in ['ndvi', 'albedo', 'ndwi', 'bsi', 'mndwi']:
         f = rasterio.open(OUTPUT_DIR / f"{name}_30m.tif", 'w', **out_profile)
         files[name] = f
         

@@ -47,6 +47,7 @@ These files represent the median physical properties of the surface over the obs
 | **NDVI**   | `ndvi_30m.tif`   | Vegetation Density (-1 to 1)            | `(NIR - Red) / (NIR + Red)`                                                           |
 | **Albedo** | `albedo_30m.tif` | Broadband Surface Reflectivity (0 to 1) | Weighted Spectral IntegrationΣ (Weight_i \* Band_i) based on Solar Irradiance (ESUN). |
 | **NDWI**   | `ndwi_30m.tif`   | Water Index (-1 to 1)                   | `(Green - NIR) / (Green + NIR)`                                                       |
+| **MNDWI**  | `mndwi_30m.tif`  | Modified Water Index (-1 to 1)          | `(Green - SWIR1) / (Green + SWIR1)`                                                   |
 | **BSI**    | `bsi_30m.tif`    | Bare Soil Index (-1 to 1)               | `((SWIR1 + Red) - (NIR + Blue)) / ((SWIR1 + Red) + (NIR + Blue))`                     |
 
 **Processing Note**: These were generated using a Median Composite of all cloud-free pixels from the available Sentinel-2 scenes.
