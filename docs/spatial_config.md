@@ -34,9 +34,11 @@ Note: Urban extent is defined by dissolving all community boundary polygons into
 ### Water Mask
 
 - **Purpose**: Identify open water bodies (Creek, Canals, Coast) to exclude them from heat analysis.
-- **File**: `data/intermediate/masks/water_mask_30m.tif` (Binary 0/1)
-- **Logic**: `(NDWI > 0) AND (Urban Mask == 1)`
-- **Stats**: ~3.15% of Urban Area.
+- **Files**:
+  - `data/intermediate/masks/water_mask_30m.tif` (Clipped to Urban Boundary)
+  - `data/intermediate/masks/water_mask_full_30m.tif` (Full Sentinel-2 Scene)
+- **Logic**: `(Albedo < 0.2) AND (NDVI < 0.1)` (Physics-based: Dark & Non-Vegetated).
+- **Note**: Morphological opening disabled to preserve narrow canals.
 
 ## Sentinel-2 Derived Grids (30m)
 

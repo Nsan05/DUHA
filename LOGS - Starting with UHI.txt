@@ -259,6 +259,33 @@ Signal Bleed: The satellite sensor is "blinded" by the bright sand (which has hu
 
 Result: The water pixels record an artificially high SWIR value (noise).
 
-- 
+- Links highlighting the issue:
+1.Impact on Narrow River Systems
+Paper: Assessment of land adjacency effect correction on deriving aquatic reflectance over river waters... (Cao et al., 2025)
+
+Relevance: This recent paper specifically focuses on narrow rivers. It found that without correction, the error in water reflectance averaged 57.8%, heavily biased by the surrounding land. It highlights that "Atmospheric blurring can introduce land signals into nearby water pixels" particularly in the NIR-SWIR bands due to the strong contrast between land and water.
+
+Link: https://opg.optica.org/oe/fulltext.cfm?uri=oe-33-21-43561
+
+2. The "Bright Land" Problem in Small Water Bodies
+Paper: The adjacency effect on inland water reflectance: occurrence and correction (Paulino et al., 2022)
+
+Relevance: This study confirms that the adjacency effect is "maximized for small water bodies" and "dark waters" (like the Creek) surrounded by bright targets. It explicitly notes that this effect causes significant errors in the Near-Infrared (NIR) wavelengths, explaining why your initial NDWI calculation failed.
+
+Link: http://www.dpi.inpe.br/labisa/en/publication/paulino-2022-adjacency/
+
+- Looked into an alternative using SCL class in Sentinel2 but it is not accurate with it's water label.
+- Started an approach with low albedo and low ndvi.
+- Sea Albedo close to 0.12, start with that and go lower/higher as needed. - https://journals.ametsoc.org/view/journals/apme/10/6/1520-0450_1971_010_1296_shvfta_2_0_co_2.xml#:~:text=Shipboard%20shortwave%20albedo%20measurements%20near,rough%20sea%2C%20high%20wind%20conditions.
+
+----
+
+16/01/2025:
+- Created a shadow mitigation logic which resulted in false positives.
+- Clipping to urban dubai removes a part of the creek so went back on that
+- Tried Increasing albedo for lagoon to be visible but resulted in roads showing up so decided to keep that out.
+- Finalized the water mask script.'
+
+
 
 

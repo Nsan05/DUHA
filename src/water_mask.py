@@ -8,15 +8,23 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+from scipy.ndimage import binary_opening
+
 # STEP 1: CONFIGURATION
 # --------------------
 BASE_DIR = Path(__file__).parent.parent
-NDWI_FILE = BASE_DIR / "data" / "intermediate" / "sentinel2_30m" / "ndwi_30m.tif"
+# NDWI_FILE = BASE_DIR / "data" / "intermediate" / "sentinel2_30m" / "ndwi_30m.tif"
+ALBEDO_FILE = BASE_DIR / "data" / "intermediate" / "sentinel2_30m" / "albedo_30m.tif"
+NDVI_FILE = BASE_DIR / "data" / "intermediate" / "sentinel2_30m" / "ndvi_30m.tif"
+
 URBAN_MASK_FILE = BASE_DIR / "data" / "intermediate" / "masks" / "urban_mask_30m.tif"
 OUTPUT_FILE = BASE_DIR / "data" / "intermediate" / "masks" / "water_mask_30m.tif"
+OUTPUT_FULL_FILE = BASE_DIR / "data" / "intermediate" / "masks" / "water_mask_full_30m.tif"
 
-# Scientific Threshold (Open Water > 0.1)
-WATER_THRESHOLD = 0
+# Scientific Thresholds (Physical Approach)
+# Water is DARK (< 0.2) and NON-VEGETATED (< 0.1)
+ALBEDO_THRESHOLD = 0.2
+NDVI_THRESHOLD = 0.1
 
 def load_urban_mask():
     """
@@ -46,36 +54,66 @@ def load_urban_mask():
         
         return urban_bool, profile
 
-def generate_water_candidates():
+def generate_water_candidates_physical():
     """
-    Load NDWI and Threshold.
-    Identifies 'Physically Water' pixels purely based on spectral signal.
+    Load Albedo + NDVI.
+    Identifies 'Physically Water' pixels: Dark (Low Albedo) AND Barren (Low NDVI).
     """
     logger.info("-" * 40)
-    logger.info(f"THRESHOLDING NDWI (Threshold: {WATER_THRESHOLD})")
+    logger.info(f"PHYSICAL WATER DETECTION (Albedo < {ALBEDO_THRESHOLD}, NDVI < {NDVI_THRESHOLD})")
     logger.info("-" * 40)
     
-    if not NDWI_FILE.exists():
-        logger.error(f"NDWI file not found at {NDWI_FILE}")
+    if not ALBEDO_FILE.exists() or not NDVI_FILE.exists():
+        logger.error("Missing input files (Albedo or NDVI)")
         sys.exit(1)
         
-    with rasterio.open(NDWI_FILE) as src:
-        ndwi = src.read(1)
+    with rasterio.open(ALBEDO_FILE) as src_alb, rasterio.open(NDVI_FILE) as src_ndvi:
+        albedo = src_alb.read(1)
+        ndvi = src_ndvi.read(1)
         
-        # Create Binary Mask: 1 where Water, 0 where Land
-        # Logic: NDWI >= 0.1
-    
-        # Suppress RuntimeWarning for NaN comparisons
+        # Logic: Dark AND Non-Vegetated
+        # Handle NaNs implicitly (comparisons with NaN are False)
         with np.errstate(invalid='ignore'):
-            water_candidates = (ndwi >= WATER_THRESHOLD)
+            is_dark = (albedo < ALBEDO_THRESHOLD)
+            is_barren = (ndvi < NDVI_THRESHOLD)
             
-        water_count = np.sum(water_candidates)
-        total_pixels = ndwi.size
+            raw_water = np.logical_and(is_dark, is_barren)
+            
+        initial_count = np.sum(raw_water)
+        logger.info(f"Raw Candidates: {initial_count:,}")
         
-        logger.info(f"NDWI Loaded. Dimensions: {ndwi.shape}")
-        logger.info(f"Water Candidates Detected: {water_count:,} ({water_count/total_pixels*100:.2f}% of total grid)")
-        
-        return water_candidates
+        return raw_water
+
+# def generate_water_candidates_ndwi():
+#     """
+#     Load NDWI and Threshold.
+#     Identifies 'Physically Water' pixels purely based on spectral signal.
+#     """
+#     logger.info("-" * 40)
+#     logger.info(f"THRESHOLDING NDWI (Threshold: {WATER_THRESHOLD})")
+#     logger.info("-" * 40)
+#     
+#     if not NDWI_FILE.exists():
+#         logger.error(f"NDWI file not found at {NDWI_FILE}")
+#         sys.exit(1)
+#         
+#     with rasterio.open(NDWI_FILE) as src:
+#         ndwi = src.read(1)
+#         
+#         # Create Binary Mask: 1 where Water, 0 where Land
+#         # Logic: NDWI >= 0.1
+#     
+#         # Suppress RuntimeWarning for NaN comparisons
+#         with np.errstate(invalid='ignore'):
+#             water_candidates = (ndwi >= WATER_THRESHOLD)
+#             
+#         water_count = np.sum(water_candidates)
+#         total_pixels = ndwi.size
+#         
+#         logger.info(f"NDWI Loaded. Dimensions: {ndwi.shape}")
+#         logger.info(f"Water Candidates Detected: {water_count:,} ({water_count/total_pixels*100:.2f}% of total grid)")
+#         
+#         return water_candidates
 
 def create_final_mask(urban_mask, water_candidates):
     """
@@ -98,39 +136,42 @@ def create_final_mask(urban_mask, water_candidates):
     
     return final_mask
 
-def save_water_mask(mask, profile):
+def save_water_mask(mask, profile, output_path):
     """
-    Save Output.
+    Save Output to specific path.
     """
     logger.info("-" * 40)
-    logger.info("SAVING MASK")
+    logger.info(f"SAVING MASK TO {output_path.name}")
     logger.info("-" * 40)
     
     # Ensure Output Directory Exists
-    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     
     # Update Profile for Boolean/Binary output
     profile.update(
         dtype=rasterio.uint8,
         count=1,
-        nodata=0, # 0 is land, so nodata=0 is ambiguous but fine for binary masks usually. Or 255.
-                  # User requested {0, 1}. Let's stick to 0=Land/Background.
+        nodata=0, 
         compress='lzw'
     )
     
     # Convert bool to uint8
     mask_uint8 = mask.astype(rasterio.uint8)
     
-    with rasterio.open(OUTPUT_FILE, 'w', **profile) as dst:
+    with rasterio.open(output_path, 'w', **profile) as dst:
         dst.write(mask_uint8, 1)
         
-    logger.info(f"Saved to {OUTPUT_FILE}")
+    logger.info(f"Saved to {output_path}")
 
 if __name__ == "__main__":
-    # Execute Step 2 & 3
     urban_mask, profile = load_urban_mask()
-    water_candidates = generate_water_candidates()
     
-    # Execute Step 4 & 5
+    #This generates the Full Extent mask
+    water_candidates = generate_water_candidates_physical()
+    
+    # SAVE FULL EXTENT 
+    save_water_mask(water_candidates, profile.copy(), OUTPUT_FULL_FILE)
+    
+    # Create and save clipped version
     final_mask = create_final_mask(urban_mask, water_candidates)
-    save_water_mask(final_mask, profile)
+    save_water_mask(final_mask, profile.copy(), OUTPUT_FILE)
