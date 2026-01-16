@@ -285,7 +285,9 @@ Link: http://www.dpi.inpe.br/labisa/en/publication/paulino-2022-adjacency/
 - Clipping to urban dubai removes a part of the creek so went back on that
 - Tried Increasing albedo for lagoon to be visible but resulted in roads showing up so decided to keep that out.
 - Finalized the water mask script.'
-
+- Added a finalize phase 1 script that confirms that all files are in the same CRS, are in the same dimension, contain expected data types and ensures that they can be stacked.
+- Added final files into final dir.
+- 
 
 
 
