@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import logging
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 INPUT_DIR = BASE_DIR / "data" / "intermediate" / "sentinel2_30m"
 MASK_DIR = BASE_DIR / "data" / "intermediate" / "masks"
 OUTPUT_FILE = MASK_DIR / "sand_mask_30m.tif"

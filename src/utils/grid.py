@@ -10,7 +10,7 @@ import json
 PROJECT_CRS = "EPSG:32640" 
 
 # Directories
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 RAW_LANDSAT_DIR = BASE_DIR / "data" / "raw" / "landsat" / "lst"
 OUTPUT_DIR = BASE_DIR / "data" / "intermediate" / "grids"
 OUTPUT_FILE = OUTPUT_DIR / "master_grid_30m.tif"

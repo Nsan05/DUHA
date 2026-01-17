@@ -3,7 +3,8 @@ import rasterio
 from rasterio.warp import transform_bounds
 from pathlib import Path
 
-META_FILE = Path("data/intermediate/grids/reference_grid_meta.json")
+BASE_DIR = Path(__file__).parent.parent.parent
+META_FILE = BASE_DIR / "data/intermediate/grids/reference_grid_meta.json"
 
 def get_bbox():
     with open(META_FILE, 'r') as f:

@@ -5,7 +5,7 @@ import rasterio
 from rasterio.features import rasterize
 import numpy as np
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 MASK_INPUT_FILE = BASE_DIR / "data" / "raw" / "boundaries" / "urban_dubai_communities.geojson"
 GRID_META_FILE = BASE_DIR / "data" / "intermediate" / "grids" / "reference_grid_meta.json"
 OUTPUT_DIR = BASE_DIR / "data" / "intermediate" / "masks"

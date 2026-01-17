@@ -17,7 +17,7 @@ import os
 # ==========================================
 # CONFIGURATION
 # ==========================================
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 INPUT_FILE = BASE_DIR / "data" / "raw" / "overture" / "buildings.geojsonseq"
 OUTPUT_DIR = BASE_DIR / "data" / "intermediate" / "urban_form"
 OUTPUT_FILE = OUTPUT_DIR / "building_density_30m.tif"

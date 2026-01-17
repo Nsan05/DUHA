@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 from scipy.ndimage import binary_opening
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 # NDWI_FILE = BASE_DIR / "data" / "intermediate" / "sentinel2_30m" / "ndwi_30m.tif"
 ALBEDO_FILE = BASE_DIR / "data" / "intermediate" / "sentinel2_30m" / "albedo_30m.tif"
 NDVI_FILE = BASE_DIR / "data" / "intermediate" / "sentinel2_30m" / "ndvi_30m.tif"

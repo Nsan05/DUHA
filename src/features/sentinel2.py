@@ -10,7 +10,7 @@ from rasterio.windows import Window
 from rasterio.coords import BoundingBox
 import logging
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 RAW_SENTINEL_DIR = BASE_DIR / "data" / "raw" / "sentinel2" / "scenes"
 GRID_META_FILE = BASE_DIR / "data" / "intermediate" / "grids" / "reference_grid_meta.json"
 URBAN_MASK_FILE = BASE_DIR / "data" / "intermediate" / "masks" / "urban_mask_30m.tif"

@@ -3,7 +3,7 @@ import numpy as np
 import glob
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 INPUT_DIRS = [
     BASE_DIR / "data" / "intermediate" / "sentinel2_30m",
     BASE_DIR / "data" / "intermediate" / "urban_form"
