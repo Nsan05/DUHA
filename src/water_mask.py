@@ -69,13 +69,14 @@ def generate_water_candidates_physical():
         albedo = src_alb.read(1)
         ndvi = src_ndvi.read(1)
         
-        # Logic: Dark AND Non-Vegetated
+        # Logic: Dark AND Non-Vegetated AND Valid (Not Nodata)
         # Handle NaNs implicitly (comparisons with NaN are False)
         with np.errstate(invalid='ignore'):
+            is_valid = (albedo != -9999) & (ndvi != -9999)
             is_dark = (albedo < ALBEDO_THRESHOLD)
             is_barren = (ndvi < NDVI_THRESHOLD)
             
-            raw_water = np.logical_and(is_dark, is_barren)
+            raw_water = is_dark & is_barren & is_valid
             
         initial_count = np.sum(raw_water)
         logger.info(f"Raw Candidates: {initial_count:,}")
