@@ -87,9 +87,57 @@ def validate_environment():
     logger.info("-" * 40)
     if all_valid:
         logger.info("ENVIRONMENT VALIDATION SUCCESSFUL. Ready for Step 2.")
+        return True
     else:
         logger.error("ENVIRONMENT VALIDATION FAILED. Fix missing files.")
         sys.exit(1)
 
+def test_viirs_loading():
+    """
+    Step 2: Test VIIRS Loading & Geometry.
+    """
+    logger.info("\nSTEP 2: TESTING VIIRS GEOMETRY")
+    logger.info("-" * 40)
+    
+    # Add BASE_DIR to path for imports
+    sys.path.append(str(BASE_DIR))
+    try:
+        from src.features import viirs
+    except ImportError as e:
+        logger.error(f"Failed to import src.features.viirs: {e}")
+        sys.exit(1)
+        
+    # Pick first file
+    viirs_files = list(VIIRS_DIR.rglob("*.nc"))
+    if not viirs_files:
+        logger.error("No VIIRS files found.")
+        sys.exit(1)
+        
+    test_file = viirs_files[0]
+    logger.info(f"Testing with file: {test_file.name}")
+    
+    # 1. Load
+    data = viirs.load_viirs_scene(test_file)
+    logger.info(f"  [OK] Loaded Data. Shape: {data['lst'].shape}")
+    logger.info(f"       Lat Range: {data['lat'].min():.4f} to {data['lat'].max():.4f}")
+    logger.info(f"       Lon Range: {data['lon'].min():.4f} to {data['lon'].max():.4f}")
+    
+    # 2. Quality Filter
+    clean_lst, valid_mask = viirs.filter_quality(data['lst'], data['qc'])
+    valid_count = valid_mask.sum()
+    total_count = valid_mask.size
+    logger.info(f"  [OK] Quality Filter. Valid Pixels: {valid_count:,} / {total_count:,} ({valid_count/total_count*100:.1f}%)")
+    
+    # 3. Transform
+    xx, yy = viirs.transform_coords(data['lat'], data['lon'])
+    logger.info(f"  [OK] Transformed Coords (EPSG:32640).")
+    logger.info(f"       X Range: {xx.min():.1f} to {xx.max():.1f}")
+    logger.info(f"       Y Range: {yy.min():.1f} to {yy.max():.1f}")
+    
+    # Save a small verified file for inspection? No, just logging is enough for now.
+    logger.info("-" * 40)
+    logger.info("VIIRS GEOMETRY EXTRACTION VERIFIED.")
+
 if __name__ == "__main__":
-    validate_environment()
+    if validate_environment():
+        test_viirs_loading()
