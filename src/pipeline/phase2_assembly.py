@@ -137,7 +137,113 @@ def test_viirs_loading():
     # Save a small verified file for inspection? No, just logging is enough for now.
     logger.info("-" * 40)
     logger.info("VIIRS GEOMETRY EXTRACTION VERIFIED.")
+    
+    return data, xx, yy
+
+def test_aggregation(viirs_data, xx, yy):
+    """
+    Step 3: Test Aggregation on a single pixel.
+    """
+    logger.info("\nSTEP 3: TESTING AGGREGATION LOGIC")
+    logger.info("-" * 40)
+    
+    try:
+        from src.features import aggregation
+    except ImportError as e:
+        logger.error(f"Failed to import src.features.aggregation: {e}")
+        sys.exit(1)
+        
+    import rasterio
+    import numpy as np
+    
+    # Open Raster Handles
+    # We need to Keep them open.
+    raster_handles = {}
+    
+    # 1. Open Urban Mask
+    urban_path = MASKS_DIR / "urban_mask_30m.tif"
+    if not urban_path.exists():
+        logger.error("Urban mask not found for test!")
+        return
+        
+    urban_src = rasterio.open(urban_path)
+    raster_handles["urban_mask_30m.tif"] = urban_src
+    
+    # 2. Open one feature (NDVI)
+    ndvi_path = PHASE1_DIR / "ndvi_30m.tif"
+    if ndvi_path.exists():
+        raster_handles["ndvi_30m.tif"] = rasterio.open(ndvi_path)
+    
+    try:
+        # TARGETED SEARCH
+        # Intead of blind search, use the Urban Mask metadata to clear target.
+        # Urban Mask bounds in EPSG:32640
+        mask_bounds = urban_src.bounds
+        min_x, max_x = mask_bounds.left, mask_bounds.right
+        min_y, max_y = mask_bounds.bottom, mask_bounds.top # Rasterio bounds
+        
+        logger.info(f"Urban Mask Bounds: X[{min_x:.0f}, {max_x:.0f}], Y[{min_y:.0f}, {max_y:.0f}]")
+        
+        # Filter VIIRS pixels that fall within these bounds
+        # xx, yy are arrays of coordinates for every VIIRS pixel
+        
+        # Create a mask of VIIRS pixels inside the Urban Mask Box
+        spatial_mask = (xx >= min_x) & (xx <= max_x) & (yy >= min_y) & (yy <= max_y)
+        
+        valid_indices = np.argwhere(spatial_mask)
+        
+        if valid_indices.size == 0:
+             logger.warning("No VIIRS pixels fall within the Urban Mask bounds!")
+             return
+             
+        logger.info(f"Found {len(valid_indices)} VIIRS pixels strictly within Urban Mask bounding box.")
+        
+        # Test a subset of these
+        # Stride to get a spread. Try every 100th pixel to be more thorough but not too slow.
+        stride = 100 
+        found_count = 0
+        
+        logger.info(f"Scanning subset of {len(valid_indices)} pixels with stride {stride}...")
+        
+        for i in range(0, len(valid_indices), stride):
+            idx_y, idx_x = valid_indices[i]
+            
+            vx = xx[idx_y, idx_x]
+            vy = yy[idx_y, idx_x]
+            
+            # Aggregate
+            try:
+                result = aggregation.aggregate_pixel(vx, vy, raster_handles)
+            except Exception as e:
+                logger.error(f"Error aggregating pixel ({vx}, {vy}): {e}")
+                continue
+            
+            if result is not None:
+                logger.info(f"  [FOUND] Valid Pixel at Index ({idx_y}, {idx_x})")
+                logger.info(f"          Coords: ({vx:.1f}, {vy:.1f})")
+                logger.info(f"          Urban Fraction: {result['urban_fraction']:.2f}")
+                if 'ndvi_mean' in result:
+                    logger.info(f"          NDVI Mean (Urban Only): {result['ndvi_mean']:.4f}")
+                
+                found_count += 1
+                found_valid = True
+                
+                # Stop after finding 3 valid examples to keep logs clean
+                if found_count >= 3:
+                    break
+        
+        if not found_valid:
+             logger.warning("Checked pixels inside bounds but none met Urban Fraction > 0.3 criteria.")
+            
+    finally:
+        # Close handles
+        for src in raster_handles.values():
+            src.close()
+            
+    logger.info("-" * 40)
+    logger.info("AGGREGATION LOGIC VERIFIED.")
 
 if __name__ == "__main__":
     if validate_environment():
-        test_viirs_loading()
+        data, xx, yy = test_viirs_loading()
+        test_aggregation(data, xx, yy)
