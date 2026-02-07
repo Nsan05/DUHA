@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.dummy import DummyRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 import joblib
@@ -120,7 +120,7 @@ def visualize_split(train_df, test_df):
 
 def train_model(train_df, test_df):
     """
-    Trains RF on LST Anomaly.
+    Trains HistGradientBoosting on LST Anomaly.
     """
     # Use Anomaly as Target
     target = TARGET_ANOMALY
@@ -139,26 +139,32 @@ def train_model(train_df, test_df):
     rmse_dummy = np.sqrt(mean_squared_error(y_test, y_pred_dummy))
     logger.info(f"Baseline (Mean) RMSE: {rmse_dummy:.2f} K")
     
-    # 2. Random Forest
-    rf = RandomForestRegressor(n_estimators=100, n_jobs=-1, random_state=RANDOM_STATE)
-    rf.fit(X_train, y_train)
+    # 2. HistGradientBoosting (The "XGBoost" equivalent)
+    logger.info("Training HistGradientBoostingRegressor (max_iter=500, lr=0.05)...")
+    gb = HistGradientBoostingRegressor(
+        max_iter=500,
+        learning_rate=0.05,
+        random_state=RANDOM_STATE,
+        early_stopping=True
+    )
+    gb.fit(X_train, y_train)
     
     # 3. Evaluate
-    y_pred = rf.predict(X_test)
+    y_pred = gb.predict(X_test)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
     r2 = r2_score(y_test, y_pred)
     
     logger.info("-" * 30)
-    logger.info("FINAL RESULTS (LST ANOMALY)")
+    logger.info("FINAL RESULTS (LST ANOMALY - GRADIENT BOOSTING)")
     logger.info(f"Test RMSE: {rmse:.2f} K")
     logger.info(f"Test R²:   {r2:.2f}")
     logger.info(f"Improvement over Baseline: {rmse_dummy - rmse:.2f} K")
     logger.info("-" * 30)
     
     # Save
-    joblib.dump(rf, MODELS_DIR / "rf_model_anomaly.joblib")
+    joblib.dump(gb, MODELS_DIR / "gb_model_anomaly.joblib")
     
-    return rf
+    return gb
 
 def main():
     if not INPUT_FILE.exists():
