@@ -341,7 +341,35 @@ Improvement over Baseline: 0.90 K
 2026-02-07 20:45:42,520 - INFO - Test RMSE: 2.53 K
 2026-02-07 20:45:42,520 - INFO - Test R²:   0.48
 2026-02-07 20:45:42,520 - INFO - Improvement over Baseline: 0.98 K
+
+
+---
+08/02/2026:
+- Looked into GBA: https://github.com/zhu-xlab/GlobalBuildingAtlas?tab=readme-ov-file
+- https://mediatum.ub.tum.de/1782307
+- https://sat-io.earthengine.app/view/gba?utm_source=chatgpt.com
+- Downloaded the height_tif files to find the tiles of UAE.
+- Identified which tiles cover dubai using QGIS.
+1. `./Height/africa/e055_n30_e060_n25/55.0_25.2_55.2_25.0_sr_ss.tif`
+2. `./Height/africa/e055_n30_e060_n25/55.2_25.4_55.4_25.2_sr_ss.tif`
+3. `./Height/africa/e055_n30_e060_n25/55.2_25.2_55.4_25.0_sr_ss.tif`
+4. `./Height/africa/e055_n30_e060_n25/55.4_25.4_55.6_25.2_sr_ss.tif`
+5. `./Height/africa/e055_n30_e060_n25/55.4_25.2_55.6_25.0_sr_ss.tif`
+6. `./Height/africa/e050_n30_e055_n25/54.8_25.2_55.0_25.0_sr_ss.tif`
+7. `./Height/africa/e050_n25_e055_n20/54.8_25.0_55.0_24.8_sr_ss.tif`
+8. `./Height/africa/e055_n25_e060_n20/55.2_25.0_55.4_24.8_sr_ss.tif`
+9. `./Height/africa/e055_n25_e060_n20/55.0_25.0_55.2_24.8_sr_ss.tif`
+10. `./Height/africa/e055_n25_e060_n20/55.0_24.8_55.2_24.6_sr_ss.tif`
+
+- Zip files:
+1. `e055_n30_e060_n25.zip`
+2. `e050_n30_e055_n25.zip`
+3. `e050_n25_e055_n20.zip`
+4. `e055_n25_e060_n20.zip`
+
+- Since files are too large, ran a script on Colab to acquire the files from the server in order to test them out.
 - 
+
 
 
 
