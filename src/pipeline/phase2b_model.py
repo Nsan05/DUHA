@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Paths
 DATA_DIR = Path("data/final")
-INPUT_FILE = DATA_DIR / "phase2_training_table.csv"
+INPUT_FILE = DATA_DIR / "phase2_training_table_enriched.csv"
 OUTPUT_DIR = Path("data/model_outputs")
 MODELS_DIR = Path("data/models")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -31,6 +31,7 @@ FEATURES = [
     'ndvi_mean',
     'albedo_mean',
     'building_density_mean',
+    'height_mean',
     'road_density_mean',
     'sand_mask_fraction',
     'water_mask_full_fraction'

@@ -335,6 +335,7 @@ Test RMSE: 2.61 K
 Test R²:   0.45
 Improvement over Baseline: 0.90 K
 - Used RF first cus its fast, doesn't need much tuning and sets a benchmark.
+
 - Switching over to HistGradientBoostingRegressor for better performance and got these results:
 2026-02-07 20:45:42,519 - INFO - ------------------------------
 2026-02-07 20:45:42,519 - INFO - FINAL RESULTS (LST ANOMALY - GRADIENT BOOSTING)
@@ -348,7 +349,7 @@ Improvement over Baseline: 0.90 K
 - Looked into GBA: https://github.com/zhu-xlab/GlobalBuildingAtlas?tab=readme-ov-file
 - https://mediatum.ub.tum.de/1782307
 - https://sat-io.earthengine.app/view/gba?utm_source=chatgpt.com
-- Downloaded the height_tif files to find the tiles of UAE.
+- Downloaded the height_tif files to find the tiles of UAE (3m resolution).
 - Identified which tiles cover dubai using QGIS.
 1. `./Height/africa/e055_n30_e060_n25/55.0_25.2_55.2_25.0_sr_ss.tif`
 2. `./Height/africa/e055_n30_e060_n25/55.2_25.4_55.4_25.2_sr_ss.tif`
@@ -368,6 +369,21 @@ Improvement over Baseline: 0.90 K
 4. `e055_n25_e060_n20.zip`
 
 - Since files are too large, ran a script on Colab to acquire the files from the server in order to test them out.
+- Since Colab did not satisfy space requirements, decided to shift to local drive-based script.
+
+---
+09/02/2026:
+- Fallback to local FileZilla download since script timesout.
+
+--
+13/02/2026:
+- Finished extracting all the files for GBA and began analysis.
+- First approach, for processing GBA included multiple small values which messes up the mean value calculation.
+
+- PLAN: Fix baseline backend, including nighttime and afternoon -> Population priority -> Make frontend features -> Improving algo
+
+- Paper to look at for improved performance (Random Forest + Regression Kriging): https://www.researchgate.net/publication/399142892_Enhanced_Urban_Heat_Island_Modeling_with_Machine_Learning_and_Regression_Kriging_in_a_Topographically_Diverse_Medium-Sized_City
+
 - 
 
 
