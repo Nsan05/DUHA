@@ -172,7 +172,8 @@ def main():
     df = add_lst_anomaly(df)
     
     # 2. Filter (The "City Envelope")
-    df = filter_data(df)
+    # df = filter_data(df) # User requested to keep all pixels
+    logger.info("Skipping Data Filtering (Using Full Dataset including Desert)...")
     
     # 3. Engineer Features (The "Physics")
     df, features = feature_engineering(df)
