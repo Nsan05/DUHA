@@ -409,6 +409,9 @@ Test RMSE: 2.49 K (Was 2.51 K).
 ----
 14/07/2026:
 - Performing hyperparameter tuning to extract best performance from the script
+- Made model interpretation report to understand model metrics
+- Added height raster script at 30m
+- Added distance to coast raster at 30m.
 - 
 
 
