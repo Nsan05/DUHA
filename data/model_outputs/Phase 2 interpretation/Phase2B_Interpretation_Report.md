@@ -12,7 +12,7 @@
 
 Permutation importance measures how much the model's R² drops when each feature is randomly shuffled. Higher values indicate stronger predictive power.
 
-![Feature Importance](../interpretation/feature_importance.png)
+![Feature Importance](../Phase 2 interpretation/feature_importance.png)
 
 | Rank | Feature                       | Importance (ΔR²) | Category          |
 | ---- | ----------------------------- | ---------------- | ----------------- |
@@ -37,7 +37,7 @@ Permutation importance measures how much the model's R² drops when each feature
 
 PDPs show how each feature **independently** affects the predicted temperature, while holding all other features constant. These are the physical relationships learned by the model.
 
-![Partial Dependence Plots](../interpretation/partial_dependence_plots.png)
+![Partial Dependence Plots](../Phase 2 interpretation/partial_dependence_plots.png)
 
 ### Physical Interpretations
 
@@ -82,7 +82,7 @@ PDPs show how each feature **independently** affects the predicted temperature, 
 
 ## 3. Feature Correlation Matrix (Spearman)
 
-![Correlation Matrix](../interpretation/feature_correlation.png)
+![Correlation Matrix](../Phase 2 interpretation/feature_correlation.png)
 
 ### Key Correlations to Note
 
@@ -95,7 +95,7 @@ PDPs show how each feature **independently** affects the predicted temperature, 
 
 ## 4. Spatial Error Map
 
-![Spatial Error Map](../interpretation/spatial_error_map.png)
+![Spatial Error Map](../Phase 2 interpretation/spatial_error_map.png)
 
 The residual map (Actual − Predicted) reveals where the model performs well and where it struggles.
 
