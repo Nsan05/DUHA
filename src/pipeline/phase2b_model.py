@@ -34,7 +34,8 @@ FEATURES = [
     'height_mean',
     'road_density_mean',
     'sand_mask_fraction',
-    'water_mask_full_fraction'
+    'water_mask_full_fraction',
+    'dist_to_coast_m'
 ]
 TARGET_RAW = 'viirs_lst'
 TARGET_ANOMALY = 'lst_anomaly'
