@@ -413,6 +413,12 @@ Test RMSE: 2.49 K (Was 2.51 K).
 - Added height raster script at 30m
 - Added distance to coast raster at 30m.
 - Upscaled to 30m resolution using the previous script and generated outputs
+
+----
+15/07/2026:
+- Analyzed the results side by side at a high level to cross check if the hotspots and coolspots lighn up in the 30m resolution and the 750m resolution.
+- The downscaled 30m anomaly map reproduces the broad spatial patterns observed in the VIIRS 750m data, including coastal cooling, water body effects, and inland warming. The downscaled map reveals fine-scale urban structure not resolvable at 750m. Peak anomaly magnitudes are attenuated in the prediction, consistent with the model's R²=0.53
+
 - 
 
 
