@@ -434,13 +434,12 @@ Test RMSE: 2.49 K (Was 2.51 K).
 2026-02-15 15:25:34,553 - INFO -   Training RMSE:      2.40 K (for comparison)
 2026-02-15 15:25:34,553 - INFO - ==================================================
 
-- Ran an experiment to train model without sand mask and got the following results:
-R2: 0.56
-RMSE: 2.05k
-
-- From error analysis found that sand dominates the features and hence shouldn't be considered
 - Changed the dir structure to make it more organized.
-- 
+- Added readme file to make things more readable.
+- Got structured phase strategy to get through the remaining phases.
+
+----
+15/02/2026:
 
 
 

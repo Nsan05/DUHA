@@ -35,17 +35,21 @@ FEATURES = [
     'dist_to_coast_m'
 ]
 
-TARGET_RAW = 'viirs_lst'
-TARGET_ANOMALY = 'lst_anomaly'
+# Hyperparameter Distributions - Using Continuous/Discrete Distributions
+# This allows the script to explore values "in between" fixed grid points.
+from scipy.stats import uniform, randint, loguniform
 
-# Hyperparameter Grid
-PARAM_GRID = {
-    'max_iter':         [300, 500, 800],
-    'learning_rate':    [0.01, 0.05, 0.1],
-    'max_depth':        [4, 6, 8, None],
-    'min_samples_leaf': [10, 20, 50],
-    'max_leaf_nodes':   [31, 63, None],
-    'l2_regularization':[0.0, 0.1, 1.0]
+# Define distributions to sample from
+PARAM_DISTRIBUTIONS = {
+    'learning_rate':    loguniform(0.01, 0.3),            # Explore small & large rates efficiently
+    'max_iter':         randint(500, 3000),               # Trees: 500 to 3000
+    'max_depth':        randint(3, 16),                   # Depth: 3 to 15 (None handling done carefully)
+    'min_samples_leaf': randint(10, 100),                 # Smoothness
+    'max_leaf_nodes':   randint(31, 255),                 # Complexity
+    'l2_regularization':uniform(0, 10),                   # Regularization: 0.0 to 10.0
+    'validation_fraction':[0.1],                          # Fixed: 10% for internal validation
+    'n_iter_no_change': [20],                             # Fixed: Patience
+    'early_stopping':   [True]                            # Fixed: Always Use
 }
 
 def load_data():
@@ -58,7 +62,7 @@ def load_data():
     
     return df
 
-def create_spatial_cv_folds(df, n_folds=5):
+def create_spatial_cv_folds(df, n_folds=10):  # Expanded from 5 to 10 folds
     """
     Creates Spatial Cross-Validation folds based on block assignments.
     Each fold uses a different set of spatial blocks as the validation set.
@@ -93,16 +97,21 @@ def evaluate_params(df, params):
     n_folds = df['fold'].nunique()
     scores = []
     
-    for fold in range(n_folds):
+    # Use only 5 folds even if we split into 10 (saves time while keeping spatial variety)
+    active_folds = range(min(n_folds, 5)) 
+    
+    for fold in active_folds:
         val_mask = df['fold'] == fold
         X_train = df.loc[~val_mask, FEATURES]
         y_train = df.loc[~val_mask, TARGET_ANOMALY]
         X_val = df.loc[val_mask, FEATURES]
         y_val = df.loc[val_mask, TARGET_ANOMALY]
         
+        # Handle "None" for max_depth if sampled value is very high (optional, or just keep int)
+        # Using the params directly as they come from the distribution sample
+        
         model = HistGradientBoostingRegressor(
             random_state=RANDOM_STATE,
-            early_stopping=True,
             **params
         )
         model.fit(X_train, y_train)
@@ -113,20 +122,38 @@ def evaluate_params(df, params):
     
     return np.mean(scores)
 
+def sample_params(n_samples):
+    """Generates n_samples parameter dictionaries from distributions."""
+    np.random.seed(RANDOM_STATE)
+    samples = []
+    for _ in range(n_samples):
+        params = {}
+        for k, v in PARAM_DISTRIBUTIONS.items():
+            if hasattr(v, 'rvs'): # If it's a scipy distribution
+                params[k] = v.rvs(random_state=np.random.randint(0, 10000))
+                # Convert numpy types to native Python (sometimes issues with JSON serialization later)
+                if isinstance(params[k], np.integer):
+                    params[k] = int(params[k])
+                elif isinstance(params[k], np.floating):
+                    params[k] = float(params[k])
+            elif isinstance(v, list): # Fixed list
+                params[k] = v[0] # Just take the first/only value for fixed params
+            else:
+                params[k] = v
+        samples.append(params)
+    return samples
+
 def run_tuning():
     # Load & Prep
     df = load_data()
-    df = create_spatial_cv_folds(df, n_folds=5)
+    df = create_spatial_cv_folds(df, n_folds=10) # 10 distinct spatial zones
     
-    # Generate all param combinations (sampled)
-    keys = list(PARAM_GRID.keys())
-    all_combos = list(product(*[PARAM_GRID[k] for k in keys]))
+    # Generate 100 random combinations from continuous distributions
+    n_combos = 100 
+    sampled_combos = sample_params(n_combos)
     
-    # Random sample to keep runtime reasonable
-    np.random.seed(RANDOM_STATE)
-    n_combos = min(30, len(all_combos))  # Test 30 random combinations
-    sampled_indices = np.random.choice(len(all_combos), n_combos, replace=False)
-    sampled_combos = [all_combos[i] for i in sampled_indices]
+    logger.info(f"Starting Robust Randomized Search with {n_combos} iterations...")
+    logger.info("Parameters are sampled from continuous distributions (not a fixed grid).")
     
     logger.info(f"Testing {n_combos} hyperparameter combinations (out of {len(all_combos)} total)...")
     
