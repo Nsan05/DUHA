@@ -416,8 +416,23 @@ Test RMSE: 2.49 K (Was 2.51 K).
 
 ----
 15/07/2026:
-- Analyzed the results side by side at a high level to cross check if the hotspots and coolspots lighn up in the 30m resolution and the 750m resolution.
+- Analyzed the results side by side at a high level to cross check if the hotspots and coolspots line up in the 30m resolution and the 750m resolution.
 - The downscaled 30m anomaly map reproduces the broad spatial patterns observed in the VIIRS 750m data, including coastal cooling, water body effects, and inland warming. The downscaled map reveals fine-scale urban structure not resolvable at 750m. Peak anomaly magnitudes are attenuated in the prediction, consistent with the model's R²=0.53
+
+- Had a more detailed analysis of the aggregation metrics:
+2026-02-15 15:25:34,552 - INFO - ==================================================
+2026-02-15 15:25:34,553 - INFO - STATISTICAL CONSISTENCY METRICS
+2026-02-15 15:25:34,553 - INFO - ==================================================
+2026-02-15 15:25:34,553 - INFO -   Observations:       42521
+2026-02-15 15:25:34,553 - INFO -   Mean Bias:          -0.183 K
+2026-02-15 15:25:34,553 - INFO -   MAE:                1.612 K
+2026-02-15 15:25:34,553 - INFO -   RMSE:               2.204 K
+2026-02-15 15:25:34,553 - INFO -   R²:                 0.493
+2026-02-15 15:25:34,553 - INFO -   Pearson r:          0.705 (p=0.00e+00)
+2026-02-15 15:25:34,553 - INFO - ==================================================
+2026-02-15 15:25:34,553 - INFO -   Training R²:        0.534  (for comparison)
+2026-02-15 15:25:34,553 - INFO -   Training RMSE:      2.40 K (for comparison)
+2026-02-15 15:25:34,553 - INFO - ==================================================
 
 - 
 
