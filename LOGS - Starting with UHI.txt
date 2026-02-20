@@ -380,8 +380,8 @@ Improvement over Baseline: 0.90 K
 - Finished extracting all the files for GBA and began analysis.
 - First approach, for processing GBA included multiple small values which messes up the mean value calculation.
 - New results- 
-Test R²: 0.49 (Was 0.48).
-Test RMSE: 2.51 K (Was 2.53 K).
+Test R²: 0.49 (Was 0.48)
+Test RMSE: 2.51 K (Was 2.53 K)
 
 - PLAN: Fix baseline backend, including nighttime and afternoon -> Population priority -> Make frontend features -> Improving algo
 
@@ -407,7 +407,7 @@ Test RMSE: 2.49 K (Was 2.51 K).
 2026-02-14 09:39:55,530 - INFO - Improvement over Baseline: 1.12 K
 
 ----
-14/07/2026:
+14/02/2026:
 - Performing hyperparameter tuning to extract best performance from the script
 - Made model interpretation report to understand model metrics
 - Added height raster script at 30m
@@ -415,7 +415,7 @@ Test RMSE: 2.49 K (Was 2.51 K).
 - Upscaled to 30m resolution using the previous script and generated outputs
 
 ----
-15/07/2026:
+15/02/2026:
 - Analyzed the results side by side at a high level to cross check if the hotspots and coolspots line up in the 30m resolution and the 750m resolution.
 - The downscaled 30m anomaly map reproduces the broad spatial patterns observed in the VIIRS 750m data, including coastal cooling, water body effects, and inland warming. The downscaled map reveals fine-scale urban structure not resolvable at 750m. Peak anomaly magnitudes are attenuated in the prediction, consistent with the model's R²=0.53
 
@@ -439,7 +439,9 @@ Test RMSE: 2.49 K (Was 2.51 K).
 - Got structured phase strategy to get through the remaining phases.
 
 ----
-15/02/2026:
-
+20/02/2026:
+- Moving onto the next phase to train landsat model
+- Added more landsat scenes to make prediction to more accurate with more data from June to September.
+- 
 
 
