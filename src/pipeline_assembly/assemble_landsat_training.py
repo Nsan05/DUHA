@@ -67,6 +67,7 @@ def main():
             nodata = src.nodata
             
             if nodata == -9999.0:
+                # captures floating point errors for 9999 and used 9000 as a safety net.
                 outside = (data <= -9000)
                 base_valid &= ~outside
                 data[outside] = 0
@@ -79,8 +80,11 @@ def main():
             
     # Calculate X and Y coordinate for each pixel
     logger.info("Generating pixel coordinates...")
+    # preparing meshgrid for transform
     cols, rows = np.meshgrid(np.arange(width), np.arange(height))
+    # Getting real world coordinate values for each pixel
     xs, ys = rasterio.transform.xy(ref_transform, rows.flatten(), cols.flatten())
+    # Reshaping the coordinate values to 2D arrays to match up with the feature arrays
     xs_2d = np.array(xs).reshape(height, width).astype(np.float32)
     ys_2d = np.array(ys).reshape(height, width).astype(np.float32)
     

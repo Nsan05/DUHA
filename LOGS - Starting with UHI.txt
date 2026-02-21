@@ -458,6 +458,7 @@ Test RMSE: 2.49 K (Was 2.51 K).
 
 - Tried a new training batch with these values - '(max_iter=1000, lr=0.03, max_leaf_nodes=63)' but got the same response. 
 - Decided to keep the current values and move on before improving the model further.
+- Created a script to see the predicted anomaly values. This provides a more generalized map from all the scenes.
 - 
 
 
