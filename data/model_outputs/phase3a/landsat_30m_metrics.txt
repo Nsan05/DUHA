@@ -1,0 +1,30 @@
+PHASE 3A DIRECT PIXEL-TO-PIXEL METRICS (30m native)
+Test Pixels:   7,586,713
+Mean Bias:     -0.013 K
+MAE:           2.023 K
+RMSE:          2.829 K
+R²:            0.913
+Pearson r:     0.955 (p=0.00e+00)
+
+
+--- Distance to Coast ---
+coast_bin     rmse      bias   count
+     <2km 2.493007  0.072319 3099630
+    2-5km 3.341342 -0.609019  611394
+   5-10km 3.089846  0.119724 1215878
+  10-20km 2.933198 -0.038745 2640755
+    >20km 4.069061  0.339260   19056
+
+
+--- Building Density ---
+     density_bin     rmse      bias   count
+      Low (<10%) 2.723625  0.022786 6353094
+    Med (10-30%) 3.245775 -0.207791  458004
+   High (30-60%) 3.274858 -0.185100  468496
+Very High (>60%) 3.497373 -0.199731  307119
+
+
+--- Sand Fraction ---
+ sand_bin     rmse      bias   count
+<10% Sand 2.774392  0.013310 4931542
+>90% Sand 2.928749 -0.061806 2655171
