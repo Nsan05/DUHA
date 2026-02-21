@@ -442,8 +442,22 @@ Test RMSE: 2.49 K (Was 2.51 K).
 20/02/2026:
 - Moving onto the next phase to train landsat model
 - Added more landsat scenes to make prediction to more accurate with more data from June to September.
+
+----
+21/02/2026:
 - Added VIIRS nighttime data to have night time prediction model.
 - Formulated a step by step plan to execute the landsat temperature model.
+- Loaded 12 landsat files and had the features loaded into a csv file for training.
+- Confirmed the csv file generated looks good on the data front.
+- Ran th training for the first time and got this output:
+026-02-21 19:17:47,282 - INFO - FINAL RESULTS (LANDSAT LST ANOMALY - GRADIENT BOOSTING)
+2026-02-21 19:17:47,282 - INFO - Test RMSE: 2.83 K
+2026-02-21 19:17:47,282 - INFO - Test R²:   0.91
+2026-02-21 19:17:47,286 - INFO - Improvement over Baseline: 6.76 K
+2026-02-21 19:17:47,286 - INFO - ------------------------------
+
+- Tried a new training batch with these values - '(max_iter=1000, lr=0.03, max_leaf_nodes=63)' but got the same response. 
+- Decided to keep the current values and move on before improving the model further.
 - 
 
 
