@@ -443,6 +443,7 @@ Test RMSE: 2.49 K (Was 2.51 K).
 - Moving onto the next phase to train landsat model
 - Added more landsat scenes to make prediction to more accurate with more data from June to September.
 - Added VIIRS nighttime data to have night time prediction model.
+- Formulated a step by step plan to execute the landsat temperature model.
 - 
 
 
