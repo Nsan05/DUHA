@@ -465,6 +465,14 @@ Test RMSE: 2.49 K (Was 2.51 K).
 22/02/2026:
 - Added landcover analysis to identify where the model fails and where it excels.
 - Wrote assembly script for viirs night time following same logic from daytime scripts.
+- Made a training script in a similar style as the previous ones.
+- Got training metrics for the model as:
+2026-02-22 14:25:11,222 - INFO - FINAL RESULTS (NIGHTTIME LST ANOMALY - GRADIENT BOOSTING)
+2026-02-22 14:25:11,222 - INFO - Test RMSE: 1.24 K
+2026-02-22 14:25:11,222 - INFO - Test R²:   0.62
+2026-02-22 14:25:11,222 - INFO - Improvement over Baseline: 0.81 K
+
+- Tried to improve model accuracy by parameter tuning but did not get better outputs so decided to keep the current model.
 - 
 
 
