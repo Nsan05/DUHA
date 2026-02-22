@@ -473,6 +473,22 @@ Test RMSE: 2.49 K (Was 2.51 K).
 2026-02-22 14:25:11,222 - INFO - Improvement over Baseline: 0.81 K
 
 - Tried to improve model accuracy by parameter tuning but did not get better outputs so decided to keep the current model.
+- Created 30m prediction raster for night time viirs
+- Evaluated the night time viirs prediction at 30m aggregated to 750m using an evaluation script.
+- Got these results for the aggregated output for nighttime:
+2026-02-22 17:28:10,281 - INFO - ==================================================
+2026-02-22 17:28:10,281 - INFO - PHASE 3B METRICS (750m scale validation)
+2026-02-22 17:28:10,281 - INFO - ==================================================
+2026-02-22 17:28:10,282 - INFO -   Test Pixels:   10,646
+2026-02-22 17:28:10,282 - INFO -   Mean Bias:     -0.321 K
+2026-02-22 17:28:10,282 - INFO -   MAE:           1.139 K
+2026-02-22 17:28:10,282 - INFO -   RMSE:          1.439 K
+2026-02-22 17:28:10,282 - INFO -   R²:            0.490
+2026-02-22 17:28:10,282 - INFO -   Pearson r:     0.718 (p=0.00e+00)
+2026-02-22 17:28:10,282 - INFO - ==================================================
+
+- Evaluated script by land cover and will improve performance in later phases.
+
 - 
 
 
