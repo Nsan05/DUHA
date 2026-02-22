@@ -464,6 +464,7 @@ Test RMSE: 2.49 K (Was 2.51 K).
 ----
 22/02/2026:
 - Added landcover analysis to identify where the model fails and where it excels.
+- Wrote assembly script for viirs night time following same logic from daytime scripts.
 - 
 
 

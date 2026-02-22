@@ -124,7 +124,7 @@ def filter_quality(lst, qc):
     # checks the last two bits of the qc (long num with nlots of info but we only care about the last two digits for quality) array and print 00 or 01 or 10 or 11 depending on comparison
     mandatory_qa = qc & 0b11
     
-    # Valid = 00 (Good) or 01 (Marginal) -> Allow both for now? 
+    # Valid = 00 (Good) or 01 (Marginal) -> Allow both 
     # Update: 00 = Pixel produced, good quality
     
     valid_mask = (mandatory_qa == 0) # only keeps the good quality pixels
