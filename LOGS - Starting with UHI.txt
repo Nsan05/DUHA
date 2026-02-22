@@ -489,6 +489,8 @@ Test RMSE: 2.49 K (Was 2.51 K).
 
 - Evaluated script by land cover and will improve performance in later phases.
 
+- Created a 3-pane output and further output analysis to understand the heatmaps produced at different times of day.
+
 - 
 
 
