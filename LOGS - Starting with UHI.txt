@@ -499,6 +499,8 @@ Test RMSE: 2.49 K (Was 2.51 K).
 28/02/2026:
 - Looked into Google Stitch to visualize UI development for front end features.
 - Looked into apple maps for design language inspiration.
+- Charted a phased implementation strategy for developing the frontend and the HVI index pre-requisites.
+- Created the frontend/ directory and initialized a Next.js application using create-next-app with TypeScript, ESLint, and the App Router enabled. Configured a flat project structure (no src/ directory), excluded Tailwind for full styling control with vanilla CSS, and retained the default import alias (@/*). Established core architectural folders including components/ (with a dedicated MapView/ module), lib/ for utilities and API helpers, and styles/ for global design configuration. Added environment configuration via .env.local, securely integrating the Mapbox public token for map rendering.
 - 
 
 
