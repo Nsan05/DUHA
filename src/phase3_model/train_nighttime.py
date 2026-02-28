@@ -163,6 +163,23 @@ def train_model(train_df, test_df):
     )
     gb.fit(X_train, y_train)
     
+    # 2.5 Plot Training Loss
+    plt.figure(figsize=(10, 6))
+    # HistGradientBoostingRegressor stores the negative of the loss in train_score_ and validation_score_
+    # We multiply by -1 to plot the actual loss which will go down over iterations.
+    plt.plot(-np.array(gb.train_score_), label='Training Loss', color='blue', linewidth=2)
+    if hasattr(gb, 'validation_score_') and len(gb.validation_score_) > 0:
+        plt.plot(-np.array(gb.validation_score_), label='Validation Loss', color='orange', linewidth=2)
+    plt.xlabel('Iteration (Number of Trees)')
+    plt.ylabel('Loss')
+    plt.title('Nighttime Model Training - Loss over Iterations')
+    plt.legend()
+    plt.grid(True)
+    loss_plot_path = OUTPUT_DIR / "nighttime_training_loss_curve.png"
+    plt.savefig(loss_plot_path)
+    logger.info(f"Training loss curve saved to {loss_plot_path}")
+    plt.close()
+    
     # 3. Evaluate
     y_pred = gb.predict(X_test)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))

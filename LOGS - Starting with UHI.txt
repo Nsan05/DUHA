@@ -491,6 +491,15 @@ Test RMSE: 2.49 K (Was 2.51 K).
 
 - Created a 3-pane output and further output analysis to understand the heatmaps produced at different times of day.
 
+----
+23/02/2026:
+- Added feature importance detection for landsat model and night time virrs.
+
+----
+28/02/2026:
+- Looked into Google Stitch to visualize UI development for front end features.
+- Looked into apple maps for design language inspiration.
 - 
+
 
 
