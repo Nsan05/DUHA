@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
     print("Starting up Dubai Urban Heat API...")
     
     # 1. Load Community GeoJSON Data for the map drawing response
-    with open(COMMUNITIES_GEOJSON_PATH, "r") as f:
+    with open(COMMUNITIES_GEOJSON_PATH, "r", encoding="utf-8") as f:
         state.communities_geojson = json.load(f)
         
     # 2. Load ML Models
@@ -246,6 +246,19 @@ async def get_shap_explanation(req: CoordinateRequest):
     
     sentence = f"This location is {abs(anomaly):.1f}°C {adjective} than the city average. "
     
+    # Units for displaying raw feature values
+    friendly_units = {
+        "ndvi_mean": "",
+        "albedo_mean": "",
+        "building_density_mean": "",
+        "height_mean": "m",
+        "road_density_mean": "",
+        "sand_mask_fraction": "",
+        "water_mask_full_fraction": "",
+        "dist_to_coast_m": "m",
+        "dist_to_coast_mean": "m"
+    }
+    
     # Grab the top 4 drivers
     top_4 = sorted_drivers[:4]
     
@@ -255,7 +268,10 @@ async def get_shap_explanation(req: CoordinateRequest):
     for feat, val in top_4:
         name = friendly_names.get(feat, feat)
         effect = "heating" if val > 0 else "cooling"
-        drivers_text.append(f"{name} ({effect} by {abs(val):.2f}°C)")
+        # Include the raw feature value so the user understands what the pixel actually looks like
+        raw_val = features.get(feat, features.get("dist_to_coast_m", 0.0))
+        unit = friendly_units.get(feat, "")
+        drivers_text.append(f"{name} = {raw_val:.2f}{unit} ({effect} by {abs(val):.2f}°C)")
         
     sentence += ", ".join(drivers_text) + ". "
     
