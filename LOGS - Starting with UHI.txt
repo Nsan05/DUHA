@@ -510,6 +510,9 @@ Test RMSE: 2.49 K (Was 2.51 K).
 - Added a script to get population in each urban community by combining the census data and the urban communities' geojson.
 - Made a script to make the stats more architecture-friendly by pre-computing the most essential metrics so that it can be served quickly to the front end.
 - All communities now have zone_stats including mean, deviation etc. for the relevant features within those communities.
+- Script done for final files with community wise metrics.
+- Decided on a tolerance value of 0.0001 https://www.quickmaptools.com/simplify-tools
+- Found that two communities were dropped due to geometry filters since it was not marked on the community shapefiles from dubai pulse but continued without them as they are vastly under developed. ((Palm Jebel Ali), (Dubai Waterfront))
 - 
 
 

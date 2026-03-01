@@ -155,6 +155,7 @@ def main():
         with rasterio.open(path) as src:
             nodata_val = src.nodata
             
+        # Calls hidden functions defined before
         stats = zonal_stats(
             gdf, 
             path, 
