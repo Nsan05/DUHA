@@ -513,6 +513,7 @@ Test RMSE: 2.49 K (Was 2.51 K).
 - Script done for final files with community wise metrics.
 - Decided on a tolerance value of 0.0001 https://www.quickmaptools.com/simplify-tools
 - Found that two communities were dropped due to geometry filters since it was not marked on the community shapefiles from dubai pulse but continued without them as they are vastly under developed. ((Palm Jebel Ali), (Dubai Waterfront))
+- Added the main FastAPI Backend layer for the script along with the relevant api endpoints.
 - 
 
 
