@@ -508,6 +508,8 @@ Test RMSE: 2.49 K (Was 2.51 K).
 ----
 01/03/2026:
 - Added a script to get population in each urban community by combining the census data and the urban communities' geojson.
+- Made a script to make the stats more architecture-friendly by pre-computing the most essential metrics so that it can be served quickly to the front end.
+- All communities now have zone_stats including mean, deviation etc. for the relevant features within those communities.
 - 
 
 

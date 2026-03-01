@@ -5,7 +5,6 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import styles from "./MapView.module.css";
 
-// Store token safely (avoid public exposure if missing)
 if (process.env.NEXT_PUBLIC_MAPBOX_TOKEN) {
   mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 }
@@ -21,8 +20,6 @@ export default function MapView() {
       console.error("Missing NEXT_PUBLIC_MAPBOX_TOKEN in .env.local");
       return;
     }
-
-    // Initialize map only once
     if (mapRef.current) return;
 
     mapRef.current = new mapboxgl.Map({
@@ -42,14 +39,9 @@ export default function MapView() {
 
     map.on("load", () => {
       setMapLoaded(true);
-
-      // Allow users to rotate and pitch the map manually using right-click drag
-      // map.dragRotate.disable();
-
-      // Optional: Add 3D buildings later in Phase 7
     });
 
-    // Add navigation controls (zoom in/out/pitch)
+    // navigation controls (zoom in/out/pitch)
     map.addControl(
       new mapboxgl.NavigationControl({
         showCompass: true, // Needed for the pitch/tilt button to appear

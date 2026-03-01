@@ -7,8 +7,7 @@ def join_population_data(
     census_path: str = "../../data/raw/census/Population_by_community.xlsx"
 ) -> gpd.GeoDataFrame:
     """
-    Joins census population data to the urban communities GeoJSON.
-    Returns an enriched GeoDataFrame.
+    Joins census population data to the urban communities GeoJSON..
     """
     print(f"Loading GeoJSON from {geojson_path}...")
     gdf = gpd.read_file(geojson_path)
@@ -38,7 +37,7 @@ def join_population_data(
     # Keep only necessary columns
     df_clean = df[['community_code', 'population', 'area_km2', 'pop_density']].copy()
     
-    # Ensure COMM_NUM in GeoJSON is int
+    # Double checking COMM_NUM in GeoJSON is int
     gdf['COMM_NUM'] = gdf['COMM_NUM'].astype(int)
     
     print("Joining datasets on COMM_NUM == community_code...")
@@ -53,12 +52,10 @@ def join_population_data(
         
         # Fill missing values with 0 or appropriate defaults
         enriched_gdf['population'] = enriched_gdf['population'].fillna(0)
-        enriched_gdf['area_km2'] = enriched_gdf['area_km2'].fillna(0) # or calculate area from geom
+        enriched_gdf['area_km2'] = enriched_gdf['area_km2'].fillna(0)
         enriched_gdf['pop_density'] = enriched_gdf['pop_density'].fillna(0)
     else:
         print("SUCCESS: All communities matched with population data.")
-
-    # Calculate pop_density if any were NaN but population wasn't, or just rely on census compute
     
     # Clean up duplicate code column
     if 'community_code' in enriched_gdf.columns:
