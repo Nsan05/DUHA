@@ -1,0 +1,87 @@
+.tooltipContainer {
+  position: fixed;
+  pointer-events: none; /* Make sure the tooltip doesn't block mouse events on the map */
+  z-index: 50;
+  transform: translate(-50%, calc(-100% - 16px)); /* Center above cursor, offset by 16px */
+  min-width: 220px;
+  max-width: 280px;
+  padding: var(--space-3) var(--space-4);
+  /* Use glass panel styles natively or via classes, we will compose in React */
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  gap: var(--space-3);
+}
+
+.title {
+  font-weight: 600;
+  font-size: var(--font-base);
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.priorityBadge {
+  background: var(--accent-hot);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.statPair {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statLabel {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hviDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Color classes for the dot */
+.hviLow { background-color: var(--accent-green); }
+.hviMed { background-color: var(--accent-amber); }
+.hviHigh { background-color: var(--accent-hot); }
+
+.anomalyValue {
+  font-variant-numeric: tabular-nums;
+}
+
+.anomalyHot { color: var(--accent-hot); }
+.anomalyCool { color: var(--accent-cool); }

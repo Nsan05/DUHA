@@ -519,6 +519,9 @@ Test RMSE: 2.49 K (Was 2.51 K).
 ----
 02/03/2026:
 - Created AppContext to hold all shared application fucntions and to fetch data from the backend and compute the hvi and priority exposure tag for each of the communities.
+- Added a beautiful floating pill bar that smoothly transitions the entire page theme and data layer when the user taps a time slot.
+- Added a tooltip component to show Core metrics for each community on hover like HVI, Population, Greenery etc.
+- Added fill and boundaries to all the communities on the map and colour coded them according to the HVI value.
 - 
 
 
