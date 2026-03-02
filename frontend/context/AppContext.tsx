@@ -1,9 +1,17 @@
 "use client";
+// createContext → Creates a global shared data container.
 
+// useContext → Reads data from a context.
+
+// useState → Stores state (data that changes and re-renders UI).
+
+// useEffect → Runs side effects after rendering (e.g., fetch, event listener).
+
+// useMemo → Caches a calculated value to avoid recalculating every render.
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 import { CommunityFeatureCollection, TimeOfDay } from "../lib/types";
 
-// The shape of our global state
+// The shape of our global state - shared by all componeents
 interface AppContextState {
   timeOfDay: TimeOfDay;
   setTimeOfDay: (time: TimeOfDay) => void;
@@ -68,7 +76,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     fetchCommunities();
   }, []);
 
-  // Step 2: HVI Computation whenever timeOfDay or raw data changes.
+  // Step 2: HVI Computation whenever timeOfDay or raw data changes. - Does normalisation first
   // Using useMemo is perfectly safe and prevents useEffect cyclic dependency issues.
   const computedCommunities = useMemo(() => {
     if (!rawCommunities) return null;
