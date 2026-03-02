@@ -515,6 +515,10 @@ Test RMSE: 2.49 K (Was 2.51 K).
 - Found that two communities were dropped due to geometry filters since it was not marked on the community shapefiles from dubai pulse but continued without them as they are vastly under developed. ((Palm Jebel Ali), (Dubai Waterfront))
 - Added the main FastAPI Backend layer for the script along with the relevant api endpoints.
 - Made the SHAP sentence more interpretable by also mentioning the actual values within it as well for more clarity.
+
+----
+02/03/2026:
+- Created AppContext to hold all shared application fucntions and to fetch data from the backend and compute the hvi and priority exposure tag for each of the communities.
 - 
 
 
