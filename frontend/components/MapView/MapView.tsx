@@ -134,21 +134,40 @@ export default function MapView() {
     }
 
     // Add Outline Layer
+    const isDarkMap = timeOfDay === "night";
+    
+    // Apple Maps style: Darker faint lines for light map, Lighter faint lines for dark map
+    const standardLineColor = isDarkMap ? "rgba(255, 255, 255, 0.25)" : "rgba(0, 0, 0, 0.15)";
+    const priorityLineColor = isDarkMap ? "rgba(255, 255, 255, 1)" : "rgba(0, 0, 0, 0.9)";
+    
+    const lineColorExpression = [
+      "case",
+      ["==", ["get", "priorityExposure"], true],
+      priorityLineColor,
+      standardLineColor
+    ];
+
+    const lineWidthExpression = [
+      "case",
+      ["==", ["get", "priorityExposure"], true],
+      2.5, // Bold boundary for priority
+      1.0  // Standard boundary
+    ];
+
     if (!map.getLayer("communities-outline")) {
       map.addLayer({
         id: "communities-outline",
         type: "line",
         source: "communities",
         paint: {
-          "line-color": "rgba(255, 255, 255, 0.4)",
-          "line-width": [
-            "case",
-            ["==", ["get", "priorityExposure"], true],
-            2.5, // Thicker border for priority communities
-            0.5  // Standard faint border
-          ]
+          "line-color": lineColorExpression as any,
+          "line-width": lineWidthExpression as any
         }
       });
+    } else {
+      // Must dynamically update paint properties when timeOfDay changes
+      map.setPaintProperty("communities-outline", "line-color", lineColorExpression as any);
+      map.setPaintProperty("communities-outline", "line-width", lineWidthExpression as any);
     }
 
     // stores which community is hovered
