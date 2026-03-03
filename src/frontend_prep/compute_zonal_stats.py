@@ -155,6 +155,11 @@ def main():
         with rasterio.open(path) as src:
             nodata_val = src.nodata
             
+            # CRITICAL FIX: If nodata is 0 for our binary masks, zonal_stats will ignore 
+            # all 0s and the mean will always be 1.0! We must treat 0 as a valid pixel.
+            if key in ["sand_fraction", "water_fraction"]:
+                nodata_val = -9999
+            
         # Calls hidden functions defined before
         stats = zonal_stats(
             gdf, 
