@@ -221,16 +221,18 @@ export default function BottomSheet() {
               ?
             </button>
           </div>
-          <button 
-            className={`${styles.priorityToggle} ${showPriorityOnly ? styles.active : ""}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowPriorityOnly(!showPriorityOnly);
-              if (height === SNAP_COLLAPSED) setHeight(SNAP_HALF);
-            }}
-          >
-            🔴 Priority Only
-          </button>
+          {viewMode === 'list' && (
+            <button 
+              className={`${styles.priorityToggle} ${showPriorityOnly ? styles.active : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPriorityOnly(!showPriorityOnly);
+                if (height === SNAP_COLLAPSED) setHeight(SNAP_HALF);
+              }}
+            >
+              🔴 Priority Only
+            </button>
+          )}
         </div>
 
         {/* HVI Info Panel */}
