@@ -146,6 +146,45 @@
   display: none; /* Chrome */
 }
 
+/* View Togglers (List vs Analytics) */
+.viewToggleGroup {
+  display: flex;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-full);
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+:global(.theme-morning) .viewToggleGroup {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.viewToggle {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.viewToggle.viewActive {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-subtle);
+  margin: auto 4px;
+  flex-shrink: 0;
+}
+
 .sortPill {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-subtle);

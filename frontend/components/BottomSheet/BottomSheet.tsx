@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { CommunityFeature } from "../../lib/types";
+import CityCharts from "../Analytics/CityCharts";
 import styles from "./BottomSheet.module.css";
 
 // Snap heights (pixels from bottom)
@@ -21,6 +22,9 @@ export default function BottomSheet() {
     sortDirection, setSortDirection
   } = useAppContext();
 
+  // UI View state
+  const [viewMode, setViewMode] = useState<'list' | 'analytics'>('list');
+  
   // Dragging state
   const [height, setHeight] = useState(SNAP_COLLAPSED); // Height starts at collapsed
   const [showHviInfo, setShowHviInfo] = useState(false);
@@ -229,32 +233,63 @@ export default function BottomSheet() {
         )}
       </div>
 
-      {/* SORT CONTROLS */}
+      {/* SORT CONTROLS / VIEW TOGGLES */}
       {(height > SNAP_COLLAPSED) && (
         <div className={styles.controlsRow}>
-          <button 
-            className={`${styles.sortPill} ${sortField === 'hvi' ? styles.sortActive : ''}`} 
-            onClick={() => handleSort('hvi')}
-          >
-            Score {sortField === 'hvi' && (sortDirection === 'asc' ? '↑' : '↓')}
-          </button>
-          <button 
-            className={`${styles.sortPill} ${sortField === 'population' ? styles.sortActive : ''}`} 
-            onClick={() => handleSort('population')}
-          >
-            Population {sortField === 'population' && (sortDirection === 'asc' ? '↑' : '↓')}
-          </button>
-          <button 
-            className={`${styles.sortPill} ${sortField === 'temperature' ? styles.sortActive : ''}`} 
-            onClick={() => handleSort('temperature')}
-          >
-            Temp {sortField === 'temperature' && (sortDirection === 'asc' ? '↑' : '↓')}
-          </button>
+          
+          <div className={styles.viewToggleGroup}>
+            <button 
+              className={`${styles.viewToggle} ${viewMode === 'list' ? styles.viewActive : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              📋 Directory
+            </button>
+            <button 
+              className={`${styles.viewToggle} ${viewMode === 'analytics' ? styles.viewActive : ''}`}
+              onClick={() => {
+                setViewMode('analytics');
+                if (height < SNAP_FULL) setHeight(SNAP_FULL); // Automatically expand fully to show charts
+              }}
+            >
+              📈 Analytics
+            </button>
+          </div>
+
+          <div className={styles.divider} />
+
+          {viewMode === 'list' && (
+            <>
+              <button 
+                className={`${styles.sortPill} ${sortField === 'hvi' ? styles.sortActive : ''}`} 
+                onClick={() => handleSort('hvi')}
+              >
+                Score {sortField === 'hvi' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </button>
+              <button 
+                className={`${styles.sortPill} ${sortField === 'population' ? styles.sortActive : ''}`} 
+                onClick={() => handleSort('population')}
+              >
+                Population {sortField === 'population' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </button>
+              <button 
+                className={`${styles.sortPill} ${sortField === 'temperature' ? styles.sortActive : ''}`} 
+                onClick={() => handleSort('temperature')}
+              >
+                Temp {sortField === 'temperature' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </button>
+            </>
+          )}
         </div>
       )}
 
-      {/* CARD LIST */}
-      {(height > SNAP_COLLAPSED) && (
+      {/* RENDER CONTENT BASED ON VIEW MODE */}
+      {(height > SNAP_COLLAPSED) && viewMode === 'analytics' && (
+        <div className={styles.analyticsContainer}>
+          <CityCharts />
+        </div>
+      )}
+
+      {(height > SNAP_COLLAPSED) && viewMode === 'list' && (
         <ul className={styles.listContainer} ref={listRef}>
           {sortedCommunities.map((feature: CommunityFeature) => {
             const props = feature.properties;
