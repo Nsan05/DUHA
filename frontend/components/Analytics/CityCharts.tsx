@@ -68,18 +68,29 @@ export default function CityCharts() {
     const hottest = sorted.slice(0, 5);
     const coolest = sorted.slice(-5).reverse();
 
-    const formatData = (features: CommunityFeature[], groupName: string) => {
-      return features.map(f => ({
-        name: f.properties.CNAME_E.substring(0, 15) + (f.properties.CNAME_E.length > 15 ? '...' : ''),
-        group: groupName,
-        Greenery: f.properties.green_fraction * 100, // percentage
-        Sand: f.properties.sand_fraction * 100,
-        Water: f.properties.water_fraction * 100,
-        Built: f.properties.building_density * 100 // approximation logic
-      }));
+    const formatData = (features: CommunityFeature[], groupName: string, emoji: string) => {
+      return features.map(f => {
+        // truncate to 15 chars and add emoji prefix
+        let shortName = f.properties.CNAME_E.substring(0, 15) + (f.properties.CNAME_E.length > 15 ? '...' : '');
+        return {
+          name: `${emoji} ${shortName}`,
+          group: groupName,
+          Greenery: (f.properties.green_fraction || 0) * 100, 
+          Sand: (f.properties.sand_fraction_mean || 0) * 100,
+          Water: (f.properties.water_fraction_mean || 0) * 100,
+          Built: (f.properties.building_density_mean || 0) * 100
+        };
+      });
     };
 
-    return [...formatData(hottest, "Top 5 Hottest"), ...formatData(coolest, "Top 5 Coolest")];
+    // Use an empty separator row for visual demarcation between the hot and cool groups
+    const separator = { name: " ", group: "separator", Greenery: 0, Sand: 0, Water: 0, Built: 0 };
+
+    return [
+      ...formatData(hottest, "Top 5 Hottest", "🔥"), 
+      separator,
+      ...formatData(coolest, "Top 5 Coolest", "❄️")
+    ];
   }, [computedCommunities, timeOfDay]);
 
   // 3. Data for Histogram (Anomaly Distribution)

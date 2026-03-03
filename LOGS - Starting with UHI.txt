@@ -539,5 +539,10 @@ The SVG chart
 The Community Rank
 
 - Added an analytics section to the bottom sheet to get in-depth cross-community analysis on all the relevant urban communities within the map
-
+- Fixed an issue with naming errors in the land composition script.
+- Noticed sand value discrepancy and delved deeper to understand the source. Got to know that the values were off for the island regions so created a specific island mask and applied the sand mask creation once again with the sand mask.
+- Re generated the sand mask with palm and world islands.
+- The zonal stats script only took the average of the 1 values rather than all of the 0s and 1s. Fixed this bug.
+- Fixed the above bug for water, sand and building heights.
+- 
 
