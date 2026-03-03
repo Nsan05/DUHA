@@ -28,6 +28,7 @@ export default function BottomSheet() {
   // Dragging state
   const [height, setHeight] = useState(SNAP_COLLAPSED); // Height starts at collapsed
   const [showHviInfo, setShowHviInfo] = useState(false);
+  const [originalHeight, setOriginalHeight] = useState(SNAP_COLLAPSED);
   const isDragging = useRef(false); 
   const startY = useRef(0);
   const startHeight = useRef(0);
@@ -199,8 +200,21 @@ export default function BottomSheet() {
               className={`${styles.infoButton} ${showHviInfo ? styles.active : ''}`}
               onClick={(e) => {
                 e.stopPropagation(); // prevent drag trigger
-                setShowHviInfo(!showHviInfo);
-                if (height === SNAP_COLLAPSED) setHeight(SNAP_HALF);
+                const nextState = !showHviInfo;
+                setShowHviInfo(nextState);
+                
+                if (nextState) {
+                  // Expanding up
+                  setOriginalHeight(height);
+                  if (height <= SNAP_COLLAPSED) {
+                    setHeight(SNAP_HALF);
+                  } else if (height === SNAP_HALF) {
+                    setHeight(SNAP_HALF + 150);
+                  }
+                } else {
+                  // Closing: Return to whatever height it was when we clicked it
+                  setHeight(originalHeight);
+                }
               }}
               title="What is HVI?"
             >
