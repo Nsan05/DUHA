@@ -70,3 +70,23 @@
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
+
+/* SVG specific pulse animation since box-shadow won't work on circles */
+@keyframes svg-pulse {
+  0% {
+    r: 4.5px;
+    fill-opacity: 0.6;
+  }
+  50% {
+    r: 12px;
+    fill-opacity: 0.1;
+  }
+  100% {
+    r: 4.5px;
+    fill-opacity: 0.6;
+  }
+}
+
+.pulseGlow {
+  animation: svg-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

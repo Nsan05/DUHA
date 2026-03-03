@@ -549,5 +549,6 @@ The Community Rank
 04/03/2026:
 - Added horizontal menu for analytics and made the bins dynamically adjust for the bar chart
 - Fixed the time selector space issue
+- Added a glowing dot to the scatter plot and a priority tag to the community in the bottom sheet.
 - 
 

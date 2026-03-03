@@ -327,7 +327,7 @@ export default function BottomSheet() {
                 <div className={styles.cardInfo}>
                   <div className={styles.commName}>
                     {props.CNAME_E}
-                    {props.priorityExposure && <span style={{fontSize: "10px"}}>🔴</span>}
+                    {props.priorityExposure && <span className={styles.priorityBadge}>🔴 Priority</span>}
                   </div>
                   <div className={styles.commMeta}>
                     <span>Pop: {props.population ? props.population.toLocaleString() : "N/A"}</span>

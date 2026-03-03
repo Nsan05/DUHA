@@ -32,6 +32,25 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+// Custom shape for the Scatter Plot dots to show a glow for F17 Priority Exposure
+const CustomDot = (props: any) => {
+  const { cx, cy, payload } = props;
+  const isPriority = payload.isPriority;
+  
+  if (isPriority) {
+    return (
+      <g>
+        {/* Glow effect */}
+        <circle cx={cx} cy={cy} r={9} fill="var(--accent-hot)" fillOpacity={0.3} className={styles.pulseGlow} />
+        {/* Core dot */}
+        <circle cx={cx} cy={cy} r={4.5} fill="var(--accent-hot)" stroke="rgba(255, 255, 255, 0.8)" strokeWidth={1} />
+      </g>
+    );
+  }
+  // Standard dot
+  return <circle cx={cx} cy={cy} r={3} fill="var(--accent-amber)" fillOpacity={0.6} />;
+};
+
 export default function CityCharts() {
   const { computedCommunities, timeOfDay } = useAppContext();
 
@@ -47,7 +66,8 @@ export default function CityCharts() {
         name: props.CNAME_E,
         population: props.population || 0,
         temp: anomaly,
-        hvi: props.hvi || 0
+        hvi: props.hvi || 0,
+        isPriority: props.priorityExposure || false
       };
     }).filter(d => d.population > 0); // Ignore unpopulated areas
   }, [computedCommunities, timeOfDay]);
@@ -174,7 +194,7 @@ export default function CityCharts() {
                 tickFormatter={(value) => value > 1000 ? `${(value/1000).toFixed(0)}k` : value}
               />
               <RechartsTooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
-              <Scatter name="Communities" data={scatterData} fill="var(--accent-amber)" shape="circle" fillOpacity={0.7} />
+              <Scatter name="Communities" data={scatterData} shape={<CustomDot />} />
             </ScatterChart>
           </ResponsiveContainer>
         </div>
