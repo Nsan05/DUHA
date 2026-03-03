@@ -157,7 +157,8 @@ def main():
             
             # CRITICAL FIX: If nodata is 0 for our binary masks, zonal_stats will ignore 
             # all 0s and the mean will always be 1.0! We must treat 0 as a valid pixel.
-            if key in ["sand_fraction", "water_fraction"]:
+            # building_height also has nodata=0, so we must treat 0 height as valid.
+            if key in ["sand_fraction", "water_fraction", "building_height"]:
                 nodata_val = -9999
             
         # Calls hidden functions defined before
