@@ -103,15 +103,34 @@ export default function CityCharts() {
               timeOfDay === "afternoon" ? f.properties.anomaly_afternoon_mean : f.properties.anomaly_night_mean;
     });
 
-    // Create bins from -3.0 to +3.0 in 0.5 increments
-    const bins = Array.from({length: 13}, (_, i) => -3.0 + i * 0.5);
+    if (anomalies.length === 0) return [];
+
+    // Dynamically calculate min and max to ensure no communities are dropped
+    const minVal = Math.floor(Math.min(...anomalies));
+    const maxVal = Math.ceil(Math.max(...anomalies));
+    
+    // Create bins in 1.0 degree increments to keep the chart clean even if range is large
+    const bins: number[] = [];
+    for (let i = minVal; i <= maxVal; i += 1.0) {
+      bins.push(i);
+    }
+    
     const counts = new Array(bins.length).fill(0);
 
     // Count how many communities fall into each bin
     anomalies.forEach(val => {
-      const rounded = Math.round(val * 2) / 2; // round to nearest 0.5
+      // Find the closest bin (rounding to nearest 1.0)
+      const rounded = Math.round(val);
       const idx = bins.indexOf(rounded);
-      if (idx !== -1) counts[idx]++;
+      
+      // If the rounded value strictly falls inside our bin array, increment it
+      if (idx !== -1) {
+        counts[idx]++;
+      } else {
+        // Edge cases for values exactly on the boundary that round out of bounds
+        if (rounded < bins[0]) counts[0]++;
+        if (rounded > bins[bins.length - 1]) counts[bins.length - 1]++;
+      }
     });
 
     return bins.map((bin, i) => ({
@@ -133,7 +152,7 @@ export default function CityCharts() {
           <div className={styles.title}>Population vs. Temperature Anomaly</div>
           <div className={styles.subtitle}>Identifying highly populated communities exposed to extreme heat vs those in cooling zones.</div>
         </div>
-        <div style={{ width: '100%', height: 250 }}>
+        <div style={{ width: '100%', height: 350 }}>
           <ResponsiveContainer>
             <ScatterChart margin={{ top: 10, right: 30, bottom: 20, left: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
@@ -167,7 +186,7 @@ export default function CityCharts() {
           <div className={styles.title}>City-Wide Anomaly Distribution</div>
           <div className={styles.subtitle}>How many communities are hotter vs cooler than the city average right now.</div>
         </div>
-        <div style={{ width: '100%', height: 200 }}>
+        <div style={{ width: '100%', height: 350 }}>
           <ResponsiveContainer>
             <BarChart data={histData} margin={{ top: 10, right: 30, bottom: 20, left: -20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
@@ -190,7 +209,7 @@ export default function CityCharts() {
           <div className={styles.title}>Land Composition: Extremes</div>
           <div className={styles.subtitle}>Comparing the physical makeup of the 5 Hottest vs 5 Coolest communities.</div>
         </div>
-        <div style={{ width: '100%', height: 300 }}>
+        <div style={{ width: '100%', height: 350 }}>
           <ResponsiveContainer>
             <BarChart data={barData} layout="vertical" margin={{ top: 10, right: 30, bottom: 10, left: 30 }} barSize={16}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" horizontal={false} />

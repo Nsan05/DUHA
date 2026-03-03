@@ -179,7 +179,7 @@ export default function BottomSheet() {
 
   return (
     <div 
-      className={styles.sheet} 
+      className={`${styles.sheet} ${viewMode === 'analytics' ? styles.sheetWide : ''}`}
       style={{ height: `${height}px` }}
     >
       {/* DRAG HANDLE & HEADER */}
