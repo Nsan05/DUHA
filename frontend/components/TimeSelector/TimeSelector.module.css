@@ -46,6 +46,7 @@
   position: absolute;
   top: 4px;
   bottom: 4px;
+  left: 0;
   /* Width is set via inline style based on active button width */
   background: rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-full);
