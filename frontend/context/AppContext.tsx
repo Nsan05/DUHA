@@ -151,8 +151,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const hvi = (0.4 * nAnom) + (0.3 * nPop) + (0.3 * nExtr);
       props.hvi = Math.round(hvi * 100); // 0 to 100 integer scale
 
-      // Priority Exposure flag: HVI > 75 (Top 25% roughly) AND Population > Median
-      props.priorityExposure = props.hvi > 75 && pop > medianPop;
+      // Priority Exposure flag: HVI > 60 (Top 40% roughly) AND Population > Median
+      props.priorityExposure = props.hvi > 60 && pop > medianPop;
     });
     
     return collection;

@@ -17,6 +17,7 @@ export default function MapView() {
   const { 
     timeOfDay, 
     computedCommunities, 
+    selectedCommunity,
     setSelectedCommunity,
     setHoveredCommunity 
   } = useAppContext();
@@ -226,8 +227,48 @@ export default function MapView() {
       map.off("mouseleave", "communities-fill", onMouseLeave);
       map.off("click", "communities-fill", onClick);
     };
-
   }, [mapLoaded, computedCommunities]);
+
+  // 4. Fly to Selected Community
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current || !selectedCommunity || !computedCommunities) return;
+    
+    // Get the feature for the selected community
+    const feature = computedCommunities.features.find(
+      (f: any) => f.properties.COMM_NUM.toString() === selectedCommunity
+    );
+    
+    if (feature && feature.geometry) {
+      // Calculate BBox manually to see where the coordinates lie to avoid pulling in external Turf.js dependencies
+      let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+      
+      const updateBounds = (coord: number[]) => {
+        if (coord[0] < minLng) minLng = coord[0];
+        if (coord[0] > maxLng) maxLng = coord[0];
+        if (coord[1] < minLat) minLat = coord[1];
+        if (coord[1] > maxLat) maxLat = coord[1];
+      };
+
+      // Going through all the cooridinates mentioned within the geometry feature to get the box
+      const coords = feature.geometry.coordinates;
+      if (feature.geometry.type === 'Polygon') {
+        coords[0].forEach(updateBounds);
+      } else if (feature.geometry.type === 'MultiPolygon') {
+        coords.forEach((poly: any) => poly[0].forEach(updateBounds));
+      }
+
+      if (minLng !== Infinity) {
+        mapRef.current.fitBounds(
+          [[minLng, minLat], [maxLng, maxLat]],
+          { 
+            padding: { top: 100, bottom: 400, left: 100, right: 100 }, // Account for bottom sheet UI
+            duration: 1500, // Cinematic 1.5s flight 
+            essential: true 
+          }
+        );
+      }
+    }
+  }, [selectedCommunity, computedCommunities, mapLoaded]);
 
   return (
     <>

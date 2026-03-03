@@ -1,0 +1,256 @@
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur) var(--glass-saturation);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturation);
+  border: 1px solid var(--border-subtle);
+  border-bottom: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transition: height var(--duration-normal) var(--ease-spring);
+  /* The height will be controlled via inline style to allow dragging */
+  height: 60px; /* Collapsed by default */
+}
+
+/* Drag Handle Area */
+.dragHeader {
+  width: 100%;
+  padding: 12px 0 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: grab;
+  flex-shrink: 0;
+  touch-action: none; /* Prevent scroll while dragging */
+}
+
+.dragHeader:active {
+  cursor: grabbing;
+}
+
+.handle {
+  width: 40px;
+  height: 4px;
+  background: var(--text-tertiary);
+  border-radius: var(--radius-full);
+  margin-bottom: 12px;
+}
+
+.titleRow {
+  width: 100%;
+  padding: 0 var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoButton {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast);
+}
+
+.infoButton:hover, .infoButton.active {
+  background: var(--text-secondary);
+  color: var(--bg-primary);
+  border-color: var(--text-secondary);
+}
+
+.infoPanel {
+  width: calc(100% - var(--space-8));
+  margin: var(--space-3) auto 0;
+  padding: var(--space-3);
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.5;
+  animation: fadeIn 0.3s ease-out;
+}
+
+:global(.theme-morning) .infoPanel {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.infoPanel strong {
+  color: var(--text-primary);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* F17 Toggle Pill */
+.priorityToggle {
+  background: rgba(255, 71, 62, 0.1);
+  color: var(--accent-hot);
+  border: 1px solid rgba(255, 71, 62, 0.3);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.priorityToggle.active {
+  background: var(--accent-hot);
+  color: white;
+  border-color: var(--accent-hot);
+}
+
+.priorityToggle:hover {
+  transform: scale(1.05);
+}
+
+/* Control Row (Sorting) */
+.controlsRow {
+  display: flex;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.controlsRow::-webkit-scrollbar {
+  display: none; /* Chrome */
+}
+
+.sortPill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sortPill:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+}
+
+.sortPill.sortActive {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Card List */
+.listContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: center;
+  cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+
+.card:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+:global(.theme-morning) .card:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.card.selected {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+:global(.theme-morning) .card.selected {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Card Elements */
+.hviBadge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--font-sm);
+  color: #fff; /* Always white text on these colored badges */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* The badge uses inline style for background color based on HVI value */
+
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.commName {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.commMeta {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  display: flex;
+  gap: 8px;
+}
+
+/* Sparkline container */
+.sparklineContainer {
+  width: 60px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}

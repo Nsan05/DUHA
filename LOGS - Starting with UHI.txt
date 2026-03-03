@@ -522,7 +522,12 @@ Test RMSE: 2.49 K (Was 2.51 K).
 - Added a beautiful floating pill bar that smoothly transitions the entire page theme and data layer when the user taps a time slot.
 - Added a tooltip component to show Core metrics for each community on hover like HVI, Population, Greenery etc.
 - Added fill and boundaries to all the communities on the map and colour coded them according to the HVI value.
-- 
 
+----
+3/3/2026:
+- Built a script to have community specific bottom sheets with extra metrics.
+- Incorporated fly to for the selected community as well within the map.
+- Debated between using population vs population density for the HVI score but decided to keep population itself as the metric to ensure that the max number of affected people is prioritized.
+- 
 
 
