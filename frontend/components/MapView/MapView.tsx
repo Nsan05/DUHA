@@ -19,8 +19,11 @@ export default function MapView() {
     computedCommunities, 
     selectedCommunity,
     setSelectedCommunity,
-    setHoveredCommunity 
+    setHoveredCommunity,
+    pixelGridData
   } = useAppContext();
+  
+  const pixelPopupRef = useRef<mapboxgl.Popup | null>(null);
 
   // Keep a ref of selectedCommunity for the click handler to access which will be updated when the selectedCommunity changes
   const selectedCommunityRef = useRef(selectedCommunity);
@@ -65,10 +68,21 @@ export default function MapView() {
       "bottom-right",
     );
 
+    // Initialize standalone popup for the pixel grid
+    pixelPopupRef.current = new mapboxgl.Popup({
+      closeButton: false, // Disable the usual close button and close on click features
+      closeOnClick: false,
+      className: "pixel-tooltip",
+    });
+
+    // Only called when the component is navigated away from automatically by React
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
+      }
+      if (pixelPopupRef.current) {
+        pixelPopupRef.current.remove();
       }
     };
   }, []);
@@ -115,7 +129,7 @@ export default function MapView() {
       (map.getSource("communities") as mapboxgl.GeoJSONSource).setData(computedCommunities as any);
     }
 
-    // Add Fill Layer (colored by HVI)
+    // Add Fill Layer (colored by HVI) - Gets the layer from added ones tot he map object like below
     if (!map.getLayer("communities-fill")) {
       map.addLayer({
         id: "communities-fill",
@@ -305,6 +319,132 @@ export default function MapView() {
       }
     }
   }, [selectedCommunity, computedCommunities, mapLoaded]);
+
+  // 5. Render Pixel Grid and Handle Cell Interactions
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded) return;
+
+    // If there is no data then hide the pixel gird and close pop up
+    if (!pixelGridData || !pixelGridData.grid || !selectedCommunity) {
+      if (map.getLayer("pixel-grid-fill")) {
+        map.setLayoutProperty("pixel-grid-fill", "visibility", "none");
+        map.setLayoutProperty("pixel-grid-outline", "visibility", "none");
+      }
+      if (pixelPopupRef.current && pixelPopupRef.current.isOpen()) {
+        pixelPopupRef.current.remove();
+      }
+      return;
+    }
+
+    const source = map.getSource("pixel-grid") as mapboxgl.GeoJSONSource;
+    // Mapbox needs an ID to manage feature states (like hover) correctly
+    // auto-generate integer IDs inside the source initialization
+    // If no source then source is added
+    if (!source) {
+      map.addSource("pixel-grid", {
+        type: "geojson",
+        data: pixelGridData.grid,
+        generateId: true // gives each pixel an unique ID
+      });
+
+      // Insert it BELOW the communities outline so community borders stay crisp
+      map.addLayer({
+        id: "pixel-grid-fill",
+        type: "fill",
+        source: "pixel-grid",
+        paint: {
+          "fill-color": [
+            "interpolate",
+            ["linear"],
+            ["get", "anomaly"],
+            -4, "#1E90FF",   // Very Cool (Dark Blue)
+            -2, "#87CEEB",   // Cool (Light Blue)
+            -0.5, "#E0F7FA", // Slightly Cool
+            0, "#F5F5F5",    // Neutral
+            0.5, "#FFF9C4",  // Slightly Warm
+            2, "#FFA500",    // Hot (Orange)
+            4, "#FF4500"     // Very Hot (Red)
+          ],
+          "fill-opacity": [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            0.9,
+            0.6
+          ]
+        }
+      }, "communities-outline"); // Before community outlines (the pixel gris is made under the community borders)
+
+      map.addLayer({
+        id: "pixel-grid-outline",
+        type: "line",
+        source: "pixel-grid",
+        paint: {
+          "line-color": "rgba(255, 255, 255, 0.15)",
+          "line-width": 1
+        }
+      }, "communities-outline"); // Before community outlines
+
+      // Hover event logic for pixels
+      let hoveredPixelId: number | string | null = null;
+
+      map.on("mousemove", "pixel-grid-fill", (e) => {
+        if (e.features && e.features.length > 0) {
+          map.getCanvas().style.cursor = "crosshair";
+          
+          if (hoveredPixelId !== null) {
+            map.setFeatureState(
+              { source: "pixel-grid", id: hoveredPixelId },
+              { hover: false } // turn off previous hover
+            );
+          }
+          // set new hover
+          hoveredPixelId = e.features[0].id!;
+          map.setFeatureState(
+            { source: "pixel-grid", id: hoveredPixelId },
+            { hover: true }
+          );
+
+          // Update and position popup
+          const anomaly = e.features[0].properties?.anomaly;
+          const formattedAnom = anomaly > 0 ? `+${anomaly.toFixed(1)}°C` : `${anomaly.toFixed(1)}°C`;
+          const anomColor = anomaly > 0 ? "#FF4500" : "#1E90FF";
+          
+          const html = `
+            <div style="padding: 4px 6px; font-family: inherit; font-size: 11px; font-weight: 600; text-align: center;">
+              <div style="color: #888; margin-bottom: 2px;">LOCAL ANOMALY</div>
+              <div style="color: ${anomColor}; font-size: 13px;">${formattedAnom}</div>
+            </div>
+          `;
+          
+          // Check is pop up object is present in memory
+          if (pixelPopupRef.current) {
+            pixelPopupRef.current.setLngLat(e.lngLat).setHTML(html).addTo(map);
+          }
+        }
+      });
+
+      map.on("mouseleave", "pixel-grid-fill", () => {
+        if (hoveredPixelId !== null) {
+          map.setFeatureState(
+            { source: "pixel-grid", id: hoveredPixelId },
+            { hover: false }
+          );
+        }
+        hoveredPixelId = null;
+        map.getCanvas().style.cursor = "";
+        
+        if (pixelPopupRef.current) {
+          pixelPopupRef.current.remove();
+        }
+      });
+
+    } else {
+      source.setData(pixelGridData.grid);
+      map.setLayoutProperty("pixel-grid-fill", "visibility", "visible");
+      map.setLayoutProperty("pixel-grid-outline", "visibility", "visible");
+    }
+  }, [pixelGridData, mapLoaded, selectedCommunity]);
 
   return (
     <>

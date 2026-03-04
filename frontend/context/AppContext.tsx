@@ -40,6 +40,10 @@ interface AppContextState {
   setSortField: (field: string) => void;
   sortDirection: 'asc' | 'desc';
   setSortDirection: (dir: 'asc' | 'desc') => void;
+
+  // Phase 2: Community Pixel Grid
+  pixelGridData: any | null;
+  setPixelGridData: (data: any | null) => void;
 }
 
 const AppContext = createContext<AppContextState | undefined>(undefined);
@@ -59,6 +63,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [sortField, setSortField] = useState<string>('hvi');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
+  // Phase 2 data
+  const [pixelGridData, setPixelGridData] = useState<any | null>(null);
+
   // Initial Data Fetch
   useEffect(() => {
     async function fetchCommunities() {
@@ -77,6 +84,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     fetchCommunities();
   }, []);
+
+  // Fetch Pixel Grid when a community is selected or timeOfDay changes
+  useEffect(() => {
+    async function fetchPixelGrid() {
+      if (!selectedCommunity) {
+        setPixelGridData(null);
+        return;
+      }
+      try {
+        const res = await fetch(`http://localhost:8000/api/community/${selectedCommunity}/pixels?time=${timeOfDay}`);
+        if (!res.ok) throw new Error("Failed to fetch pixel grid data");
+        const data = await res.json();
+        setPixelGridData(data);
+      } catch (err) {
+        console.error("Error fetching pixel grid:", err);
+        setPixelGridData(null);
+      }
+    }
+    fetchPixelGrid();
+  }, [selectedCommunity, timeOfDay]);
 
   // Step 2: HVI Computation whenever timeOfDay or raw data changes. - Does normalisation first
   // Using useMemo is perfectly safe and prevents useEffect cyclic dependency issues.
@@ -168,7 +195,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loading, error,
     showPriorityOnly, setShowPriorityOnly,
     sortField, setSortField,
-    sortDirection, setSortDirection
+    sortDirection, setSortDirection,
+    pixelGridData, setPixelGridData
   };
 
   return (
