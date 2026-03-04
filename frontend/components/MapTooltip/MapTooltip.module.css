@@ -1,12 +1,29 @@
 .tooltipContainer {
   position: fixed;
-  pointer-events: none; /* Make sure the tooltip doesn't block mouse events on the map */
+  pointer-events: none;
   z-index: 50;
-  transform: translate(-50%, calc(-100% - 16px)); /* Center above cursor, offset by 16px */
+  transform: translate(-50%, calc(-100% - 16px));
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+}
+
+.largeTooltip {
   min-width: 220px;
   max-width: 280px;
   padding: var(--space-3) var(--space-4);
-  /* Use glass panel styles natively or via classes, we will compose in React */
+  display: block; /* Override flex */
+  border-radius: var(--radius-lg);
+}
+
+.pixelDetailRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
 }
 
 .header {
@@ -52,16 +69,16 @@
 }
 
 .statLabel {
-  font-size: var(--font-xs);
+  font-size: 10px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
 .statValue {
-  font-size: var(--font-sm);
-  color: var(--text-primary);
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -74,7 +91,6 @@
   display: inline-block;
 }
 
-/* Color classes for the dot */
 .hviLow { background-color: var(--accent-green); }
 .hviMed { background-color: var(--accent-amber); }
 .hviHigh { background-color: var(--accent-hot); }

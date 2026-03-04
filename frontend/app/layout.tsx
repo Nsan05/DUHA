@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 
 import { AppProvider } from "../context/AppContext";
 import MapTooltip from "../components/MapTooltip/MapTooltip";
+import RightSidebar from "../components/RightSidebar/RightSidebar";
 
 export default function RootLayout({
   children,
@@ -30,6 +31,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <AppProvider>
           <MapTooltip />
+          <RightSidebar />
           {children}
         </AppProvider>
       </body>

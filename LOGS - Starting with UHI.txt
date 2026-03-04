@@ -561,4 +561,5 @@ F17	Population Exposure Scoring
 - Added a fly back mechanism where we reset back to the main when a community is deselected and improved the panning from one community to another within the map.
 - Added a 30m pixel grid to selected communities along with anomaly data for each.
 - Added a loading bar to the map view when the raster is loading in.
+- Updated the script to have better tooltip switching between selected communities and non-selected communities and also added a sidebar to display fixed values.
 - 

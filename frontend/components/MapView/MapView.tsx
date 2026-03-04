@@ -21,10 +21,9 @@ export default function MapView() {
     setSelectedCommunity,
     setHoveredCommunity,
     pixelGridData,
-    pixelGridLoading
+    pixelGridLoading,
+    setHoveredPixelAnomaly
   } = useAppContext();
-  
-  const pixelPopupRef = useRef<mapboxgl.Popup | null>(null);
 
   // Keep a ref of selectedCommunity for the click handler to access which will be updated when the selectedCommunity changes
   const selectedCommunityRef = useRef(selectedCommunity);
@@ -69,21 +68,10 @@ export default function MapView() {
       "bottom-right",
     );
 
-    // Initialize standalone popup for the pixel grid
-    pixelPopupRef.current = new mapboxgl.Popup({
-      closeButton: false, // Disable the usual close button and close on click features
-      closeOnClick: false,
-      className: "pixel-tooltip",
-    });
-
-    // Only called when the component is navigated away from automatically by React
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
-      }
-      if (pixelPopupRef.current) {
-        pixelPopupRef.current.remove();
       }
     };
   }, []);
@@ -332,9 +320,7 @@ export default function MapView() {
         map.setLayoutProperty("pixel-grid-fill", "visibility", "none");
         map.setLayoutProperty("pixel-grid-outline", "visibility", "none");
       }
-      if (pixelPopupRef.current && pixelPopupRef.current.isOpen()) {
-        pixelPopupRef.current.remove();
-      }
+      setHoveredPixelAnomaly(null);
       return;
     }
 
@@ -389,6 +375,7 @@ export default function MapView() {
       // Hover event logic for pixels
       let hoveredPixelId: number | string | null = null;
 
+      // event when the mouse on top of a pixel
       map.on("mousemove", "pixel-grid-fill", (e) => {
         if (e.features && e.features.length > 0) {
           map.getCanvas().style.cursor = "crosshair";
@@ -406,26 +393,15 @@ export default function MapView() {
             { hover: true }
           );
 
-          // Update and position popup
+          // Update hovered pixel anomaly state instead of local popup
           const anomaly = e.features[0].properties?.anomaly;
-          const formattedAnom = anomaly > 0 ? `+${anomaly.toFixed(1)}°C` : `${anomaly.toFixed(1)}°C`;
-          const anomColor = anomaly > 0 ? "#FF4500" : "#1E90FF";
-          
-          const html = `
-            <div style="padding: 4px 6px; font-family: inherit; font-size: 11px; font-weight: 600; text-align: center;">
-              <div style="color: #888; margin-bottom: 2px;">LOCAL ANOMALY</div>
-              <div style="color: ${anomColor}; font-size: 13px;">${formattedAnom}</div>
-            </div>
-          `;
-          
-          // Check is pop up object is present in memory
-          if (pixelPopupRef.current) {
-            pixelPopupRef.current.setLngLat(e.lngLat).setHTML(html).addTo(map);
-          }
+          setHoveredPixelAnomaly(anomaly);
         }
       });
 
+      // When the mouse leaves the pixel grid entirely
       map.on("mouseleave", "pixel-grid-fill", () => {
+        // the last pixel value that was registered before the cursor left the pixel grid
         if (hoveredPixelId !== null) {
           map.setFeatureState(
             { source: "pixel-grid", id: hoveredPixelId },
@@ -435,9 +411,7 @@ export default function MapView() {
         hoveredPixelId = null;
         map.getCanvas().style.cursor = "";
         
-        if (pixelPopupRef.current) {
-          pixelPopupRef.current.remove();
-        }
+        setHoveredPixelAnomaly(null);
       });
 
     } else {

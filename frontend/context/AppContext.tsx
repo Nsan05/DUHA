@@ -27,6 +27,8 @@ interface AppContextState {
   setSelectedCommunity: (id: string | null) => void;
   hoveredCommunity: string | null;
   setHoveredCommunity: (id: string | null) => void;
+  hoveredPixelAnomaly: number | null;
+  setHoveredPixelAnomaly: (val: number | null) => void;
   
   loading: boolean;
   error: string | null;
@@ -59,6 +61,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Selection/Hover state
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
   const [hoveredCommunity, setHoveredCommunity] = useState<string | null>(null);
+  const [hoveredPixelAnomaly, setHoveredPixelAnomaly] = useState<number | null>(null);
   
   // Panel controls
   const [showPriorityOnly, setShowPriorityOnly] = useState<boolean>(false);
@@ -200,6 +203,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     rawCommunities, computedCommunities,
     selectedCommunity, setSelectedCommunity,
     hoveredCommunity, setHoveredCommunity,
+    hoveredPixelAnomaly, setHoveredPixelAnomaly,
     loading, error,
     showPriorityOnly, setShowPriorityOnly,
     sortField, setSortField,
