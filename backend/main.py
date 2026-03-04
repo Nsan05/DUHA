@@ -300,6 +300,7 @@ async def get_community_pixels(comm_num: int, time: str = "afternoon"): # defaul
     if not feature:
         raise HTTPException(status_code=404, detail=f"Community {comm_num} not found")
         
+    # 4326 - lat/lon    
     geom_4326 = shape(feature["geometry"])
     
     # 2. Project to native CRS (EPSG:32640, matching the raster)
@@ -344,7 +345,10 @@ async def get_community_pixels(comm_num: int, time: str = "afternoon"): # defaul
     # Optimization: Instead of building full dict per loop step, build efficiently
     lons_t, lats_t = [], []
     for r, c in zip(rows, cols):
+        # Top left corner of pixel
         x_tl, y_tl = out_transform * (c, r)
+        
+        # Add all 5 corners of pixel to lists
         lons_t.extend([x_tl, x_tl + pixel_width, x_tl + pixel_width, x_tl, x_tl])
         lats_t.extend([y_tl, y_tl, y_tl + pixel_height, y_tl + pixel_height, y_tl])
         
