@@ -97,6 +97,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
       try {
+        setPixelGridData(null); // Instantly clear old grid while loading new one
         setPixelGridLoading(true);
         const res = await fetch(`http://localhost:8000/api/community/${selectedCommunity}/pixels?time=${timeOfDay}`);
         if (!res.ok) throw new Error("Failed to fetch pixel grid data");
