@@ -3,9 +3,11 @@
 
 // useContext → Reads data from a context.
 
-// useState → Stores state (data that changes and re-renders UI).
+// useState → Stores state (data that changes and re-renders UI if function triggered).
 
-// useEffect → Runs side effects after rendering (e.g., fetch, event listener).
+// useEffect → Do an action when somehting changes.
+
+// useRef -> Stores value
 
 // useMemo → Caches a calculated value to avoid recalculating every render.
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";

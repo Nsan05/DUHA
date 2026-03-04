@@ -22,6 +22,12 @@ export default function MapView() {
     setHoveredCommunity 
   } = useAppContext();
 
+  // Keep a ref of selectedCommunity for the click handler to access which will be updated when the selectedCommunity changes
+  const selectedCommunityRef = useRef(selectedCommunity);
+  useEffect(() => {
+    selectedCommunityRef.current = selectedCommunity;
+  }, [selectedCommunity]);
+
   // 1. Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -137,10 +143,11 @@ export default function MapView() {
     // Add Outline Layer
     const isDarkMap = timeOfDay === "night";
     
-    // Apple Maps style: Darker faint lines for light map, Lighter faint lines for dark map
+    // Darker faint lines for light map, Lighter faint lines for dark map
     const standardLineColor = isDarkMap ? "rgba(255, 255, 255, 0.25)" : "rgba(0, 0, 0, 0.15)";
     const priorityLineColor = isDarkMap ? "rgba(255, 255, 255, 1)" : "rgba(0, 0, 0, 0.9)";
     
+    // If the community is priority then use the appropriate color
     const lineColorExpression = [
       "case",
       ["==", ["get", "priorityExposure"], true],
@@ -148,6 +155,7 @@ export default function MapView() {
       standardLineColor
     ];
 
+    // Liek above use the appropriate width of the line
     const lineWidthExpression = [
       "case",
       ["==", ["get", "priorityExposure"], true],
@@ -166,7 +174,7 @@ export default function MapView() {
         }
       });
     } else {
-      // Must dynamically update paint properties when timeOfDay changes
+      // Must dynamically update paint properties when timeOfDay changes - default function
       map.setPaintProperty("communities-outline", "line-color", lineColorExpression as any);
       map.setPaintProperty("communities-outline", "line-width", lineWidthExpression as any);
     }
@@ -207,32 +215,57 @@ export default function MapView() {
       setHoveredCommunity(null);
     };
 
-    const onClick = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
-      if (e.features && e.features.length > 0) {
-        const commId = e.features[0].properties?.COMM_NUM?.toString();
+    // Runs when map is clicked
+    const onMapClick = (e: mapboxgl.MapMouseEvent) => {
+      // Check if we clicked on a community polygon
+      const features = map.queryRenderedFeatures(e.point, { layers: ["communities-fill"] });
+      // If we did indeed click on a real community
+      if (features.length > 0) {
+        const commId = features[0].properties?.COMM_NUM?.toString();
         if (commId) {
-          setSelectedCommunity(commId); // Updates global context for selected community
+          // Toggle selection if clicking the already selected community
+          if (selectedCommunityRef.current === commId) {
+            setSelectedCommunity(null);
+          } else {
+            setSelectedCommunity(commId);
+          }
         }
+      } else {
+        // If clicked on water/empty space, deselect
+        setSelectedCommunity(null);
       }
     };
 
     // Attach listeners
     map.on("mousemove", "communities-fill", onMouseMove);
     map.on("mouseleave", "communities-fill", onMouseLeave);
-    map.on("click", "communities-fill", onClick);
+    map.on("click", onMapClick);
 
     return () => {
       // Cleanup listeners if effect re-runs
       map.off("mousemove", "communities-fill", onMouseMove);
       map.off("mouseleave", "communities-fill", onMouseLeave);
-      map.off("click", "communities-fill", onClick);
+      map.off("click", onMapClick);
     };
   }, [mapLoaded, computedCommunities]);
 
   // 4. Fly to Selected Community
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current || !selectedCommunity || !computedCommunities) return;
+    if (!mapLoaded || !mapRef.current || !computedCommunities) return;
     
+    // If deselected, fly back to city-wide view
+    if (!selectedCommunity) {
+      mapRef.current.flyTo({ 
+        center: [55.27, 25.2], 
+        zoom: 11, 
+        pitch: 30, 
+        bearing: 0, 
+        duration: 2000,
+        essential: true 
+      });
+      return;
+    }
+
     // Get the feature for the selected community
     const feature = computedCommunities.features.find(
       (f: any) => f.properties.COMM_NUM.toString() === selectedCommunity
@@ -261,8 +294,11 @@ export default function MapView() {
         mapRef.current.fitBounds(
           [[minLng, minLat], [maxLng, maxLat]],
           { 
-            padding: { top: 100, bottom: 400, left: 100, right: 100 }, // Account for bottom sheet UI
-            duration: 1500, // Cinematic 1.5s flight 
+            padding: { top: 40, bottom: 300, left: 40, right: 40 }, // Tighter padding for closer focus
+            maxZoom: 14.5,  // Prevent zooming indiscriminately close on very small communities
+            duration: 2000, // Cinematic 2.0s flight 
+            pitch: 38,      // Shallower tilt so it's not too angled
+            bearing: -10,   // Slight rotation for dynamism
             essential: true 
           }
         );

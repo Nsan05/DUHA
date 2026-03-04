@@ -558,4 +558,5 @@ F17	Population Exposure Scoring
 
 - Starting Phase 2: 
 - Wrote an api to obtain 30x30m pixel polygons along with their temperature anomaly value within a specified community.
+- Added a fly back mechanism where we reset back to the main when a community is deselected and improved the panning from one community to another within the map.
 - 
