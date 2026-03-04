@@ -44,6 +44,8 @@ interface AppContextState {
   // Phase 2: Community Pixel Grid
   pixelGridData: any | null;
   setPixelGridData: (data: any | null) => void;
+  pixelGridLoading: boolean;
+  setPixelGridLoading: (loading: boolean) => void;
 }
 
 const AppContext = createContext<AppContextState | undefined>(undefined);
@@ -65,6 +67,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Phase 2 data
   const [pixelGridData, setPixelGridData] = useState<any | null>(null);
+  const [pixelGridLoading, setPixelGridLoading] = useState<boolean>(false);
 
   // Initial Data Fetch
   useEffect(() => {
@@ -90,9 +93,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async function fetchPixelGrid() {
       if (!selectedCommunity) {
         setPixelGridData(null);
+        setPixelGridLoading(false);
         return;
       }
       try {
+        setPixelGridLoading(true);
         const res = await fetch(`http://localhost:8000/api/community/${selectedCommunity}/pixels?time=${timeOfDay}`);
         if (!res.ok) throw new Error("Failed to fetch pixel grid data");
         const data = await res.json();
@@ -100,6 +105,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         console.error("Error fetching pixel grid:", err);
         setPixelGridData(null);
+      } finally {
+        setPixelGridLoading(false);
       }
     }
     fetchPixelGrid();
@@ -196,7 +203,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     showPriorityOnly, setShowPriorityOnly,
     sortField, setSortField,
     sortDirection, setSortDirection,
-    pixelGridData, setPixelGridData
+    pixelGridData, setPixelGridData,
+    pixelGridLoading, setPixelGridLoading
   };
 
   return (

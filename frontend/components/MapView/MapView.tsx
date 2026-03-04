@@ -20,7 +20,8 @@ export default function MapView() {
     selectedCommunity,
     setSelectedCommunity,
     setHoveredCommunity,
-    pixelGridData
+    pixelGridData,
+    pixelGridLoading
   } = useAppContext();
   
   const pixelPopupRef = useRef<mapboxgl.Popup | null>(null);
@@ -448,6 +449,12 @@ export default function MapView() {
 
   return (
     <>
+      {pixelGridLoading && (
+        <div className={styles.pixelLoader}>
+          <div className={styles.spinner} />
+          Loading Community Heat Map...
+        </div>
+      )}
       <div className={styles.mapContainer} ref={mapContainerRef} />
       <div className="map-atmospheric-overlay" />
     </>
