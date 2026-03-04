@@ -550,5 +550,12 @@ The Community Rank
 - Added horizontal menu for analytics and made the bins dynamically adjust for the bar chart
 - Fixed the time selector space issue
 - Added a glowing dot to the scatter plot and a priority tag to the community in the bottom sheet.
-- 
+- Finished phase with these features implemeneted:
+F1	Cinematic Time-of-Day Selector
+F2	Community Prioritization Dashboard
+F3	Analytics Charts (City-Wide)
+F17	Population Exposure Scoring
 
+- Starting Phase 2: 
+- Wrote an api to obtain 30x30m pixel polygons along with their temperature anomaly value within a specified community.
+- 

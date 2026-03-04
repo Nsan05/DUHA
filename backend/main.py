@@ -12,6 +12,9 @@ import rasterio
 from pyproj import Transformer
 import joblib
 import shap
+from shapely.geometry import shape
+from shapely.ops import transform as shapely_transform
+import rasterio.mask
 
 # --- CONFIGURATION & PATHS ---
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -62,7 +65,7 @@ class AppState:
 
 state = AppState()
 
-# --- LIFESPAN MANAGER ---
+# --- LIFESPAN MANAGER --- Runs when server starts
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up Dubai Urban Heat API...")
@@ -281,4 +284,118 @@ async def get_shap_explanation(req: CoordinateRequest):
         "shap_values": contributions,
         "explanation": sentence,
         "base_value": float(shap_vals.base_values[0]) if hasattr(shap_vals, 'base_values') else 0.0
+    }
+
+@app.get("/api/community/{comm_num}/pixels")
+async def get_community_pixels(comm_num: int, time: str = "afternoon"): # default time is afternoon
+    """
+    Returns a GeoJSON FeatureCollection of 30x30m pixels covering the specified community.
+    Each feature has the temperature anomaly for the requested time of day.
+    """
+    if time not in ["morning", "afternoon", "night"]:
+        raise HTTPException(status_code=400, detail="Invalid time of day")
+        
+    # 1. Find the community polygon features that matches the comm_num
+    feature = next((f for f in state.communities_geojson.get("features", []) if f["properties"].get("COMM_NUM") == comm_num), None)
+    if not feature:
+        raise HTTPException(status_code=404, detail=f"Community {comm_num} not found")
+        
+    geom_4326 = shape(feature["geometry"])
+    
+    # 2. Project to native CRS (EPSG:32640, matching the raster)
+    geom_32640 = shapely_transform(state.transformer.transform, geom_4326)
+    
+    # 3. Mask the anomaly raster using the projected geometry
+    # Getting the anomaly raster
+    handle = state.raster_handles["anomalies"].get(time)
+    if not handle:
+        raise HTTPException(status_code=500, detail=f"Raster for {time} not loaded")
+        
+    # crop=True extracts just the bounding box of the polygon
+    # out_image: pixel values
+    # out_transform: affine transform
+    try:
+        out_image, out_transform = rasterio.mask.mask(handle, [geom_32640], crop=True, filled=False)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error masking raster: {str(e)}")
+        
+    pixels = []
+    stats = {"count": 0, "min": float('inf'), "max": float('-inf'), "sum": 0.0}
+    
+    # out_image usually has shape (1, height, width)
+    data = out_image[0]
+    
+    # transformer for going back to EPSG:4326
+    # Note: setting always_xy to True avoids lat/lon vs lon/lat order issues
+    transformer_back = Transformer.from_crs("EPSG:32640", "EPSG:4326", always_xy=True)
+    
+    # Pixel dimensions
+    pixel_width = out_transform.a
+    pixel_height = out_transform.e
+    
+    # Determine valid pixels - creating a mask for pixels that are not nodata
+    if hasattr(data, 'mask'):
+        valid_mask = ~data.mask
+    else:
+        valid_mask = data != handle.nodata
+        
+    rows, cols = np.where(valid_mask)
+    
+    # Optimization: Instead of building full dict per loop step, build efficiently
+    lons_t, lats_t = [], []
+    for r, c in zip(rows, cols):
+        x_tl, y_tl = out_transform * (c, r)
+        lons_t.extend([x_tl, x_tl + pixel_width, x_tl + pixel_width, x_tl, x_tl])
+        lats_t.extend([y_tl, y_tl, y_tl + pixel_height, y_tl + pixel_height, y_tl])
+        
+    # Batch transform all corners
+    if lons_t and lats_t:
+        lons_4326, lats_4326 = transformer_back.transform(lons_t, lats_t)
+    else:
+        lons_4326, lats_4326 = [], []
+
+    idx = 0
+    for r, c in zip(rows, cols):
+        val = float(data[r, c])
+        
+        # Update stats
+        stats["count"] += 1
+        stats["sum"] += val
+        if val < stats["min"]: stats["min"] = val
+        if val > stats["max"]: stats["max"] = val
+        
+        # Extract the 5 processed corners for this pixel
+        corners_4326 = [
+            (lons_4326[idx], lats_4326[idx]),
+            (lons_4326[idx+1], lats_4326[idx+1]),
+            (lons_4326[idx+2], lats_4326[idx+2]),
+            (lons_4326[idx+3], lats_4326[idx+3]),
+            (lons_4326[idx+4], lats_4326[idx+4])
+        ]
+        idx += 5
+        
+        pixels.append({
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [corners_4326]
+            },
+            "properties": {
+                "anomaly": float(f"{val:.3f}"), # Round to 3 decimal places to reduce JSON size
+                "row": int(r),
+                "col": int(c)
+            }
+        })
+        
+    if stats["count"] > 0:
+        stats["mean"] = stats["sum"] / stats["count"]
+    else:
+        stats["min"] = stats["max"] = stats["mean"] = 0.0
+
+    return {
+        "grid": {
+            "type": "FeatureCollection",
+            "features": pixels
+        },
+        "stats": stats
     }
