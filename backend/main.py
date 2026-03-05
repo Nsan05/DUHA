@@ -15,6 +15,16 @@ import shap
 from shapely.geometry import shape
 from shapely.ops import transform as shapely_transform
 import rasterio.mask
+from fastapi.responses import Response
+
+try:
+    from rio_tiler.io import Reader
+    from rio_tiler.colormap import cmap
+    from rio_tiler.profiles import img_profiles
+except ImportError:
+    Reader = None
+    cmap = None
+
 
 # --- CONFIGURATION & PATHS ---
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -403,3 +413,53 @@ async def get_community_pixels(comm_num: int, time: str = "afternoon"): # defaul
         },
         "stats": stats
     }
+
+@app.get("/api/tiles/{layer}/{z}/{x}/{y}.png")
+async def get_tile(
+    layer: str, 
+    z: int, x: int, y: int,  # Zoom level (z), tile column (x), tile row (y)
+    colormap: str = "viridis", 
+    min_val: float = 0.0, # Only default values to use when frontend does not send the values
+    max_val: float = 1.0, # Only default values to use when frontend does not send the values
+    nodata: float = None
+):
+    """
+    Serves XYZ web mercator tiles for raster overlays dynamically using rio-tiler.
+    """
+    if Reader is None:
+        raise HTTPException(status_code=500, detail="rio-tiler is not installed")
+        
+    # Check if the layer exists in RASTER_PATHS
+    path = RASTER_PATHS["features"].get(layer) or RASTER_PATHS["anomalies"].get(layer)
+    if not path or not os.path.exists(path):
+        raise HTTPException(status_code=404, detail=f"Layer '{layer}' not found or file missing")
+        
+    try:
+        with Reader(path) as src:
+            # We configure nodata directly if requested, else rely on the tiff's internal nodata
+            if nodata is not None:
+                src.nodata = nodata
+
+            # Read the tile from the source raster
+            img = src.tile(x, y, z)
+            
+            # Rescale the raw data to 0-255 based on min/max - for the map colour projection
+            img.rescale(in_range=((min_val, max_val),))
+            
+            # Apply the requested matplotlib colormap
+            # Special check for custom mapbox gl js cases where transparent 0 is expected
+            # rio-tiler automatically makes nodata transparent. If the file has 0 as nodata, it'll work.
+            try:
+                cm = cmap.get(colormap) # Try to use user provided colourmap first
+            except Exception:
+                cm = cmap.get("viridis") # fallback
+                
+            # Render the tile to a PNG formatted byte string
+            content = img.render(img_format="PNG", colormap=cm)
+            
+            # Return HTTP response
+            return Response(content=content, media_type="image/png")
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Tile rendering error: {str(e)}")

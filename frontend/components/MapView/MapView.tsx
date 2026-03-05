@@ -5,6 +5,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import styles from "./MapView.module.css";
 import { useAppContext } from "../../context/AppContext";
+import LayerPanel from "../LayerPanel/LayerPanel";
 
 if (process.env.NEXT_PUBLIC_MAPBOX_TOKEN) {
   mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -476,6 +477,7 @@ export default function MapView() {
         </div>
       )}
       <div className={styles.mapContainer} ref={mapContainerRef} />
+      <LayerPanel map={mapRef.current} />
       <div className="map-atmospheric-overlay" />
     </>
   );
