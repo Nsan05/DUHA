@@ -53,6 +53,7 @@ export interface CommunityProperties {
 
 export interface CommunityFeature {
   type: "Feature";
+  id?: number | string;
   geometry: any;
   properties: CommunityProperties;
 }

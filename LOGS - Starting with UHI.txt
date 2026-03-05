@@ -562,4 +562,8 @@ F17	Population Exposure Scoring
 - Added a 30m pixel grid to selected communities along with anomaly data for each.
 - Added a loading bar to the map view when the raster is loading in.
 - Updated the script to have better tooltip switching between selected communities and non-selected communities and also added a sidebar to display fixed values.
+- Made changes to opacity of 30m pixels and made it so that the community hover feature is not present if a community is chosen.
+- Mapbox rendering is very strict about how it manages interactive states (like changing a polygon's opacity when hover: true or selected: true).
+To do this, Mapbox requires every single polygon in the dataset (GeoJSON) to have a unique identifier explicitly stored in a top-level 
+id tag. To do this previously we used the auto generated ones but we assigned it to comm_id so that setFeatureState now works with our commids.
 - 

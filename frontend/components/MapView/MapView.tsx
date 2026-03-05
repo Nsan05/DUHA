@@ -110,8 +110,7 @@ export default function MapView() {
     if (!map.getSource("communities")) {
       map.addSource("communities", {
         type: "geojson",
-        data: computedCommunities as any,
-        generateId: true // Required for feature state (hover) to work
+        data: computedCommunities as any
       });
     } else {
       // Just update the data if source already exists (e.g., HVI changed)
@@ -135,6 +134,8 @@ export default function MapView() {
           ],
           "fill-opacity": [
             "case",
+            ["boolean", ["feature-state", "selected"], false],
+            0.0, // Completely transparent when selected to see map beneath pixel grid
             ["boolean", ["feature-state", "hover"], false],
             0.65, // Opacity when hovered
             0.35  // Default opacity
@@ -187,22 +188,37 @@ export default function MapView() {
     
     const onMouseMove = (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
       if (e.features && e.features.length > 0) { // Ensures we are hovering over a community
+        const props = e.features[0].properties;
+        const commId = props?.COMM_NUM?.toString();
+        const featureId = e.features[0].id!;
+
+        // If we are over the selected community, we don't want any hover state. - False if the selected community is being hovered over
+        const shouldHover = commId !== selectedCommunityRef.current;
+
+        // Clear previous hover state if moving to a new community, or if we hover the selected community
         if (hoveredStateId !== null) {
+          if (hoveredStateId !== featureId || !shouldHover) {
+            map.setFeatureState(
+              { source: "communities", id: hoveredStateId },
+              { hover: false }
+            );
+            hoveredStateId = null;
+          }
+        }
+
+        // Apply new hover state if it's NOT the selected community
+        if (shouldHover && hoveredStateId !== featureId) {
+          hoveredStateId = featureId; 
           map.setFeatureState(
             { source: "communities", id: hoveredStateId },
-            { hover: false } // If yes turn off previous hover state
+            { hover: true }
           );
         }
-        hoveredStateId = e.features[0].id!; // Update hovered state to current hover
-        map.setFeatureState(
-          { source: "communities", id: hoveredStateId },
-          { hover: true }
-        );
+        
         map.getCanvas().style.cursor = "pointer";
         
-        // Pass info to state for tooltip
-        const props = e.features[0].properties;
-        setHoveredCommunity(props?.COMM_NUM?.toString() || null);
+        // Pass info to state for tooltip (needs to happen even if selected)
+        setHoveredCommunity(commId || null);
       }
     };
 
@@ -248,9 +264,39 @@ export default function MapView() {
       // Cleanup listeners if effect re-runs
       map.off("mousemove", "communities-fill", onMouseMove);
       map.off("mouseleave", "communities-fill", onMouseLeave);
-      map.off("click", onMapClick);
+      map.off("click", "communities-fill", onMapClick);
     };
-  }, [mapLoaded, computedCommunities]);
+  }, [timeOfDay, mapLoaded, computedCommunities]);
+
+  // Handle selected state visually on the main community polygons
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded || !computedCommunities) return;
+    
+    // Clear 'selected' feature state for all communities
+    computedCommunities.features.forEach((f: any) => {
+      if (f.id !== undefined) {
+        map.setFeatureState(
+          { source: "communities", id: f.id },
+          { selected: false }
+        );
+      }
+    });
+
+    // Set 'selected' state for the actively selected community ONLY when pixel grid finishes loading
+    // Selcted state makes the community polygon transparent to see the pixel grid - line 136 mentioned
+    if (selectedCommunity && !pixelGridLoading) {
+      const activeFeature = computedCommunities.features.find(
+        (f: any) => f.properties.COMM_NUM.toString() === selectedCommunity
+      );
+      if (activeFeature && activeFeature.id !== undefined) {
+        map.setFeatureState(
+          { source: "communities", id: activeFeature.id },
+          { selected: true }
+        );
+      }
+    }
+  }, [selectedCommunity, computedCommunities, mapLoaded, pixelGridLoading]);
 
   // 4. Fly to Selected Community
   useEffect(() => {
@@ -356,8 +402,8 @@ export default function MapView() {
           "fill-opacity": [
             "case",
             ["boolean", ["feature-state", "hover"], false],
-            0.9,
-            0.6
+            0.75, // Hover opacity
+            0.35  // Default opacity - lowered to let map features bleed through
           ]
         }
       }, "communities-outline"); // Before community outlines (the pixel gris is made under the community borders)

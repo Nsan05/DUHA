@@ -193,6 +193,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       // Priority Exposure flag: HVI > 60 (Top 40% roughly) AND Population > Median
       props.priorityExposure = props.hvi > 60 && pop > medianPop;
+
+      // Assign explicit top-level ID for MapBox feature state binding
+      // Ensure it's a number (MapBox strongly prefers integer IDs for feature-state)
+      f.id = props.COMM_NUM;
     });
     
     return collection;
