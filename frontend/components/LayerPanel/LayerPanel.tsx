@@ -148,7 +148,7 @@ export default function LayerPanel({ map }: LayerPanelProps) {
         }
         
         if (!layerExists) {
-          const beforeId = map.getLayer("communities-fill") ? "communities-fill" : undefined;
+          const beforeId = map.getLayer("communities-outline") ? "communities-outline" : undefined;
           
           map.addLayer({
             id: config.id,
@@ -158,7 +158,7 @@ export default function LayerPanel({ map }: LayerPanelProps) {
               "raster-opacity": state.opacity,
               "raster-fade-duration": 300
             }
-          }, beforeId); // Render just below the community fill so its overlayed by the heatmap but over the basemap
+          }, beforeId); // Render above the heatmap fill but below the community border strokes
         } else {
           // It exists, update its opacity - cus the user would have changed it.
           map.setPaintProperty(config.id, "raster-opacity", state.opacity);
