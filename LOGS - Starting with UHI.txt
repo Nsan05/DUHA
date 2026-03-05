@@ -566,4 +566,8 @@ F17	Population Exposure Scoring
 - Mapbox rendering is very strict about how it manages interactive states (like changing a polygon's opacity when hover: true or selected: true).
 To do this, Mapbox requires every single polygon in the dataset (GeoJSON) to have a unique identifier explicitly stored in a top-level 
 id tag. To do this previously we used the auto generated ones but we assigned it to comm_id so that setFeatureState now works with our commids.
+
+----
+05/03/2026:
+- Added right side bar to display key metrics about the selected community, including land cover, mean temp comparison, Diurnal temp comparison with city average.
 - 

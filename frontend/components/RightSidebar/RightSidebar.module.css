@@ -40,7 +40,7 @@
 }
 
 .sidebarPanel {
-  width: 280px;
+  width: 420px;
   min-height: 120px;
   border-radius: 0 0 0 12px;
   border: 1px solid var(--border-subtle);
@@ -62,13 +62,19 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: var(--space-2);
-  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.titleInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
 .title {
   font-weight: 600;
-  font-size: var(--font-base);
+  font-size: 20px;
   color: var(--text-primary);
   line-height: 1.2;
 }
@@ -76,22 +82,168 @@
 .priorityBadge {
   background: var(--accent-hot);
   color: white;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
 
-.statsGrid {
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-top: -4px;
+  margin-right: -4px;
+}
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* Dashboard Grid */
+.dashboardGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Widget Box */
+.widgetBox {
+  background: rgba(0, 0, 0, 0.12); 
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.widgetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.widgetTitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.widgetValue {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Gauge */
+.gaugeTrack {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  margin: 6px 0 4px 0;
+}
+.gaugeCenterLine {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  z-index: 2;
+}
+.gaugeFill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 6px;
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
+}
+.gaugeLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Donut */
+.donutRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 4px;
+}
+.donutSvg {
+  flex-shrink: 0;
+  transform: rotate(-90deg); /* Start at top */
+}
+.donutLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+}
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: calc(50% - 4px); /* 2 columns */
+}
+.legendDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.legendText {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Chart */
+.chartContainer {
+  margin-top: 4px;
+  width: 100%;
+}
+.chartLegendRow {
+  display: flex;
+  gap: 8px;
+}
+.chartLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.legendLine {
+  width: 12px;
+  border-bottom-width: 2px;
+  border-bottom-style: solid; /* Default for community */
+  display: inline-block;
+  margin-bottom: 2px;
+}
+
+/* Key Stats Grid */
+.keyStatsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-3);
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--border-subtle);
+  margin-top: var(--space-1);
 }
 
 .statPair {
@@ -101,7 +253,7 @@
 }
 
 .statLabel {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -109,7 +261,7 @@
 }
 
 .statValue {
-  font-size: 15px;
+  font-size: 20px;
   color: var(--text-primary);
   font-weight: 500;
   display: flex;
