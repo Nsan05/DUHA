@@ -583,4 +583,6 @@ F8: Diurnal Profile Viewer
 ----
 06/03/2026:
 - Made changes in AppContext to include details for selected pixel and the associated loading state.
+- Used refs for the selected pixels in mapview because Mapbox event handlers run outside of the standard React render cycle, they require "refs" to reliably access the freshest state values.
+- Added the pixel select logic within the Mapview script and added a stop propagation to prevent the click from heading down to the community layer and panning out.
 - 

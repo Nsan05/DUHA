@@ -23,7 +23,9 @@ export default function MapView() {
     setHoveredCommunity,
     pixelGridData,
     pixelGridLoading,
-    setHoveredPixelAnomaly
+    setHoveredPixelAnomaly,
+    selectedPixel,
+    setSelectedPixel
   } = useAppContext();
 
   // Keep a ref of selectedCommunity for the click handler to access which will be updated when the selectedCommunity changes
@@ -31,6 +33,12 @@ export default function MapView() {
   useEffect(() => {
     selectedCommunityRef.current = selectedCommunity;
   }, [selectedCommunity]);
+
+  // Keep a ref of selectedPixel for click handlers - Mapbox event handlers require refs to reliably access the freshest state values
+  const selectedPixelRef = useRef(selectedPixel);
+  useEffect(() => {
+    selectedPixelRef.current = selectedPixel;
+  }, [selectedPixel]);
 
   // 1. Initialize Map
   useEffect(() => {
@@ -402,6 +410,8 @@ export default function MapView() {
           ],
           "fill-opacity": [
             "case",
+            ["boolean", ["feature-state", "selected"], false],
+            0.9,  // Selected opacity (almost opaque)
             ["boolean", ["feature-state", "hover"], false],
             0.75, // Hover opacity
             0.35  // Default opacity - lowered to let map features bleed through
@@ -443,6 +453,44 @@ export default function MapView() {
           // Update hovered pixel anomaly state instead of local popup
           const anomaly = e.features[0].properties?.anomaly;
           setHoveredPixelAnomaly(anomaly);
+        }
+      });
+
+      // Click event logic for pixels
+      let clickedPixelId: number | string | null = null;
+
+      map.on("click", "pixel-grid-fill", (e) => {
+        // PREVENT the event from bubbling down to the community polygon click handler
+        e.originalEvent.stopPropagation();
+        
+        if (e.features && e.features.length > 0) {
+          const feature = e.features[0];
+          
+          // Clear previous selection visually
+          if (clickedPixelId !== null) {
+            map.setFeatureState(
+              { source: "pixel-grid", id: clickedPixelId },
+              { selected: false }
+            );
+          }
+
+          // Set new selection visually
+          clickedPixelId = feature.id!;
+          map.setFeatureState(
+            { source: "pixel-grid", id: clickedPixelId },
+            { selected: true }
+          );
+
+          // Fly to the pixel slightly to center it
+          map.panTo(e.lngLat, { duration: 800 });
+
+          // Dispatch to AppContext to trigger inspector
+          const anomaly = feature.properties?.anomaly;
+          setSelectedPixel({
+            lat: e.lngLat.lat,
+            lng: e.lngLat.lng,
+            anomaly: anomaly
+          });
         }
       });
 
