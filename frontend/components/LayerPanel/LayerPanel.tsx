@@ -93,11 +93,12 @@ interface LayerPanelProps {
 }
 
 export default function LayerPanel({ map }: LayerPanelProps) {
+  // Sidebar open/close state
   const [isOpen, setIsOpen] = useState(false);
   
-  // Track active layer state. using a Map or object is easier.
-  // Record<layerId, { active: boolean, opacity: number }>
+  // Track active layer state - along with initialization function (running only once)
   const [layerState, setLayerState] = useState<Record<string, { active: boolean; opacity: number }>>(() => {
+    // Loops through all the layers and sets the default state
     const initial: Record<string, { active: boolean; opacity: number }> = {};
     LAYERS.forEach(l => {
       initial[l.id] = { active: false, opacity: 0.6 };
@@ -105,16 +106,35 @@ export default function LayerPanel({ map }: LayerPanelProps) {
     return initial;
   });
 
+  // Track map style reloads so we know when to re-inject custom layers
+  const [styleLoadedTracker, setStyleLoadedTracker] = useState(0);
+
+  useEffect(() => {
+    if (!map) return;
+    const onStyleLoad = () => {
+      // Small timeout ensures parent MapView's layers are initialized first
+      setTimeout(() => setStyleLoadedTracker(prev => prev + 1), 10);
+    };
+    // listener that triggers when the map is loaded do the increment
+    map.on("style.load", onStyleLoad);
+    return () => {
+      map.off("style.load", onStyleLoad);
+    };
+  }, [map]);
+
   // Sync state to Mapbox
   useEffect(() => {
     if (!map) return;
 
+
     LAYERS.forEach(config => {
-      const state = layerState[config.id];
-      const layerExists = map.getLayer(config.id);
-      const sourceId = `${config.id}-source`;
+      // Seperating sources (data) and layers (visualizations)
+      const state = layerState[config.id];  // Output: { active: true, opacity: 0.6 }
+      const layerExists = map.getLayer(config.id); 
+      const sourceId = `${config.id}-source`; // Output: "ndvi-overlay-source"
       const sourceExists = map.getSource(sourceId);
 
+      // When user turned the overlay on
       if (state.active) {
         // If not added to map, add it
         if (!sourceExists) {
@@ -128,6 +148,8 @@ export default function LayerPanel({ map }: LayerPanelProps) {
         }
         
         if (!layerExists) {
+          const beforeId = map.getLayer("communities-fill") ? "communities-fill" : undefined;
+          
           map.addLayer({
             id: config.id,
             type: "raster",
@@ -136,13 +158,13 @@ export default function LayerPanel({ map }: LayerPanelProps) {
               "raster-opacity": state.opacity,
               "raster-fade-duration": 300
             }
-          }, "communities-fill"); // Render just below the community fill so its overlayed by the heatmap but over the basemap
+          }, beforeId); // Render just below the community fill so its overlayed by the heatmap but over the basemap
         } else {
-          // It exists, update its opacity
+          // It exists, update its opacity - cus the user would have changed it.
           map.setPaintProperty(config.id, "raster-opacity", state.opacity);
         }
       } else {
-        // Active is false. If layer exists, remove it
+        // Active is false (user has unticked the box). If layer exists, remove it
         if (layerExists) {
           map.removeLayer(config.id);
         }
@@ -151,12 +173,13 @@ export default function LayerPanel({ map }: LayerPanelProps) {
         }
       }
     });
-  }, [layerState, map]);
+  }, [layerState, map, styleLoadedTracker]);
 
+  // When user clicks the checkbox the active flag is turned on and off in the layerstate
   const toggleLayer = (id: string) => {
     setLayerState(prev => ({
-      ...prev,
-      [id]: {
+      ...prev, // Copies all the existing previous layers { active: true, opacity: 0.6 }
+      [id]: { // update the specific layer that was clicked
         ...prev[id],
         active: !prev[id].active
       }
@@ -168,7 +191,7 @@ export default function LayerPanel({ map }: LayerPanelProps) {
       ...prev,
       [id]: {
         ...prev[id],
-        opacity
+        opacity // shorthand notation for opacity: opacity
       }
     }));
   };
