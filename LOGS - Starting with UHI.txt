@@ -574,4 +574,11 @@ id tag. To do this previously we used the auto generated ones but we assigned it
 - Added a layerpanel to go over the map view for all the feature layers for easier analysis.
 - The panel layers are more useful for high-level analysis and quick insight into what may be contributing to height.
 - Fixed a bug of panels not loading on time selector changing and the panel colours being off.
-- 
+- Implemented these features as part of Phase 2:
+F4: Visual Pixel Grid Deep-Dive
+F5: Community Stats Widgets
+F6: Layer Toggle System
+F8: Diurnal Profile Viewer
+
+----
+06/03/2026:
