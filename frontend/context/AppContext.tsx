@@ -97,6 +97,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!selectedCommunity) {
         setPixelGridData(null);
         setPixelGridLoading(false);
+        setHoveredPixelAnomaly(null); 
         return;
       }
       try {
