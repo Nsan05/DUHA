@@ -582,3 +582,5 @@ F8: Diurnal Profile Viewer
 
 ----
 06/03/2026:
+- Made changes in AppContext to include details for selected pixel and the associated loading state.
+- 

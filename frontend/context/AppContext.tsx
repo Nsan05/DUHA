@@ -48,6 +48,14 @@ interface AppContextState {
   setPixelGridData: (data: any | null) => void;
   pixelGridLoading: boolean;
   setPixelGridLoading: (loading: boolean) => void;
+
+  // Phase 3: Pixel Inspector
+  selectedPixel: { lat: number; lng: number; anomaly: number } | null;
+  setSelectedPixel: (pixel: { lat: number; lng: number; anomaly: number } | null) => void;
+  pixelInspectorData: any | null;
+  setPixelInspectorData: (data: any | null) => void;
+  pixelInspectorLoading: boolean;
+  setPixelInspectorLoading: (loading: boolean) => void;
 }
 
 const AppContext = createContext<AppContextState | undefined>(undefined);
@@ -71,6 +79,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Phase 2 data
   const [pixelGridData, setPixelGridData] = useState<any | null>(null);
   const [pixelGridLoading, setPixelGridLoading] = useState<boolean>(false);
+
+  // Phase 3 data
+  const [selectedPixel, setSelectedPixel] = useState<{ lat: number; lng: number; anomaly: number } | null>(null);
+  const [pixelInspectorData, setPixelInspectorData] = useState<any | null>(null);
+  const [pixelInspectorLoading, setPixelInspectorLoading] = useState<boolean>(false);
 
   // Initial Data Fetch
   useEffect(() => {
@@ -98,6 +111,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setPixelGridData(null);
         setPixelGridLoading(false);
         setHoveredPixelAnomaly(null); 
+        setSelectedPixel(null); // Phase 3: clear pixel state when leaving community view
         return;
       }
       try {
@@ -116,6 +130,53 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     fetchPixelGrid();
   }, [selectedCommunity, timeOfDay]);
+
+  // Phase 3: Fetch Pixel Inspector Data when a pixel is selected or timeOfDay changes
+  useEffect(() => {
+    async function fetchPixelData() {
+      if (!selectedPixel) {
+        setPixelInspectorData(null);
+        setPixelInspectorLoading(false);
+        return;
+      }
+
+      setPixelInspectorLoading(true);
+      try {
+        // Parallel fetch for speed
+        const [pixelRes, shapRes] = await Promise.all([
+          fetch("http://localhost:8000/api/pixel", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lat: selectedPixel.lat, lon: selectedPixel.lng, time_of_day: timeOfDay }),
+          }),
+          fetch("http://localhost:8000/api/shap", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lat: selectedPixel.lat, lon: selectedPixel.lng, time_of_day: timeOfDay }),
+          })
+        ]);
+
+        if (!pixelRes.ok || !shapRes.ok) throw new Error("Failed to fetch pixel inspector data");
+
+        const pixelData = await pixelRes.json();
+        const shapData = await shapRes.json();
+
+        setPixelInspectorData({
+          features: pixelData.features,
+          anomalies: pixelData.anomalies,
+          shap_values: shapData.shap_values,
+          explanation: shapData.explanation,
+          base_value: shapData.base_value,
+        });
+      } catch (err) {
+        console.error("Error fetching pixel inspector data:", err);
+        setPixelInspectorData(null);
+      } finally {
+        setPixelInspectorLoading(false);
+      }
+    }
+    fetchPixelData();
+  }, [selectedPixel, timeOfDay]);
 
   // Step 2: HVI Computation whenever timeOfDay or raw data changes. - Does normalisation first
   // Using useMemo is perfectly safe and prevents useEffect cyclic dependency issues.
@@ -214,7 +275,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     sortField, setSortField,
     sortDirection, setSortDirection,
     pixelGridData, setPixelGridData,
-    pixelGridLoading, setPixelGridLoading
+    pixelGridLoading, setPixelGridLoading,
+    selectedPixel, setSelectedPixel,
+    pixelInspectorData, setPixelInspectorData,
+    pixelInspectorLoading, setPixelInspectorLoading
   };
 
   return (
