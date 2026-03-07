@@ -27,7 +27,7 @@ export default function PixelInspector() {
     timeOfDay, globalFeatureRanges
   } = useAppContext();
 
-  // Reference for community name and average comparison
+  // Finding the selected community's data
   const communityFeature = useMemo(() => {
     if (!computedCommunities || !selectedCommunity) return null;
     return computedCommunities.features.find(
@@ -39,6 +39,7 @@ export default function PixelInspector() {
 
   const handleBack = () => setSelectedPixel(null);
 
+  // Loading state
   if (pixelInspectorLoading || !pixelInspectorData) {
     return (
       <div className={styles.wrapper}>
@@ -70,6 +71,7 @@ export default function PixelInspector() {
   const radarRadius = 100;
   const cx = 150, cy = 150;
   
+  // Convert a feature value into a radar chart coordinate.
   const getPoint = (val: number, range: [number, number], index: number, maxR: number = radarRadius) => {
     let pct = (val - range[0]) / (range[1] - range[0]);
     pct = Math.max(0, Math.min(1, pct));
@@ -91,6 +93,7 @@ export default function PixelInspector() {
         range = globalFeatureRanges[lookupKey] || [0, 1];
     }
     
+    // Getting a point to plot based on the value and the range
     return getPoint(rawVal, range, i);
   });
   
@@ -107,13 +110,14 @@ export default function PixelInspector() {
   const buildDiurnalChart = () => {
     if (!communityFeature) return null;
     const p = communityFeature.properties;
+    // Data structure for the temperature anomaly for the community and the city
     const dData = [
       { comm: anomalies.morning || 0, city: p.anomaly_morning_mean || 0 },
       { comm: anomalies.afternoon || 0, city: p.anomaly_afternoon_mean || 0 },
       { comm: anomalies.night || 0, city: p.anomaly_night_mean || 0 }
     ];
     const allVals = dData.flatMap(d => [d.comm, d.city]);
-    const minVal = Math.min(-1, ...allVals) - 0.5;
+    const minVal = Math.min(-1, ...allVals) - 0.5; // Add padding as well
     const maxVal = Math.max(1, ...allVals) + 0.5;
     const normY = (val: number) => 90 - ((val - minVal) / (maxVal - minVal) * 80);
     const xVals = [40, 160, 280]; 

@@ -518,6 +518,7 @@ export default function MapView() {
         setHoveredPixelAnomaly(null);
       });
 
+      isPixelGridEnabled.current = true;
     } else {
       source.setData(pixelGridData.grid);
       map.setLayoutProperty("pixel-grid-fill", "visibility", "visible");
