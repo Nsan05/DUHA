@@ -262,13 +262,16 @@ export default function MapView() {
           // Toggle selection if clicking the already selected community
           if (selectedCommunityRef.current === commId) {
             setSelectedCommunity(null);
+            setSelectedPixel(null);
           } else {
             setSelectedCommunity(commId);
+            setSelectedPixel(null);
           }
         }
       } else {
         // If clicked on water/empty space, deselect
         setSelectedCommunity(null);
+        setSelectedPixel(null);
       }
     };
 
