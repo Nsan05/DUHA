@@ -71,16 +71,21 @@ export default function PixelInspector() {
   const radarRadius = 100;
   const cx = 150, cy = 150;
   
-  // Convert a feature value into a radar chart coordinate.
-  const getPoint = (val: number, range: [number, number], index: number, maxR: number = radarRadius) => {
-    let pct = (val - range[0]) / (range[1] - range[0]);
-    pct = Math.max(0, Math.min(1, pct));
+  // Convert an angle index and radius ratio into a coordinate
+  const getRadialPoint = (ratio: number, index: number, maxR: number = radarRadius) => {
     const angle = (Math.PI * 2 * index) / numAxes - Math.PI / 2;
-    const r = pct * maxR;
+    const r = ratio * maxR;
     return {
       x: cx + r * Math.cos(angle),
       y: cy + r * Math.sin(angle)
     };
+  };
+
+  // Convert a feature value into a radar chart coordinate. - with auto scaling
+  const getPoint = (val: number, range: [number, number], index: number, maxR: number = radarRadius) => {
+    let pct = (range[1] - range[0] === 0) ? 0 : (val - range[0]) / (range[1] - range[0]);
+    pct = Math.max(0, Math.min(1, pct));
+    return getRadialPoint(pct, index, maxR);
   };
 
   const radarPoints = radarFeatures.map((f, i) => {
@@ -247,25 +252,36 @@ export default function PixelInspector() {
         {/* -- SECTION 2: RADAR CHART -- */}
         <div className={styles.widgetBox}>
           <div className={styles.widgetTitle}>Pixel Profile vs City Range</div>
+          <div style={{fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: 4}}>
+            Shows where this exact 30m² area sits between the absolute minimum (center) and maximum (outer ring) values found across all of Dubai.
+          </div>
           <div className={styles.radarContainer}>
-            <svg width="240" height="240" viewBox="0 0 300 300">
+            <svg width="100%" height="auto" viewBox="-30 -30 360 360" style={{maxWidth: '280px', margin: '0 auto', display: 'block'}}>
               {/* Scale Rings */}
-              {[0.25, 0.5, 0.75, 1.0].map((scale, idx) => (
-                <polygon 
-                  key={`web-${idx}`}
-                  points={radarFeatures.map((_, i) => `${getPoint(0, [0, 1], i, radarRadius * scale).x},${getPoint(0, [0, 1], i, radarRadius * scale).y}`).join(" ")}
-                  fill="none"
-                  stroke="rgba(255,255,255,0.06)"
-                  strokeWidth="1.5"
-                />
-              ))}
+              {[0.25, 0.5, 0.75, 1.0].map((scale, idx) => {
+                const topPt = getRadialPoint(scale, 0);
+                return (
+                  <g key={`web-${idx}`}>
+                    <polygon 
+                      points={radarFeatures.map((_, i) => `${getRadialPoint(scale, i).x},${getRadialPoint(scale, i).y}`).join(" ")}
+                      fill="none"
+                      stroke="var(--border-subtle)"
+                      strokeWidth="1.5"
+                    />
+                    {/* Ring Labels */}
+                    <text x={cx + 4} y={topPt.y + 2} fill="var(--text-secondary)" fontSize="9" dominantBaseline="middle">
+                      {scale === 1.0 ? 'Max' : `${scale * 100}%`}
+                    </text>
+                  </g>
+                );
+              })}
               {/* Axes and Labels */}
               {radarFeatures.map((f, i) => {
-                const pEdge = getPoint(0, [0, 1], i, radarRadius * 1.35);
-                const pAxisEnd = getPoint(0, [0, 1], i, radarRadius);
+                const pEdge = getRadialPoint(1.35, i);
+                const pAxisEnd = getRadialPoint(1.0, i);
                 return (
                   <g key={`axis-${i}`}>
-                    <line x1={cx} y1={cy} x2={pAxisEnd.x} y2={pAxisEnd.y} stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                    <line x1={cx} y1={cy} x2={pAxisEnd.x} y2={pAxisEnd.y} stroke="var(--border-subtle)" strokeWidth="1" />
                     <text x={pEdge.x} y={pEdge.y} fill="var(--text-secondary)" fontSize="10" textAnchor="middle" dominantBaseline="middle">
                       {FRIENDLY_NAMES[f] ? FRIENDLY_NAMES[f] : f}
                     </text>
