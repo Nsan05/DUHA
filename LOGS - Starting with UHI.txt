@@ -592,4 +592,5 @@ F8: Diurnal Profile Viewer
 - Added a pixel inspector component containing all the graphs and extra metrics for each selected pixel.
 - Added the pixel inspector features to the right sidebar and also added a fix in the mapview so that when clicked on a particular pixel, the pixel click handler handles the click instead of the global one.
 - Fixed bug of panning out to main portion when clicking on a pixel for the first time.
+- Added better readability in light mode.
 - 
