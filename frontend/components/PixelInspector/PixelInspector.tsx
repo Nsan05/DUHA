@@ -89,7 +89,10 @@ export default function PixelInspector() {
   };
 
   const radarPoints = radarFeatures.map((f, i) => {
-    const rawVal = features[f] || features['dist_to_coast_m'] || 0;
+    // Exact mapping for the SHAP 'dist_to_coast_mean' key to the physical 'dist_to_coast_m' key
+    const featureName = f === 'dist_to_coast_mean' ? 'dist_to_coast_m' : f;
+    const rawVal = features[featureName] !== undefined ? features[featureName] : 0;
+    
     let range: [number, number] = [0, 1];
     
     if (globalFeatureRanges) {
@@ -283,7 +286,7 @@ export default function PixelInspector() {
                 return (
                   <g key={`axis-${i}`}>
                     <line x1={cx} y1={cy} x2={pAxisEnd.x} y2={pAxisEnd.y} stroke="var(--border-subtle)" strokeWidth="1" />
-                    <text x={pEdge.x} y={pEdge.y} fill="var(--text-secondary)" fontSize="10" textAnchor="middle" dominantBaseline="middle">
+                    <text x={pEdge.x} y={pEdge.y} fill="var(--text-primary)" fontSize="11" fontWeight="500" textAnchor="middle" dominantBaseline="middle" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
                       {FRIENDLY_NAMES[f] ? FRIENDLY_NAMES[f] : f}
                     </text>
                   </g>

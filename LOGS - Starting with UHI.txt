@@ -594,4 +594,9 @@ F8: Diurnal Profile Viewer
 - Fixed bug of panning out to main portion when clicking on a pixel for the first time.
 - Added better readability in light mode.
 - Fixed the radar map scaling issue.
+
+----
+08/03/2026:
+- Fixed the contrasts in the pixel inspector on the right sidebar.
+- Fixed radar chart math issue.
 - 
