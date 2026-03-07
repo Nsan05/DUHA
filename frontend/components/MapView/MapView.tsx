@@ -37,6 +37,7 @@ export default function MapView() {
   // Keep a ref of selectedPixel for click handlers - Mapbox event handlers require refs to reliably access the freshest state values
   const selectedPixelRef = useRef(selectedPixel);
   const isPixelGridEnabled = useRef(false);
+  const activePixelsRef = useRef<{ hovered: any | null, selected: any | null }>({ hovered: null, selected: null });
   useEffect(() => {
     selectedPixelRef.current = selectedPixel;
   }, [selectedPixel]);
@@ -147,8 +148,8 @@ export default function MapView() {
             ["boolean", ["feature-state", "selected"], false],
             0.0, // Completely transparent when selected to see map beneath pixel grid
             ["boolean", ["feature-state", "hover"], false],
-            0.65, // Opacity when hovered
-            0.35  // Default opacity
+            0.70, // Opacity when hovered
+            0.30  // Default opacity
           ]
         }
       });
@@ -383,7 +384,15 @@ export default function MapView() {
       if (map.getLayer("pixel-grid-fill")) {
         map.setLayoutProperty("pixel-grid-fill", "visibility", "none");
         map.setLayoutProperty("pixel-grid-outline", "visibility", "none");
+        if (map.getLayer("active-pixels-extrusion")) {
+          map.setLayoutProperty("active-pixels-extrusion", "visibility", "none");
+        }
       }
+      activePixelsRef.current = { hovered: null, selected: null };
+      
+      const activeSrc = map.getSource("active-pixels") as mapboxgl.GeoJSONSource;
+      if (activeSrc) activeSrc.setData({ type: "FeatureCollection", features: [] });
+      
       setHoveredPixelAnomaly(null);
       return;
     }
@@ -399,7 +408,7 @@ export default function MapView() {
         generateId: true // gives each pixel an unique ID
       });
 
-      // Insert it BELOW the communities outline so community borders stay crisp
+      // 1. The flat 2D grid for the background
       map.addLayer({
         id: "pixel-grid-fill",
         type: "fill",
@@ -419,14 +428,49 @@ export default function MapView() {
           ],
           "fill-opacity": [
             "case",
-            ["boolean", ["feature-state", "selected"], false],
-            0.9,  // Selected opacity (almost opaque)
-            ["boolean", ["feature-state", "hover"], false],
-            0.75, // Hover opacity
-            0.35  // Default opacity - lowered to let map features bleed through
+             // completely hide selected/hovered so the 3D block underneath takes over visual space
+            ["boolean", ["feature-state", "selected"], false], 0.0,
+            ["boolean", ["feature-state", "hover"], false], 0.0,
+            0.30  // Default opacity shows underlying map nicely
           ]
         }
-      }, "communities-outline"); // Before community outlines (the pixel gris is made under the community borders)
+      }, "communities-outline");
+
+      // 2. The dynamic 3D overlay for just the active/hovered pixels to bypass mapbox opacity limits
+      if (!map.getSource("active-pixels")) {
+        map.addSource("active-pixels", {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] }
+        });
+        
+        map.addLayer({
+          id: "active-pixels-extrusion",
+          type: "fill-extrusion",
+          source: "active-pixels",
+          paint: {
+            "fill-extrusion-color": [
+              "interpolate",
+              ["linear"],
+              ["get", "anomaly"],
+              -4, "#1E90FF",
+              -2, "#87CEEB",
+              -0.5, "#E0F7FA",
+              0, "#F5F5F5",
+              0.5, "#FFF9C4",
+              2, "#FFA500",
+              4, "#FF4500"
+            ],
+            "fill-extrusion-opacity": 0.70, // Solid opaque column!
+            "fill-extrusion-height": [
+              "case",
+              ["boolean", ["get", "isSelected"], false],
+              50,  // Selected pop logic
+              10   // Hover pop logic
+            ],
+            "fill-extrusion-base": 0
+          }
+        }, "communities-outline");
+      }
 
       map.addLayer({
         id: "pixel-grid-outline",
@@ -440,6 +484,19 @@ export default function MapView() {
 
       // Hover event logic for pixels
       let hoveredPixelId: number | string | null = null;
+      
+      const updateActive3DPixels = () => {
+        const source = map.getSource("active-pixels") as mapboxgl.GeoJSONSource;
+        if (!source) return;
+        const feats = [];
+        if (activePixelsRef.current.hovered && activePixelsRef.current.hovered.id !== activePixelsRef.current.selected?.id) {
+          feats.push({ ...activePixelsRef.current.hovered, properties: { ...activePixelsRef.current.hovered.properties, isSelected: false } });
+        }
+        if (activePixelsRef.current.selected) {
+          feats.push({ ...activePixelsRef.current.selected, properties: { ...activePixelsRef.current.selected.properties, isSelected: true } });
+        }
+        source.setData({ type: "FeatureCollection", features: feats as any });
+      };
 
       // event when the mouse on top of a pixel
       map.on("mousemove", "pixel-grid-fill", (e) => {
@@ -458,6 +515,15 @@ export default function MapView() {
             { source: "pixel-grid", id: hoveredPixelId },
             { hover: true }
           );
+
+          // update 3D layer
+          activePixelsRef.current.hovered = {
+            type: "Feature",
+            geometry: e.features[0].geometry,
+            properties: e.features[0].properties,
+            id: hoveredPixelId
+          } as any;
+          updateActive3DPixels();
 
           // Update hovered pixel anomaly state instead of local popup
           const anomaly = e.features[0].properties?.anomaly;
@@ -490,6 +556,14 @@ export default function MapView() {
             { selected: true }
           );
 
+          activePixelsRef.current.selected = {
+            type: "Feature",
+            geometry: feature.geometry,
+            properties: feature.properties,
+            id: clickedPixelId
+          } as any;
+          updateActive3DPixels();
+
           // Fly to the pixel slightly to center it
           map.panTo(e.lngLat, { duration: 800 });
 
@@ -515,6 +589,9 @@ export default function MapView() {
         hoveredPixelId = null;
         map.getCanvas().style.cursor = "";
         
+        activePixelsRef.current.hovered = null;
+        updateActive3DPixels();
+        
         setHoveredPixelAnomaly(null);
       });
 
@@ -523,6 +600,9 @@ export default function MapView() {
       source.setData(pixelGridData.grid);
       map.setLayoutProperty("pixel-grid-fill", "visibility", "visible");
       map.setLayoutProperty("pixel-grid-outline", "visibility", "visible");
+      if (map.getLayer("active-pixels-extrusion")) {
+        map.setLayoutProperty("active-pixels-extrusion", "visibility", "visible");
+      }
       isPixelGridEnabled.current = true;
     }
   }, [pixelGridData, mapLoaded, selectedCommunity]);
