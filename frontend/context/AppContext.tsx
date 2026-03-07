@@ -56,6 +56,9 @@ interface AppContextState {
   setPixelInspectorData: (data: any | null) => void;
   pixelInspectorLoading: boolean;
   setPixelInspectorLoading: (loading: boolean) => void;
+
+  // Phase 3: Dynamic Radar Constraints
+  globalFeatureRanges: Record<string, [number, number]> | null;
 }
 
 const AppContext = createContext<AppContextState | undefined>(undefined);
@@ -63,6 +66,7 @@ const AppContext = createContext<AppContextState | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('afternoon');
   const [rawCommunities, setRawCommunities] = useState<CommunityFeatureCollection | null>(null);
+  const [globalFeatureRanges, setGlobalFeatureRanges] = useState<Record<string, [number, number]> | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -94,6 +98,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (!res.ok) throw new Error("Failed to fetch community data");
         const data: CommunityFeatureCollection = await res.json();
         setRawCommunities(data);
+        if (data.global_feature_ranges) {
+          setGlobalFeatureRanges(data.global_feature_ranges);
+        }
       } catch (err: any) {
         console.error("Error fetching communities:", err);
         setError(err.message);
@@ -278,7 +285,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     pixelGridLoading, setPixelGridLoading,
     selectedPixel, setSelectedPixel,
     pixelInspectorData, setPixelInspectorData,
-    pixelInspectorLoading, setPixelInspectorLoading
+    pixelInspectorLoading, setPixelInspectorLoading,
+    globalFeatureRanges
   };
 
   return (

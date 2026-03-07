@@ -169,8 +169,37 @@ def sample_rasters(lon: float, lat: float) -> tuple[Dict[str, float], Dict[str, 
 # --- ENDPOINTS ---
 @app.get("/api/communities")
 async def get_communities():
-    """Returns the full enriched GeoJSON for Mapbox to draw the map layers."""
-    return state.communities_geojson
+    """Returns the full enriched GeoJSON for Mapbox to draw the map layers + global feature ranges."""
+    
+    # Calculate global min/max ranges for the frontend radar chart
+    ranges = {
+        "ndvi_mean": [float("inf"), float("-inf")],
+        "albedo_mean": [float("inf"), float("-inf")],
+        "building_density_mean": [float("inf"), float("-inf")],
+        "height_mean": [float("inf"), float("-inf")],
+        "road_density_mean": [float("inf"), float("-inf")],
+        "sand_fraction_mean": [float("inf"), float("-inf")], 
+        "water_fraction_mean": [float("inf"), float("-inf")],
+        "dist_to_coast_mean": [float("inf"), float("-inf")],
+    }
+    
+    for f in state.communities_geojson.get("features", []):
+        props = f.get("properties", {})
+        for key in ranges.keys():
+            val = props.get(key) # get the actual values from the geojson file
+            if val is not None:
+                if val < ranges[key][0]: ranges[key][0] = val
+                if val > ranges[key][1]: ranges[key][1] = val
+                
+    # Fallback to defaults if any were untouched
+    for k, v in ranges.items():
+        if v[0] == float("inf"): v[0] = 0
+        if v[1] == float("-inf"): v[1] = 1
+
+    return {
+        **state.communities_geojson,
+        "global_feature_ranges": ranges
+    }
 
 @app.post("/api/pixel")
 async def get_pixel_data(req: CoordinateRequest):

@@ -61,4 +61,5 @@ export interface CommunityFeature {
 export interface CommunityFeatureCollection {
   type: "FeatureCollection";
   features: CommunityFeature[];
+  global_feature_ranges?: Record<string, [number, number]>;
 }
