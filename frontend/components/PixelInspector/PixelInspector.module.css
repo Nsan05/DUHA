@@ -182,7 +182,14 @@
   flex: 1;
   height: 100%;
   position: relative;
-  border-left: 1px dashed rgba(255, 255, 255, 0.2); /* Center zero line */
+}
+.waterfallTrack::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  border-left: 1px dashed var(--border-subtle); /* Center zero line */
 }
 .waterfallBar {
   position: absolute;

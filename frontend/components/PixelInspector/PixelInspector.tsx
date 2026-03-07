@@ -108,7 +108,8 @@ export default function PixelInspector() {
   const sortedShap = Object.entries(shap_values)
     .sort((a, b) => Math.abs(b[1] as number) - Math.abs(a[1] as number));
   
-  const maxAbsShap = Math.max(...sortedShap.map(s => Math.abs(s[1] as number)), 0.1);
+  // Multiply the maximum SHAP by 1.5 to guarantee the text reading will never overflow out of its 50% grid block
+  const maxAbsShap = Math.max(...sortedShap.map(s => Math.abs(s[1] as number)), 0.1) * 1.5;
   const getBarWidth = (val: number) => (Math.abs(val) / maxAbsShap) * 100; 
 
   // -- DIURNAL CHART LOGIC --
