@@ -36,6 +36,7 @@ export default function MapView() {
 
   // Keep a ref of selectedPixel for click handlers - Mapbox event handlers require refs to reliably access the freshest state values
   const selectedPixelRef = useRef(selectedPixel);
+  const isPixelGridEnabled = useRef(false);
   useEffect(() => {
     selectedPixelRef.current = selectedPixel;
   }, [selectedPixel]);
@@ -245,6 +246,12 @@ export default function MapView() {
 
     // Runs when map is clicked
     const onMapClick = (e: mapboxgl.MapMouseEvent) => {
+      // PREVENT community toggle if the pixel grid is currently active and rendered
+      if (isPixelGridEnabled.current) {
+        const pixelFeatures = map.queryRenderedFeatures(e.point, { layers: ["pixel-grid-fill"] });
+        if (pixelFeatures.length > 0) return; // Let the dedicated pixel click handler deal with it
+      }
+
       // Check if we clicked on a community polygon
       const features = map.queryRenderedFeatures(e.point, { layers: ["communities-fill"] });
       // If we did indeed click on a real community
@@ -370,7 +377,9 @@ export default function MapView() {
     if (!map || !mapLoaded) return;
 
     // If there is no data then hide the pixel gird and close pop up
+    // Hide pixel grid if no community selected
     if (!pixelGridData || !pixelGridData.grid || !selectedCommunity) {
+      isPixelGridEnabled.current = false;
       if (map.getLayer("pixel-grid-fill")) {
         map.setLayoutProperty("pixel-grid-fill", "visibility", "none");
         map.setLayoutProperty("pixel-grid-outline", "visibility", "none");
@@ -513,6 +522,7 @@ export default function MapView() {
       source.setData(pixelGridData.grid);
       map.setLayoutProperty("pixel-grid-fill", "visibility", "visible");
       map.setLayoutProperty("pixel-grid-outline", "visibility", "visible");
+      isPixelGridEnabled.current = true;
     }
   }, [pixelGridData, mapLoaded, selectedCommunity]);
 

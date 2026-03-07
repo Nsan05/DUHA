@@ -4,22 +4,23 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useAppContext } from "../../context/AppContext";
 import styles from "./RightSidebar.module.css";
 import { CommunityFeature } from "../../lib/types";
+import PixelInspector from "../PixelInspector/PixelInspector";
 
 export default function RightSidebar() {
-  const { selectedCommunity, setSelectedCommunity, computedCommunities, timeOfDay } = useAppContext();
+  const { selectedCommunity, setSelectedCommunity, computedCommunities, timeOfDay, selectedPixel } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
 
   // The community to display: exclusively the selected one
   const activeCommId = selectedCommunity;
 
-  // Re-open sidebar automatically if a new community is selected
+  // Re-open sidebar automatically if a new community or pixel is selected
   useEffect(() => {
-    if (activeCommId) {
+    if (activeCommId || selectedPixel) {
       setIsOpen(true);
     } else {
       setIsOpen(false);
     }
-  }, [activeCommId]);
+  }, [activeCommId, selectedPixel]);
 
   if (!computedCommunities) return null;
 
@@ -48,8 +49,11 @@ export default function RightSidebar() {
       </button>
 
       {/* Main Panel */}
+      {/* If a pixel is selected, show the pixel inspector, otherwise show the community dashboard */}
       <div className={`glass-panel ${styles.sidebarPanel}`}>
-        {feature ? (
+        {selectedPixel ? (
+          <PixelInspector />
+        ) : feature ? (
           <SidebarContent 
             feature={feature} 
             timeOfDay={timeOfDay} 

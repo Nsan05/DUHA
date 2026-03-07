@@ -590,4 +590,5 @@ F8: Diurnal Profile Viewer
 07/03/2026:
 - Added the ranges of the values to be also returned during the communities api call and added it to appcontext.
 - Added a pixel inspector component containing all the graphs and extra metrics for each selected pixel.
+- Added the pixel inspector features to the right sidebar and also added a fix in the mapview so that when clicked on a particular pixel, the pixel click handler handles the click instead of the global one.
 - 
