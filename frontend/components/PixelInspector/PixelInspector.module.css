@@ -251,7 +251,8 @@
   display: block;
   margin-top: 6px;
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  opacity: 0.8;
   font-style: italic;
 }
 
