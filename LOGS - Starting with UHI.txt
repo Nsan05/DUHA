@@ -599,4 +599,23 @@ F8: Diurnal Profile Viewer
 08/03/2026:
 - Fixed the contrasts in the pixel inspector on the right sidebar.
 - Fixed radar chart math issue.
+- Finished phase 3 and implemented: F7 (Pixel Inspector + SHAP Attribution)
+- Researched about the changes in feature metrics when interventions are applied. But found that the values mentioned in studies dont always line up perfectly with the real world arid coniditons of dubai. Instead decided to get the intervention values directly from the map to make it hyper localized and more realistic to the region.
+. Parks: Find intervention values from the maps using script
+. Cool Pavements: https://nchr.elsevierpure.com/en/publications/evaluation-and-thermal-performance-of-cool-pavement-under-desert-/ (Reflective coating on parking pavement in educational complex shifted albedo from 0.24 → 0.70 " so increase albedo by 0.46 times road density.)
+. Cool Roofs (We are increasing the reflectivity to 0.8): https://www.sciencedirect.com/science/article/pii/S0038092X24001415
+. Green Roofs (light NDVI around 0.28, albedo : 0.33 (similar for park like surfaces which kinda remains the same for the all the diff ndvi values)
+https://link.springer.com/article/10.1007/s12273-022-0940-x
+
+ .. “For GRs at the top level, the highest mean NDVI was observed in March, reaching a value of 0.31.”
+ .. “the months of November and December recorded the lowest NDVI means for GRs at the top (0.25) and ground level (0.32).”
+ .. https://www.mdpi.com/2072-4292/17/21/3657
+ .. Thus chose 0.28 as the NDVI value.
+
+. Water feature & Construct Building: Find intervention values from the maps using script
+
+- Higher NDVI -> Lesser albedo
+
+- Fine-tuned the phase 4 implementation plan for the interventions to use the current pixel values rather than average values to be more precise.
+- Calculated the albedo value mean for NDVI values between 0.25 and 0.31 and found the value to be 0.326
 - 
