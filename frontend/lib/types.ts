@@ -63,3 +63,18 @@ export interface CommunityFeatureCollection {
   features: CommunityFeature[];
   global_feature_ranges?: Record<string, [number, number]>;
 }
+
+export type TimeOfDayData = {
+  morning: number;
+  afternoon: number;
+  night: number;
+};
+
+// Phase 4 Types
+export type SinglePixelInterventionState = {
+  pixelId: string;
+  originalFeatures: Record<string, number>;
+  modifiedFeatures: Record<string, number>;
+  activeInterventions: string[];
+  predictedAnomalies: TimeOfDayData | null;
+};

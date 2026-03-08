@@ -618,4 +618,8 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 
 - Fine-tuned the phase 4 implementation plan for the interventions to use the current pixel values rather than average values to be more precise.
 - Calculated the albedo value mean for NDVI values between 0.25 and 0.31 and found the value to be 0.326
+
+----
+09/03/2026:
+- Added interventions.ts containing intervention names, ranges and templates for each intervention.
 - 
