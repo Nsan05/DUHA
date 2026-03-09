@@ -623,4 +623,5 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 09/03/2026:
 - Added interventions.ts containing intervention names, ranges and templates for each intervention.
 - Added an a suggestions ts script to suggest possible interventions to the user.
+- Added the relevant states and functions to appcontext
 - 

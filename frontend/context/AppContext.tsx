@@ -12,6 +12,7 @@
 // useMemo → Caches a calculated value to avoid recalculating every render.
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 import { CommunityFeatureCollection, TimeOfDay } from "../lib/types";
+import { FeatureVector, InterventionId, InterventionParams } from "../lib/interventions";
 
 // The shape of our global state - shared by all componeents
 interface AppContextState {
@@ -59,6 +60,33 @@ interface AppContextState {
 
   // Phase 3: Dynamic Radar Constraints
   globalFeatureRanges: Record<string, [number, number]> | null;
+
+  // Phase 4: Intervention Simulator
+  interventionMode: boolean;
+  setInterventionMode: (mode: boolean) => void;
+
+  selectedPixels: Array<{
+    lat: number;
+    lng: number;
+    anomaly: number;
+    features: FeatureVector;
+    anomalies: { morning: number; afternoon: number; night: number };
+  }>;
+  setSelectedPixels: (pixels: Array<{ lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }>) => void;
+  addSelectedPixel: (pixel: { lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }) => void;
+  removeSelectedPixel: (lat: number, lng: number) => void;
+
+  modifiedFeatures: FeatureVector | null;
+  setModifiedFeatures: (f: FeatureVector | null) => void;
+
+  predictedAnomalies: { morning: number; afternoon: number; night: number } | null;
+  setPredictedAnomalies: (a: { morning: number; afternoon: number; night: number } | null) => void;
+
+  activeInterventions: Array<{ templateId: InterventionId; params?: InterventionParams }>;
+  setActiveInterventions: (i: Array<{ templateId: InterventionId; params?: InterventionParams }>) => void;
+
+  expertMode: boolean;
+  setExpertMode: (mode: boolean) => void;
 }
 
 const AppContext = createContext<AppContextState | undefined>(undefined);
@@ -89,6 +117,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [pixelInspectorData, setPixelInspectorData] = useState<any | null>(null);
   const [pixelInspectorLoading, setPixelInspectorLoading] = useState<boolean>(false);
 
+  // Phase 4 data
+  const [interventionMode, setInterventionMode] = useState<boolean>(false);
+  const [selectedPixels, setSelectedPixels] = useState<Array<{ lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }>>([]);
+  const [modifiedFeatures, setModifiedFeatures] = useState<FeatureVector | null>(null);
+  const [predictedAnomalies, setPredictedAnomalies] = useState<{ morning: number; afternoon: number; night: number } | null>(null);
+  const [activeInterventions, setActiveInterventions] = useState<Array<{ templateId: InterventionId; params?: InterventionParams }>>([]);
+  const [expertMode, setExpertMode] = useState<boolean>(false);
+
+  const addSelectedPixel = (pixel: { lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }) => {
+    // prev selected pixels
+    setSelectedPixels(prev => {
+      // Check if already exactly present in selected pixels or not
+      if (prev.some(p => p.lat === pixel.lat && p.lng === pixel.lng)) return prev;
+      return [...prev, pixel];
+    });
+    setInterventionMode(true);
+  };
+
+  const removeSelectedPixel = (lat: number, lng: number) => {
+    setSelectedPixels(prev => {
+      const next = prev.filter(p => !(p.lat === lat && p.lng === lng));
+      if (next.length === 0) setInterventionMode(false);
+      return next;
+    });
+  };
+
   // Initial Data Fetch
   useEffect(() => {
     async function fetchCommunities() {
@@ -114,6 +168,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Fetch Pixel Grid when a community is selected or timeOfDay changes
   useEffect(() => {
     async function fetchPixelGrid() {
+      // Phase 4 clears
+      setSelectedPixels([]);
+      setModifiedFeatures(null);
+      setPredictedAnomalies(null);
+      setActiveInterventions([]);
+      setInterventionMode(false);
+
       if (!selectedCommunity) {
         setPixelGridData(null);
         setPixelGridLoading(false);
@@ -286,7 +347,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     selectedPixel, setSelectedPixel,
     pixelInspectorData, setPixelInspectorData,
     pixelInspectorLoading, setPixelInspectorLoading,
-    globalFeatureRanges
+    globalFeatureRanges,
+    interventionMode, setInterventionMode,
+    selectedPixels, setSelectedPixels,
+    addSelectedPixel, removeSelectedPixel,
+    modifiedFeatures, setModifiedFeatures,
+    predictedAnomalies, setPredictedAnomalies,
+    activeInterventions, setActiveInterventions,
+    expertMode, setExpertMode
   };
 
   return (
