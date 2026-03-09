@@ -628,4 +628,5 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 - Had an issue with the shift button not working due to Mapbox's default rectangle selection but disabled it.
 - Fixed an issue of the initial selected pixel not matching the UI of th other selected pixels and pixel de select not being available on shift.
 - Fixed the bug of cyan outline remaining for the original slected pixel in a shift selected pixel batch, when another pixel was selected.
+- Didnt account for the fact of group pixel predicitions and only did individual pixel predictions added a predict-batch api endpoint to handle predictions of multiple pixels.
 - 

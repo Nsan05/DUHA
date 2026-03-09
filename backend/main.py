@@ -135,6 +135,9 @@ class CoordinateRequest(BaseModel):
 class PredictionRequest(BaseModel):
     features: Dict[str, float]
 
+class PredictionBatchRequest(BaseModel):
+    pixels: List[Dict[str, float]]
+
 # --- UTILS ---
 def sample_rasters(lon: float, lat: float) -> tuple[Dict[str, float], Dict[str, float]]:
     """Samples all rasters at a given coordinate. Throws HTTP 400 if out of bounds/NaN."""
@@ -237,6 +240,50 @@ async def predict_anomaly(req: PredictionRequest):
             predictions[time_of_day] = None
             
     return {"predicted_anomalies": predictions}
+
+@app.post("/api/predict-batch")
+async def predict_batch(req: PredictionBatchRequest):
+    """Runs a batch of feature override vectors through all 3 ML models and returns average new anomalies."""
+    # If no pixels, return 
+    if not req.pixels:
+        raise HTTPException(status_code=400, detail="Empty pixels array")
+        
+    predictions_sum = {"morning": 0.0, "afternoon": 0.0, "night": 0.0}
+    valid_counts = {"morning": 0, "afternoon": 0, "night": 0}
+    
+    # We can optimize by compiling all rows into a single pandas DataFrame
+    ordered_rows = []
+    for feature_dict in req.pixels:
+        try:
+            ordered_rows.append([feature_dict[f] for f in FEATURE_ORDER]) # Added the values of each each of each pixel into one row
+        except KeyError as e:
+            raise HTTPException(status_code=400, detail=f"Missing feature in request: {e}")
+            
+    # contains the average predictions for all the times of day
+    avg_predictions = {}
+    for time_of_day, model in state.models.items():
+        try:
+            order = list(FEATURE_ORDER)
+            if time_of_day == "night":
+                order[-1] = 'dist_to_coast_mean'
+                
+            X = pd.DataFrame(ordered_rows, columns=order)
+            
+            # Predict in bulk
+            vals = model.predict(X)
+            # get sum of predictions and total num
+            predictions_sum[time_of_day] = float(np.sum(vals))
+            valid_counts[time_of_day] = len(vals)
+        except Exception as e:
+            print(f"Batch prediction failed for {time_of_day}: {e}")
+            
+    for tod in ["morning", "afternoon", "night"]:
+        if valid_counts[tod] > 0:
+            avg_predictions[tod] = predictions_sum[tod] / valid_counts[tod]
+        else:
+            avg_predictions[tod] = None
+            
+    return {"predicted_anomalies": avg_predictions}
 
 @app.post("/api/shap")
 async def get_shap_explanation(req: CoordinateRequest):
