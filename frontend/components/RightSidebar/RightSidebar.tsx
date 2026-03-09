@@ -5,10 +5,12 @@ import { useAppContext } from "../../context/AppContext";
 import styles from "./RightSidebar.module.css";
 import { CommunityFeature } from "../../lib/types";
 import PixelInspector from "../PixelInspector/PixelInspector";
+import InterventionPanel from "../InterventionPanel/InterventionPanel";
 
 export default function RightSidebar() {
   const { selectedCommunity, setSelectedCommunity, computedCommunities, timeOfDay, selectedPixel } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'inspector' | 'intervention'>('inspector');
 
   // The community to display: exclusively the selected one
   const activeCommId = selectedCommunity;
@@ -52,7 +54,25 @@ export default function RightSidebar() {
       {/* If a pixel is selected, show the pixel inspector, otherwise show the community dashboard */}
       <div className={`glass-panel ${styles.sidebarPanel}`}>
         {selectedPixel ? (
-          <PixelInspector />
+          <div className={styles.pixelViewContainer}>
+            <div className={styles.tabBar}>
+              <button 
+                className={`${styles.tabButton} ${activeTab === 'inspector' ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab('inspector')}
+              >
+                Analytics
+              </button>
+              <button 
+                className={`${styles.tabButton} ${activeTab === 'intervention' ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab('intervention')}
+              >
+                Interventions
+              </button>
+            </div>
+            <div className={styles.scrollContainer}>
+              {activeTab === 'inspector' ? <PixelInspector /> : <InterventionPanel />}
+            </div>
+          </div>
         ) : feature ? (
           <SidebarContent 
             feature={feature} 

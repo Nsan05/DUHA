@@ -631,4 +631,8 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 - Didnt account for the fact of group pixel predicitions and only did individual pixel predictions added a predict-batch api endpoint to handle predictions of multiple pixels.
 - Made the similar change in suggestions.ts to handle the predict-batch endpoint.
 - Wrote a script for the intervention panel to go on the right side bar that contains intervention suggestion, intervention processing and UI elements for comparing the previous metrics and changes after the application of the interventions.
--  
+
+----
+10/03/2026:
+-  Generated a sidebar view for the initial intervention view.
+- 
