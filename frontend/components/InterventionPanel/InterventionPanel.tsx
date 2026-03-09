@@ -75,6 +75,7 @@ export default function InterventionPanel() {
     return null; // hide if nothing selected
   }
 
+  // Calculate current anamolies before any interventions
   const currentAnomalies = {
     morning: selectedPixels.reduce((sum, p) => sum + p.anomalies.morning, 0) / selectedPixels.length,
     afternoon: selectedPixels.reduce((sum, p) => sum + p.anomalies.afternoon, 0) / selectedPixels.length,
