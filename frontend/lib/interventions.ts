@@ -40,7 +40,7 @@ export const FEATURE_RANGES: Record<string, [number, number]> = {
   ndvi_mean: [-0.3068, 0.671],
   albedo_mean: [0.0928, 1.0258],
   building_density_mean: [0, 1.0],
-  height_mean: [0.02, 102.7687],
+  height_mean: [0, 102.7687], // Min changed to 0 to support true empty sand patches
   road_density_mean: [0, 1.0],
   sand_mask_fraction: [0, 1.0], 
   water_mask_full_fraction: [0, 1.0], // Masks are 0 to 1 natively
