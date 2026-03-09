@@ -639,4 +639,6 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 - Fixed the back border issue int he intervention toggle
 - Trying to add messages on why some interventions cant be applied.
 - Added on hover pop ups to explain why certain interventions cant be added
+- Added info boxes on intervention tiles to explain the changes that are being made
+- Improved toggle UI.
 - 

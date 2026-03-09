@@ -428,7 +428,7 @@ button.card {
 }
 
 input:checked + .slider {
-  background-color: var(--accent-blue);
+  background-color: #4CAF50;
 }
 
 input:checked + .slider:before {
@@ -457,7 +457,7 @@ input:checked + .slider:before {
 
 .sliderInput {
   width: 100%;
-  accent-color: var(--accent-blue);
+  accent-color: #4CAF50;
 }
 
 .sliderInput:disabled {
