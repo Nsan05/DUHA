@@ -250,7 +250,12 @@ export default function InterventionPanel() {
                 {suggestions.map((s, i) => (
                   <div key={i} className={styles.card}>
                     <div className={styles.cardHeader}>
-                      <span className={styles.cardTitle}>{s.icon} {s.name}</span>
+                      <span className={styles.cardTitle}>
+                        {s.icon} {s.name}
+                        {INTERVENTION_TEMPLATES.find(t => t.id === s.templateId)?.explanation && (
+                          <span className={styles.infoIcon} data-tooltip={INTERVENTION_TEMPLATES.find(t => t.id === s.templateId)?.explanation}>i</span>
+                        )}
+                      </span>
                       <span className={`${styles.deltaBadge} ${s.deltaT < 0 ? styles.cooling : styles.warming}`}>
                         {formatDelta(s.deltaT)}
                       </span>
@@ -314,7 +319,12 @@ export default function InterventionPanel() {
                     data-disabled-reason={disableReason || undefined}
                   >
                     <div className={styles.cardHeader}>
-                      <span className={styles.cardTitle}>{template.icon} {template.name}</span>
+                      <span className={styles.cardTitle}>
+                        {template.icon} {template.name}
+                        {template.explanation && (
+                          <span className={styles.infoIcon} data-tooltip={template.explanation}>i</span>
+                        )}
+                      </span>
                       {isActive && <span style={{color: '#4CAF50', fontSize: '14px'}}>✓</span>}
                     </div>
                     <div className={styles.cardDescription}>{template.description}</div>

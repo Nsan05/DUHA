@@ -20,6 +20,7 @@ export interface InterventionTemplate {
   icon: string;
   description: string;
   requirementDescription: string;
+  explanation: string;
   canApply: (features: FeatureVector) => boolean;
   apply: (features: FeatureVector, params?: InterventionParams) => FeatureVector;
   conflictsWith: InterventionId[];
@@ -58,6 +59,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     icon: "🌳",
     description: "Convert sand into a vegetated park.",
     requirementDescription: "Requires 100% open sand.",
+    explanation: "Replaces sand with dense vegetation, maximizing NDVI and lowering Albedo.",
     canApply: (features) => features.sand_mask_fraction === 1,
     apply: (features) => ({
       ...features,
@@ -73,6 +75,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     icon: "🛣️",
     description: "Apply reflective coating to roads.",
     requirementDescription: "Requires existing roads.",
+    explanation: "Increases surface albedo (reflectivity) of existing road infrastructure.",
     canApply: (features) => features.road_density_mean > 0,
     apply: (features) => ({
       ...features,
@@ -90,6 +93,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     icon: "🏢",
     description: "Apply reflective coating to building roofs.",
     requirementDescription: "Requires existing buildings.",
+    explanation: "Increases structural Albedo to simulate bright, sun-reflecting rooftops.",
     canApply: (features) => features.building_density_mean > 0,
     apply: (features) => ({
       ...features,
@@ -107,6 +111,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     icon: "🌿",
     description: "Install extensive green roofs on buildings.",
     requirementDescription: "Requires existing buildings.",
+    explanation: "Increases NDVI and slightly adjusts Albedo on building footprints to simulate rooftop vegetation.",
     canApply: (features) => features.building_density_mean > 0,
     apply: (features) => ({
       ...features,
@@ -129,6 +134,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     icon: "💧",
     description: "Convert sand to a large water body.",
     requirementDescription: "Requires 100% open sand.",
+    explanation: "Replaces sand entirely with a high thermal capacity water body.",
     canApply: (features) => features.sand_mask_fraction === 1,
     apply: (features) => ({
       ...features,
@@ -145,6 +151,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     icon: "🏗️",
     description: "Construct a new dense urban block.",
     requirementDescription: "Requires 100% open sand.",
+    explanation: "Replaces sand with a specified density and height of building structures.",
     canApply: (features) => features.sand_mask_fraction === 1,
     apply: (features, params) => {
       const density = params?.buildingDensity ?? 0.5;

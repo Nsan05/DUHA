@@ -84,7 +84,6 @@
   gap: var(--space-2);
   transition: all 0.2s ease;
   position: relative;
-  overflow: hidden;
   text-align: left;
   color: var(--text-primary);
 }
@@ -147,6 +146,60 @@ button.card {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* Card Info Icon */
+.infoIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 10px;
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: help;
+  margin-left: 2px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.infoIcon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+
+.infoIcon:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: -10px; /* Default: expand to the right */
+  transform: translateY(-6px);
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  white-space: normal;
+  width: max-content;
+  max-width: 180px;
+  text-align: left;
+  pointer-events: none;
+  z-index: 30;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  font-weight: normal;
+  line-height: 1.4;
+}
+
+/* Right-column cards expand inward to the left so they don't clip the screen */
+.interventionsGrid .card:nth-child(even) .infoIcon:hover::after {
+  left: auto;
+  right: -10px;
 }
 
 .cardDescription {
