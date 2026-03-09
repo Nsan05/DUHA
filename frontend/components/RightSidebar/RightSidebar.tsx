@@ -8,7 +8,7 @@ import PixelInspector from "../PixelInspector/PixelInspector";
 import InterventionPanel from "../InterventionPanel/InterventionPanel";
 
 export default function RightSidebar() {
-  const { selectedCommunity, setSelectedCommunity, computedCommunities, timeOfDay, selectedPixel } = useAppContext();
+  const { selectedCommunity, setSelectedCommunity, computedCommunities, timeOfDay, selectedPixel, selectedPixels, interventionMode } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'inspector' | 'intervention'>('inspector');
 
@@ -23,6 +23,15 @@ export default function RightSidebar() {
       setIsOpen(false);
     }
   }, [activeCommId, selectedPixel]);
+
+  // Auto-switch tabs based on multi-pixel selection
+  useEffect(() => {
+    if (!interventionMode || (selectedPixels && selectedPixels.length <= 1)) {
+      setActiveTab('inspector');
+    } else if (selectedPixels && selectedPixels.length > 1) {
+      setActiveTab('intervention');
+    }
+  }, [selectedPixels, interventionMode]);
 
   if (!computedCommunities) return null;
 
@@ -55,23 +64,31 @@ export default function RightSidebar() {
       <div className={`glass-panel ${styles.sidebarPanel}`}>
         {selectedPixel ? (
           <div className={styles.pixelViewContainer}>
-            <div className={styles.tabBar}>
-              <button 
-                className={`${styles.tabButton} ${activeTab === 'inspector' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('inspector')}
-              >
-                Analytics
-              </button>
-              <button 
-                className={`${styles.tabButton} ${activeTab === 'intervention' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('intervention')}
-              >
-                Interventions
-              </button>
-            </div>
-            <div className={styles.scrollContainer}>
-              {activeTab === 'inspector' ? <PixelInspector /> : <InterventionPanel />}
-            </div>
+            {interventionMode ? (
+              <>
+                <div className={styles.tabBar}>
+                  <button 
+                    className={`${styles.tabButton} ${activeTab === 'inspector' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('inspector')}
+                  >
+                    Analytics
+                  </button>
+                  <button 
+                    className={`${styles.tabButton} ${activeTab === 'intervention' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('intervention')}
+                  >
+                    Interventions
+                  </button>
+                </div>
+                <div className={styles.scrollContainer}>
+                  {activeTab === 'inspector' ? <PixelInspector /> : <InterventionPanel />}
+                </div>
+              </>
+            ) : (
+              <div className={styles.scrollContainer}>
+                <PixelInspector />
+              </div>
+            )}
           </div>
         ) : feature ? (
           <SidebarContent 
