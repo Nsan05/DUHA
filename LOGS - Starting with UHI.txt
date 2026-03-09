@@ -634,6 +634,6 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 
 ----
 10/03/2026:
--  Generated a sidebar view for the initial intervention view.
+- Generated a sidebar view for the initial intervention view.
 - Added auto-switch depending on pixels selected.
-- 
+- Fixed the back border issue int he intervention toggle
