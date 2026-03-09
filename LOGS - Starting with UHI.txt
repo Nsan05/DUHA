@@ -624,4 +624,8 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 - Added interventions.ts containing intervention names, ranges and templates for each intervention.
 - Added an a suggestions ts script to suggest possible interventions to the user.
 - Added the relevant states and functions to appcontext
+- Made changes in mapview to show the pixels getting selected, including multiple pixels getting selected and using api/pixel for features.
+- Had an issue with the shift button not working due to Mapbox's default rectangle selection but disabled it.
+- Fixed an issue of the initial selected pixel not matching the UI of th other selected pixels and pixel de select not being available on shift.
+- Fixed the bug of cyan outline remaining for the original slected pixel in a shift selected pixel batch, when another pixel was selected.
 - 

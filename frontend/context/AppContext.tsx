@@ -66,15 +66,16 @@ interface AppContextState {
   setInterventionMode: (mode: boolean) => void;
 
   selectedPixels: Array<{
+    id: string | number;
     lat: number;
     lng: number;
     anomaly: number;
     features: FeatureVector;
     anomalies: { morning: number; afternoon: number; night: number };
   }>;
-  setSelectedPixels: (pixels: Array<{ lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }>) => void;
-  addSelectedPixel: (pixel: { lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }) => void;
-  removeSelectedPixel: (lat: number, lng: number) => void;
+  setSelectedPixels: (pixels: Array<{ id: string | number; lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }>) => void;
+  addSelectedPixel: (pixel: { id: string | number; lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }) => void;
+  removeSelectedPixel: (id: string | number) => void;
 
   modifiedFeatures: FeatureVector | null;
   setModifiedFeatures: (f: FeatureVector | null) => void;
@@ -119,25 +120,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Phase 4 data
   const [interventionMode, setInterventionMode] = useState<boolean>(false);
-  const [selectedPixels, setSelectedPixels] = useState<Array<{ lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }>>([]);
+  const [selectedPixels, setSelectedPixels] = useState<Array<{ id: string | number; lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }>>([]);
   const [modifiedFeatures, setModifiedFeatures] = useState<FeatureVector | null>(null);
   const [predictedAnomalies, setPredictedAnomalies] = useState<{ morning: number; afternoon: number; night: number } | null>(null);
   const [activeInterventions, setActiveInterventions] = useState<Array<{ templateId: InterventionId; params?: InterventionParams }>>([]);
   const [expertMode, setExpertMode] = useState<boolean>(false);
 
-  const addSelectedPixel = (pixel: { lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }) => {
+  const addSelectedPixel = (pixel: { id: string | number; lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }) => {
     // prev selected pixels
     setSelectedPixels(prev => {
-      // Check if already exactly present in selected pixels or not
-      if (prev.some(p => p.lat === pixel.lat && p.lng === pixel.lng)) return prev;
+      // Check if already exactly present in selected pixels or not by ID
+      if (prev.some(p => p.id === pixel.id)) return prev;
       return [...prev, pixel];
     });
     setInterventionMode(true);
   };
 
-  const removeSelectedPixel = (lat: number, lng: number) => {
+  const removeSelectedPixel = (id: string | number) => {
     setSelectedPixels(prev => {
-      const next = prev.filter(p => !(p.lat === lat && p.lng === lng));
+      // Only keeping items that do not match the id to be removed
+      const next = prev.filter(p => p.id !== id);
       if (next.length === 0) setInterventionMode(false);
       return next;
     });

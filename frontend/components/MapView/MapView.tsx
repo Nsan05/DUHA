@@ -25,7 +25,13 @@ export default function MapView() {
     pixelGridLoading,
     setHoveredPixelAnomaly,
     selectedPixel,
-    setSelectedPixel
+    setSelectedPixel,
+    interventionMode,
+    selectedPixels,
+    setSelectedPixels,
+    addSelectedPixel,
+    removeSelectedPixel,
+    pixelInspectorData
   } = useAppContext();
 
   // Keep a ref of selectedCommunity for the click handler to access which will be updated when the selectedCommunity changes
@@ -37,10 +43,23 @@ export default function MapView() {
   // Keep a ref of selectedPixel for click handlers - Mapbox event handlers require refs to reliably access the freshest state values
   const selectedPixelRef = useRef(selectedPixel);
   const isPixelGridEnabled = useRef(false);
-  const activePixelsRef = useRef<{ hovered: any | null, selected: any | null }>({ hovered: null, selected: null });
+  const activePixelsRef = useRef<{ hovered: any | null, selected: any | null, multiSelected: any[] }>({ hovered: null, selected: null, multiSelected: [] });
+  const timeOfDayRef = useRef(timeOfDay);
+  const selectedPixelsRef = useRef(selectedPixels);
+  const pixelInspectorDataRef = useRef(pixelInspectorData);
+  
   useEffect(() => {
     selectedPixelRef.current = selectedPixel;
   }, [selectedPixel]);
+  useEffect(() => {
+    timeOfDayRef.current = timeOfDay;
+  }, [timeOfDay]);
+  useEffect(() => {
+    selectedPixelsRef.current = selectedPixels;
+  }, [selectedPixels]);
+  useEffect(() => {
+    pixelInspectorDataRef.current = pixelInspectorData;
+  }, [pixelInspectorData]);
 
   // 1. Initialize Map
   useEffect(() => {
@@ -62,7 +81,8 @@ export default function MapView() {
       pitch: 30, // Slight 3D tilt
       bearing: 0,
       attributionControl: true,
-      antialias: true, 
+      antialias: true,
+      boxZoom: false, // Mapbox's default boxZoom swallows Shift+mousedowns. Disable it so we can capture Shift+clicks!
     });
 
     const map = mapRef.current;
@@ -391,7 +411,7 @@ export default function MapView() {
           map.setLayoutProperty("active-pixels-extrusion", "visibility", "none");
         }
       }
-      activePixelsRef.current = { hovered: null, selected: null };
+      activePixelsRef.current = { hovered: null, selected: null, multiSelected: [] };
       
       const activeSrc = map.getSource("active-pixels") as mapboxgl.GeoJSONSource;
       if (activeSrc) activeSrc.setData({ type: "FeatureCollection", features: [] });
@@ -433,6 +453,7 @@ export default function MapView() {
             "case",
              // completely hide selected/hovered so the 3D block underneath takes over visual space
             ["boolean", ["feature-state", "selected"], false], 0.0,
+            ["boolean", ["feature-state", "multiSelected"], false], 0.0,
             ["boolean", ["feature-state", "hover"], false], 0.0,
             0.30  // Default opacity shows underlying map nicely
           ]
@@ -448,26 +469,38 @@ export default function MapView() {
         
         map.addLayer({
           id: "active-pixels-extrusion",
-          type: "fill-extrusion",
+          type: "fill-extrusion", // 3D Column
           source: "active-pixels",
           paint: {
             "fill-extrusion-color": [
-              "interpolate",
-              ["linear"],
-              ["get", "anomaly"],
-              -4, "#1E90FF",
-              -2, "#87CEEB",
-              -0.5, "#E0F7FA",
-              0, "#F5F5F5",
-              0.5, "#FFF9C4",
-              2, "#FFA500",
-              4, "#FF4500"
+              "case", // if condition
+              // The pixel is both selected and multiselcted, adding a dark cyan color
+              ["all", ["boolean", ["get", "isSelected"], false], ["boolean", ["get", "isMultiSelected"], false]],
+              "#00838F", // Darker Cyan for the active primary pixel
+              ["boolean", ["get", "isMultiSelected"], false],
+              "#00BCD4", // Cyan block for multi-select
+              [
+                "interpolate",
+                ["linear"],
+                ["get", "anomaly"],
+                -4, "#1E90FF",
+                -2, "#87CEEB",
+                -0.5, "#E0F7FA",
+                0, "#F5F5F5",
+                0.5, "#FFF9C4",
+                2, "#FFA500",
+                4, "#FF4500"
+              ]
             ],
             "fill-extrusion-opacity": 0.70, // Solid opaque column!
             "fill-extrusion-height": [
               "case",
+              ["all", ["boolean", ["get", "isSelected"], false], ["boolean", ["get", "isMultiSelected"], false]],
+              32,  // Primary multi-selected height (slightly taller)
               ["boolean", ["get", "isSelected"], false],
               50,  // Selected pop logic
+              ["boolean", ["get", "isMultiSelected"], false],
+              30,  // Multi-selected height
               10   // Hover pop logic
             ],
             "fill-extrusion-base": 0
@@ -480,10 +513,23 @@ export default function MapView() {
         type: "line",
         source: "pixel-grid",
         paint: {
-          "line-color": "rgba(255, 255, 255, 0.15)",
-          "line-width": 1
+          "line-color": [
+            "case",
+            ["all", ["boolean", ["feature-state", "selected"], false], ["boolean", ["feature-state", "multiSelected"], false]],
+            "#00838F", // Darker border for primary
+            ["boolean", ["feature-state", "multiSelected"], false],
+            "#00BCD4", // Cyan border for multi-select
+            "rgba(255, 255, 255, 0.15)"
+          ],
+          "line-width": [
+            "case",
+            ["boolean", ["feature-state", "multiSelected"], false],
+            2,
+            1
+          ]
         }
       }, "communities-outline"); // Before community outlines
+
 
       // Hover event logic for pixels
       let hoveredPixelId: number | string | null = null;
@@ -491,13 +537,33 @@ export default function MapView() {
       const updateActive3DPixels = () => {
         const source = map.getSource("active-pixels") as mapboxgl.GeoJSONSource;
         if (!source) return;
-        const feats = [];
+        const feats = []; // Empty array to store features to draw as 3D columns (hover, select, multi)
+        const hasMulti = selectedPixelsRef.current.length > 0;
+        
+        // If hovered pixel is not the same as the selected pixel, add it to the feats array
         if (activePixelsRef.current.hovered && activePixelsRef.current.hovered.id !== activePixelsRef.current.selected?.id) {
           feats.push({ ...activePixelsRef.current.hovered, properties: { ...activePixelsRef.current.hovered.properties, isSelected: false } });
         }
+        // Primary selected pixel
         if (activePixelsRef.current.selected) {
-          feats.push({ ...activePixelsRef.current.selected, properties: { ...activePixelsRef.current.selected.properties, isSelected: true } });
+          feats.push({ 
+            ...activePixelsRef.current.selected, 
+            properties: { 
+              ...activePixelsRef.current.selected.properties, 
+              isSelected: true, // we keep this TRUE so the layer logic knows it's the primary pixel
+              isMultiSelected: hasMulti 
+            } 
+          });
         }
+        // Goes through each multiselected pixel
+        activePixelsRef.current.multiSelected.forEach(f => {
+          // If seelcted pixel is there in multiselect dont do anything as we already have it
+          if (activePixelsRef.current.selected && f.id === activePixelsRef.current.selected.id) return;
+          // If the hover pixel, dont add it to the feats array as we already added it before
+          if (activePixelsRef.current.hovered && f.id === activePixelsRef.current.hovered.id) return;
+          // Add normal multi-selected pixels
+          feats.push({ ...f, properties: { ...f.properties, isMultiSelected: true } });
+        });
         source.setData({ type: "FeatureCollection", features: feats as any });
       };
 
@@ -543,40 +609,111 @@ export default function MapView() {
         
         if (e.features && e.features.length > 0) {
           const feature = e.features[0];
+          const pixelId = feature.id!;
           
-          // Clear previous selection visually
-          if (clickedPixelId !== null) {
+          if (e.originalEvent.shiftKey) {
+            // Prevents the default behaviour of rectangle tool box
+            e.originalEvent.preventDefault();
+            
+            // Check if already exactly present in selected pixels or not by ID - If yes then remove it
+            // Shift click again deselects a pixel
+            if (selectedPixelsRef.current.some(p => p.id === pixelId)) {
+               removeSelectedPixel(pixelId);
+               return; 
+            }
+            
+            // Auto-add the initially selected pixel to `selectedPixels` at first using clickedPixelID which only changes on normal clicks and not shift clicks
+            if (selectedPixelsRef.current.length === 0 && clickedPixelId !== null && clickedPixelId !== pixelId && pixelInspectorDataRef.current) {
+                if (selectedPixelRef.current) {
+                  addSelectedPixel({
+                      id: clickedPixelId,
+                      lat: selectedPixelRef.current.lat,
+                      lng: selectedPixelRef.current.lng,
+                      anomaly: selectedPixelRef.current.anomaly,
+                      features: pixelInspectorDataRef.current.features,
+                      anomalies: pixelInspectorDataRef.current.anomalies
+                  });
+                }
+            }
+
+            map.getCanvas().style.cursor = "wait";
+            
+            // fetch features to add to multi-select for the selcted pixel
+            fetch(`http://localhost:8000/api/pixel`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ lat: e.lngLat.lat, lon: e.lngLat.lng, time_of_day: timeOfDayRef.current }),
+            })
+            .then(res => res.json())
+            .then(data => {
+              addSelectedPixel({
+                id: pixelId,
+                lat: e.lngLat.lat,
+                lng: e.lngLat.lng,
+                anomaly: feature.properties!.anomaly,
+                features: data.features,
+                anomalies: data.anomalies
+              });
+
+
+              // Checks if the pixel has been added to the multiselect already visually
+              if (!activePixelsRef.current.multiSelected.find(f => f.id === pixelId)) {
+                map.setFeatureState({ source: "pixel-grid", id: pixelId }, { multiSelected: true });
+                activePixelsRef.current.multiSelected.push({
+                  type: "Feature",
+                  geometry: feature.geometry,
+                  properties: feature.properties,
+                  id: pixelId
+                });
+                updateActive3DPixels();
+              }
+              map.getCanvas().style.cursor = "crosshair";
+            })
+            .catch(err => {
+              console.error(err);
+              map.getCanvas().style.cursor = "crosshair";
+            });
+            
+          } else {
+            // Normal click
+            
+            // Clear any multi-selection we had
+            setSelectedPixels([]);
+            
+            // Clear previous selection visually
+            if (clickedPixelId !== null) {
+              map.setFeatureState(
+                { source: "pixel-grid", id: clickedPixelId },
+                { selected: false, multiSelected: false } // Force clear multiSelected too!
+              );
+            }
+
+            // Set new selection visually
+            clickedPixelId = pixelId;
             map.setFeatureState(
               { source: "pixel-grid", id: clickedPixelId },
-              { selected: false }
+              { selected: true }
             );
+
+            activePixelsRef.current.selected = {
+              type: "Feature",
+              geometry: feature.geometry,
+              properties: feature.properties,
+              id: clickedPixelId
+            } as any;
+            updateActive3DPixels();
+
+            // Fly to the pixel slightly to center it
+            map.panTo(e.lngLat, { duration: 800 });
+
+            // Dispatch to AppContext to trigger inspector
+            const anomaly = feature.properties?.anomaly;
+            setSelectedPixel({
+              lat: e.lngLat.lat,
+              lng: e.lngLat.lng,
+              anomaly: anomaly
+            });
           }
-
-          // Set new selection visually
-          clickedPixelId = feature.id!;
-          map.setFeatureState(
-            { source: "pixel-grid", id: clickedPixelId },
-            { selected: true }
-          );
-
-          activePixelsRef.current.selected = {
-            type: "Feature",
-            geometry: feature.geometry,
-            properties: feature.properties,
-            id: clickedPixelId
-          } as any;
-          updateActive3DPixels();
-
-          // Fly to the pixel slightly to center it
-          map.panTo(e.lngLat, { duration: 800 });
-
-          // Dispatch to AppContext to trigger inspector
-          const anomaly = feature.properties?.anomaly;
-          setSelectedPixel({
-            lat: e.lngLat.lat,
-            lng: e.lngLat.lng,
-            anomaly: anomaly
-          });
         }
       });
 
@@ -609,6 +746,73 @@ export default function MapView() {
       isPixelGridEnabled.current = true;
     }
   }, [pixelGridData, mapLoaded, selectedCommunity]);
+
+  // Update mapbox feature states for multi-selection
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded) return;
+
+    // No multiselected features - Switched back to normal or cleared multi
+    if (selectedPixels.length === 0) {
+      // Remove previous selected styling
+      activePixelsRef.current.multiSelected.forEach(f => {
+        map.setFeatureState({ source: "pixel-grid", id: f.id }, { multiSelected: false });
+      });
+      activePixelsRef.current.multiSelected = [];
+      // fixed bug of selected pixel still marked as multi
+      if (activePixelsRef.current.selected) {
+        map.setFeatureState({ source: "pixel-grid", id: activePixelsRef.current.selected.id }, { multiSelected: false });
+      }
+    } else { // Yes multi-selected features
+      // Filter out removes
+      // activePixelsRef - Mapbox cache used for rendering visual things
+      // Selectedpixel used as the actual app context state
+      const validIds = new Set(selectedPixels.map(p => p.id)); // set lookups are faster
+      const removed = activePixelsRef.current.multiSelected.filter(f => !validIds.has(f.id));
+      if (removed.length > 0) {
+        // Update styling for removed pixels
+        removed.forEach(f => {
+          map.setFeatureState({ source: "pixel-grid", id: f.id }, { multiSelected: false });
+        });
+        // Update cache to valid pixels alone
+        activePixelsRef.current.multiSelected = activePixelsRef.current.multiSelected.filter(f => validIds.has(f.id));
+      }
+      // // If the primary selected pixel is no longer in the selectedPixels array, remove its multiSelected styling
+      // if (activePixelsRef.current.selected && !validIds.has(activePixelsRef.current.selected.id)) {
+      //   map.setFeatureState({ source: "pixel-grid", id: activePixelsRef.current.selected.id }, { multiSelected: false });
+      // }
+    }
+
+    // Force redraw of 3D array
+    // First normal click on a pixel → goes to activePixelsRef.current.selected
+    // Every shift+click after that → goes to activePixelsRef.current.multiSelected (an array)
+    const activeSrc = map.getSource("active-pixels") as mapboxgl.GeoJSONSource;
+    if (activeSrc) {
+      const feats = [];
+      const hasMulti = selectedPixels.length > 0;
+      if (activePixelsRef.current.hovered && activePixelsRef.current.hovered.id !== activePixelsRef.current.selected?.id) {
+        feats.push({ ...activePixelsRef.current.hovered, properties: { ...activePixelsRef.current.hovered.properties, isSelected: false } });
+      }
+      if (activePixelsRef.current.selected) {
+        feats.push({ 
+          ...activePixelsRef.current.selected, 
+          properties: { 
+            ...activePixelsRef.current.selected.properties, 
+            isSelected: true, // Keep it true so we can style the primary item distinctly
+            isMultiSelected: hasMulti 
+          } 
+        });
+        // We also need to force the line border state! 
+        map.setFeatureState({ source: "pixel-grid", id: activePixelsRef.current.selected.id }, { multiSelected: hasMulti });
+      }
+      activePixelsRef.current.multiSelected.forEach(f => {
+        if (activePixelsRef.current.selected && f.id === activePixelsRef.current.selected.id) return;
+        if (activePixelsRef.current.hovered && f.id === activePixelsRef.current.hovered.id) return;
+        feats.push({ ...f, properties: { ...f.properties, isMultiSelected: true } });
+      });
+      activeSrc.setData({ type: "FeatureCollection", features: feats as any });
+    }
+  }, [selectedPixels, mapLoaded]);
 
   return (
     <>
