@@ -19,6 +19,7 @@ export interface InterventionTemplate {
   name: string;
   icon: string;
   description: string;
+  requirementDescription: string;
   canApply: (features: FeatureVector) => boolean;
   apply: (features: FeatureVector, params?: InterventionParams) => FeatureVector;
   conflictsWith: InterventionId[];
@@ -56,6 +57,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     name: "Park",
     icon: "🌳",
     description: "Convert sand into a vegetated park.",
+    requirementDescription: "Requires 100% open sand.",
     canApply: (features) => features.sand_mask_fraction === 1,
     apply: (features) => ({
       ...features,
@@ -70,6 +72,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     name: "Cool Road",
     icon: "🛣️",
     description: "Apply reflective coating to roads.",
+    requirementDescription: "Requires existing roads.",
     canApply: (features) => features.road_density_mean > 0,
     apply: (features) => ({
       ...features,
@@ -86,6 +89,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     name: "Cool Roof",
     icon: "🏢",
     description: "Apply reflective coating to building roofs.",
+    requirementDescription: "Requires existing buildings.",
     canApply: (features) => features.building_density_mean > 0,
     apply: (features) => ({
       ...features,
@@ -102,6 +106,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     name: "Green Roof",
     icon: "🌿",
     description: "Install extensive green roofs on buildings.",
+    requirementDescription: "Requires existing buildings.",
     canApply: (features) => features.building_density_mean > 0,
     apply: (features) => ({
       ...features,
@@ -123,6 +128,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     name: "Water Feature",
     icon: "💧",
     description: "Convert sand to a large water body.",
+    requirementDescription: "Requires 100% open sand.",
     canApply: (features) => features.sand_mask_fraction === 1,
     apply: (features) => ({
       ...features,
@@ -138,6 +144,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     name: "Construct Building",
     icon: "🏗️",
     description: "Construct a new dense urban block.",
+    requirementDescription: "Requires 100% open sand.",
     canApply: (features) => features.sand_mask_fraction === 1,
     apply: (features, params) => {
       const density = params?.buildingDensity ?? 0.5;

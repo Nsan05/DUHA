@@ -301,14 +301,18 @@ export default function InterventionPanel() {
                 const isConflict = conflicts.length > 0;
                 
                 let disableReason = "";
-                if (!canApply) disableReason = "Current selection contains pixels incompatible with this intervention.";
+                if (!canApply) disableReason = `Incompatible footprint: ${template.requirementDescription}`;
                 if (isConflict) disableReason = `Conflicts with: ${conflicts.join(", ")}`;
 
                 const numActive = activeIds.length;
                 const isConstructActive = template.id === "construct_building" && !isActive && !isConflict && canApply;
 
                 return (
-                  <div key={template.id} className={`${styles.card} ${isActive ? styles.active : ''} ${(!canApply || isConflict) && !isActive ? styles.disabled : ''}`} title={disableReason}>
+                  <div 
+                    key={template.id} 
+                    className={`${styles.card} ${isActive ? styles.active : ''} ${(!canApply || isConflict) && !isActive ? styles.disabled : ''}`} 
+                    data-disabled-reason={disableReason || undefined}
+                  >
                     <div className={styles.cardHeader}>
                       <span className={styles.cardTitle}>{template.icon} {template.name}</span>
                       {isActive && <span style={{color: '#4CAF50', fontSize: '14px'}}>✓</span>}
@@ -329,7 +333,7 @@ export default function InterventionPanel() {
                     )}
 
                     {!isActive ? (
-                      <button className={styles.applyButton} onClick={() => handleApply(template.id, template.id === "construct_building" ? buildingSliders : undefined)} disabled={predicting}>
+                      <button className={styles.applyButton} onClick={() => handleApply(template.id, template.id === "construct_building" ? buildingSliders : undefined)} disabled={predicting || (!canApply || isConflict)}>
                         Apply
                       </button>
                     ) : (
