@@ -21,14 +21,18 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
  * Generates smart suggestions by simulating each applicable intervention.
  */
 export async function suggestInterventions(
-  originalFeatures: FeatureVector,
+  originalFeaturesBatch: FeatureVector[],
   currentAnomalies: { morning: number; afternoon: number; night: number },
   timeOfDay: "morning" | "afternoon" | "night",
   activeInterventions: InterventionId[]
 ): Promise<Suggestion[]> {
   // 1. Find all candidate templates that can be applied and don't conflict
+  // We check canApply against ALL pixels to ensure the intervention is valid for the entire selected region
   const candidates = INTERVENTION_TEMPLATES.filter((template) => {
-    if (!template.canApply(originalFeatures)) return false;
+    // If any single pixel in the selection doesn't support this intervention, discard the template
+    const isValidForAll = originalFeaturesBatch.every(pixelFeatures => template.canApply(pixelFeatures));
+    if (!isValidForAll) return false;
+    
     if (activeInterventions.includes(template.id)) return false; // Don't suggest if already active
     if (getConflicts(activeInterventions, template.id).length > 0) return false;
     return true;
@@ -36,25 +40,25 @@ export async function suggestInterventions(
 
   if (candidates.length === 0) return [];
 
-  // 2. Simulate each candidate via the backend API
+  // 2. Simulate each candidate via the backend batch API
   const simulationPromises = candidates.map(async (template) => {
     // Determine default params if needed (e.g., Construct Building)
     let params: InterventionParams | undefined;
-    // The deafult ones are passed fust o see the intervntion suggestions
+    // The deafult ones are passed first to see the intervntion suggestions
     if (template.id === "construct_building") {
       params = { buildingDensity: 0.5, height: 10 };
     }
 
-    // Dry-run the intervention to get the modified feature vector
-    const modifiedFeatures = template.apply(originalFeatures, params);
+    // Dry-run the intervention to get the modified feature vectors
+    const modifiedFeaturesBatch = originalFeaturesBatch.map(f => template.apply(f, params));
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/predict`, {
+      const response = await fetch(`${API_BASE_URL}/api/predict-batch`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ features: modifiedFeatures }),
+        body: JSON.stringify({ pixels: modifiedFeaturesBatch }),
       });
 
       if (!response.ok) {
