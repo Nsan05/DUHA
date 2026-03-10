@@ -248,6 +248,10 @@ async def predict_batch(req: PredictionBatchRequest):
     # If no pixels, return 
     if not req.pixels:
         raise HTTPException(status_code=400, detail="Empty pixels array")
+    
+    # If no time of day, return
+    if not req.time_of_day:
+        raise HTTPException(status_code=400, detail="Empty time of day")
         
     predictions_sum = {"morning": 0.0, "afternoon": 0.0, "night": 0.0}
     valid_counts = {"morning": 0, "afternoon": 0, "night": 0}
