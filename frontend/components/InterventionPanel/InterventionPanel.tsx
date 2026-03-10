@@ -97,7 +97,7 @@ export default function InterventionPanel() {
       // pick the intervention template to apply based on the active interventions list item 
       const t = INTERVENTION_TEMPLATES.find(x => x.id === active.templateId);
       if (t) {
-         batchCurrentV = batchCurrentV.map(v => t.apply(v, active.params));
+         batchCurrentV = batchCurrentV.map(v => t.canApply(v) ? t.apply(v, active.params) : v);
       }
     }
 
@@ -300,8 +300,8 @@ export default function InterventionPanel() {
               {INTERVENTION_TEMPLATES.map(template => {
                 const isActive = activeIds.includes(template.id);
                 
-                // For the UI grid buttons, we ensure the template is valid for EVERY pixel in the selection array
-                const canApply = selectedPixels.every(p => template.canApply(p.features));
+                // For the UI grid buttons, we ensure the template is valid for AT LEAST ONE pixel in the selection array
+                const canApply = selectedPixels.some(p => template.canApply(p.features));
                 const conflicts = getConflicts(activeIds, template.id);
                 const isConflict = conflicts.length > 0;
                 

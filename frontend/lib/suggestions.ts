@@ -29,9 +29,9 @@ export async function suggestInterventions(
   // 1. Find all candidate templates that can be applied and don't conflict
   // We check canApply against ALL pixels to ensure the intervention is valid for the entire selected region
   const candidates = INTERVENTION_TEMPLATES.filter((template) => {
-    // If any single pixel in the selection doesn't support this intervention, discard the template
-    const isValidForAll = originalFeaturesBatch.every(pixelFeatures => template.canApply(pixelFeatures));
-    if (!isValidForAll) return false;
+    // If NO pixels in the selection support this intervention, discard the template
+    const isValidForSome = originalFeaturesBatch.some(pixelFeatures => template.canApply(pixelFeatures));
+    if (!isValidForSome) return false;
     
     if (activeInterventions.includes(template.id)) return false; // Don't suggest if already active
     if (getConflicts(activeInterventions, template.id).length > 0) return false;
@@ -49,8 +49,8 @@ export async function suggestInterventions(
       params = { buildingDensity: 0.5, height: 10 };
     }
 
-    // Dry-run the intervention to get the modified feature vectors
-    const modifiedFeaturesBatch = originalFeaturesBatch.map(f => template.apply(f, params));
+    // Dry-run the intervention (only applying to pixels that actually satisfy it, mirroring UI behavior)
+    const modifiedFeaturesBatch = originalFeaturesBatch.map(f => template.canApply(f) ? template.apply(f, params) : f);
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/predict-batch`, {

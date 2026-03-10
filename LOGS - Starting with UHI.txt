@@ -643,4 +643,7 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 - Improved toggle UI.
 - Light mode intervention panel view fixed
 - Fixed the bug oftervention panel not opening up due to anchor not being set with clickedPixelID.
+- Found issue persisting on loading another community and fixed it by setting anchor to null.
+- Fixed a UI bug that prevented interventions from being clickable.
+- Fixed similar bug with suggestions as well.
 - 
