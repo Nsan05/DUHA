@@ -287,6 +287,11 @@ export default function InterventionPanel() {
               <span className={styles.compLabel}><div className={styles.compDot} style={{ background: '#4CAF50' }}/> Veg</span>
             </div>
             <div className={styles.chipRow}>
+              <div className={styles.chip}>Sand: {activeFeaturesVector.sand_mask_fraction.toFixed(2)}</div>
+              <div className={styles.chip}>Water: {activeFeaturesVector.water_mask_full_fraction.toFixed(2)}</div>
+              <div className={styles.chip}>Bldg: {activeFeaturesVector.building_density_mean.toFixed(2)}</div>
+              <div className={styles.chip}>Road: {activeFeaturesVector.road_density_mean.toFixed(2)}</div>
+              <div className={styles.chip}>Veg: {activeFeaturesVector.ndvi_mean.toFixed(2)}</div>
               <div className={styles.chip}>Albedo: {activeFeaturesVector.albedo_mean.toFixed(2)}</div>
               <div className={styles.chip}>Height: {Math.round(activeFeaturesVector.height_mean)}m</div>
               <div className={styles.chip}>Dist2Coast: {Math.round(activeFeaturesVector.dist_to_coast_m)}m</div>
@@ -379,7 +384,7 @@ export default function InterventionPanel() {
                     </span>
                   </div>
                   <div className={`${styles.deltaBadge} ${delta < 0 ? styles.cooling : styles.warming} ${isCurrentTime ? styles.activeBadge : ''}`}>
-                    {delta > 0 ? '🔺' : '💧'} {formatDelta(delta)}
+                    {delta > 0 ? '🔺' : '❄️'} {formatDelta(delta)}
                   </div>
                 </div>
               );
