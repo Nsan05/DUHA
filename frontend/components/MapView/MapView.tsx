@@ -30,7 +30,9 @@ export default function MapView() {
     setInterventionMode,
     setActiveInterventions,
     setModifiedFeatures,
+    predictedAnomalies,
     setPredictedAnomalies,
+    perPixelAnomalies,
     selectedPixels,
     setSelectedPixels,
     addSelectedPixel,
@@ -51,6 +53,7 @@ export default function MapView() {
   const timeOfDayRef = useRef(timeOfDay);
   const selectedPixelsRef = useRef(selectedPixels);
   const pixelInspectorDataRef = useRef(pixelInspectorData);
+  const perPixelAnomaliesRef = useRef(perPixelAnomalies);
   
   useEffect(() => {
     selectedPixelRef.current = selectedPixel;
@@ -64,6 +67,10 @@ export default function MapView() {
   useEffect(() => {
     pixelInspectorDataRef.current = pixelInspectorData;
   }, [pixelInspectorData]);
+
+  useEffect(() => {
+    perPixelAnomaliesRef.current = perPixelAnomalies;
+  }, [perPixelAnomalies]);
 
   // 1. Initialize Map
   useEffect(() => {
@@ -478,11 +485,27 @@ export default function MapView() {
           paint: {
             "fill-extrusion-color": [
               "case", // if condition
+              // If we have a prediction override
+              ["has", "isPredicted"],
+              [
+                "interpolate",
+                ["linear"],
+                ["get", "anomaly"],
+                -4, "#1E90FF",
+                -2, "#87CEEB",
+                -0.5, "#E0F7FA",
+                0, "#F5F5F5",
+                0.5, "#FFF9C4",
+                2, "#FFA500",
+                4, "#FF4500"
+              ],
+              // Else, use normal selection colours
               // The pixel is both selected and multiselcted, adding a dark cyan color
               ["all", ["boolean", ["get", "isSelected"], false], ["boolean", ["get", "isMultiSelected"], false]],
               "#00838F", // Darker Cyan for the active primary pixel
               ["boolean", ["get", "isMultiSelected"], false],
               "#00BCD4", // Cyan block for multi-select
+              // Normal single hover/select default
               [
                 "interpolate",
                 ["linear"],
@@ -544,16 +567,32 @@ export default function MapView() {
         const feats = []; // Empty array to store features to draw as 3D columns (hover, select, multi)
         const hasMulti = selectedPixelsRef.current.length > 0;
         
+        // Helper to get anomaly override index by getting the index position of the pixel in the selectedPixelsRef array
+        const getAnomalyOverride = (pixelId: number | string) => {
+          // If no predictions, return undefined
+          if (!perPixelAnomaliesRef.current) return undefined;
+          // Find the index of this pixel in selectedPixelsRef to grab the corresponding prediction
+          const idx = selectedPixelsRef.current.findIndex(p => p.id === pixelId);
+          if (idx !== -1 && idx < perPixelAnomaliesRef.current.length) {
+            return perPixelAnomaliesRef.current[idx];
+          }
+          return undefined;
+        };
+
         // If hovered pixel is not the same as the selected pixel, add it to the feats array
         if (activePixelsRef.current.hovered && activePixelsRef.current.hovered.id !== activePixelsRef.current.selected?.id) {
           feats.push({ ...activePixelsRef.current.hovered, properties: { ...activePixelsRef.current.hovered.properties, isSelected: false } });
         }
         // Primary selected pixel
         if (activePixelsRef.current.selected) {
+          // Get override value of the selected pixel
+          const overrideVal = getAnomalyOverride(activePixelsRef.current.selected.id);
           feats.push({ 
             ...activePixelsRef.current.selected, 
             properties: { 
               ...activePixelsRef.current.selected.properties, 
+              // If override value exists, add it to the feats array in the anomaly property (replace the old one)
+              ...(overrideVal !== undefined ? { anomaly: overrideVal, isPredicted: true } : {}),
               isSelected: true, // we keep this TRUE so the layer logic knows it's the primary pixel
               isMultiSelected: hasMulti 
             } 
@@ -565,8 +604,18 @@ export default function MapView() {
           if (activePixelsRef.current.selected && f.id === activePixelsRef.current.selected.id) return;
           // If the hover pixel, dont add it to the feats array as we already added it before
           if (activePixelsRef.current.hovered && f.id === activePixelsRef.current.hovered.id) return;
+          
+          // get anomaly value for each of the selected pixels and override it if it exsits
+          const overrideVal = getAnomalyOverride(f.id);
           // Add normal multi-selected pixels
-          feats.push({ ...f, properties: { ...f.properties, isMultiSelected: true } });
+          feats.push({ 
+             ...f, 
+             properties: { 
+               ...f.properties, 
+               ...(overrideVal !== undefined ? { anomaly: overrideVal, isPredicted: true } : {}),
+               isMultiSelected: true 
+             } 
+          });
         });
         source.setData({ type: "FeatureCollection", features: feats as any });
       };
@@ -787,6 +836,8 @@ export default function MapView() {
   }, [pixelGridData, mapLoaded, selectedCommunity]);
 
   // Update mapbox feature states for multi-selection
+  // Upper effect: updates the map when the user interacts with pixels
+  // Lower effect: updates the map when the underlying data (like predicted anomalies or selected pixels) changes
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded) return;
@@ -829,14 +880,26 @@ export default function MapView() {
     if (activeSrc) {
       const feats = [];
       const hasMulti = selectedPixels.length > 0;
+      
+      const getAnomalyOverride = (pixelId: number | string) => {
+        if (!perPixelAnomalies) return undefined;
+        const idx = selectedPixels.findIndex(p => p.id === pixelId);
+        if (idx !== -1 && idx < perPixelAnomalies.length) {
+          return perPixelAnomalies[idx];
+        }
+        return undefined;
+      };
+
       if (activePixelsRef.current.hovered && activePixelsRef.current.hovered.id !== activePixelsRef.current.selected?.id) {
         feats.push({ ...activePixelsRef.current.hovered, properties: { ...activePixelsRef.current.hovered.properties, isSelected: false } });
       }
       if (activePixelsRef.current.selected) {
+        const overrideVal = getAnomalyOverride(activePixelsRef.current.selected.id);
         feats.push({ 
           ...activePixelsRef.current.selected, 
           properties: { 
             ...activePixelsRef.current.selected.properties, 
+            ...(overrideVal !== undefined ? { anomaly: overrideVal, isPredicted: true } : {}),
             isSelected: true, // Keep it true so we can style the primary item distinctly
             isMultiSelected: hasMulti 
           } 
@@ -847,11 +910,20 @@ export default function MapView() {
       activePixelsRef.current.multiSelected.forEach(f => {
         if (activePixelsRef.current.selected && f.id === activePixelsRef.current.selected.id) return;
         if (activePixelsRef.current.hovered && f.id === activePixelsRef.current.hovered.id) return;
-        feats.push({ ...f, properties: { ...f.properties, isMultiSelected: true } });
+        
+        const overrideVal = getAnomalyOverride(f.id);
+        feats.push({ 
+          ...f, 
+          properties: { 
+             ...f.properties, 
+             ...(overrideVal !== undefined ? { anomaly: overrideVal, isPredicted: true } : {}),
+             isMultiSelected: true 
+          } 
+        });
       });
       activeSrc.setData({ type: "FeatureCollection", features: feats as any });
     }
-  }, [selectedPixels, mapLoaded]);
+  }, [selectedPixels, perPixelAnomalies, mapLoaded]);
 
   return (
     <>
