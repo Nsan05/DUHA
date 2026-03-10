@@ -1,0 +1,93 @@
+/* ── Hint Toast ── pill-shaped hint that slides in below the TimeSelector */
+
+.toast {
+  position: fixed;
+  top: 72px; /* just below the TimeSelector pill (~56px tall + 16px gap) */
+  left: 50%;
+  transform: translateX(-50%) translateY(-12px);
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 9px 16px 9px 12px;
+  border-radius: var(--radius-full, 9999px);
+
+  background: rgba(20, 20, 40, 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255,255,255,0.04) inset;
+
+  color: var(--text-primary, #f5f5f5);
+  font-family: var(--font-family, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 400;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000;
+
+  /* Hidden state */
+  opacity: 0;
+  transition:
+    opacity 350ms var(--ease-spring, cubic-bezier(0.25, 1, 0.5, 1)),
+    transform 350ms var(--ease-spring, cubic-bezier(0.25, 1, 0.5, 1));
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+/* Shift key icon badge */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+
+.text {
+  color: var(--text-secondary, #c0c0c0);
+  font-size: 12.5px;
+}
+
+.text strong {
+  color: var(--text-primary, #f5f5f5);
+  font-weight: 600;
+}
+
+/* Small ✕ dismiss button */
+.dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 11px;
+  border-radius: 50%;
+  transition: color 150ms ease, background 150ms ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.dismiss:hover {
+  color: var(--text-primary, #f5f5f5);
+  background: rgba(255, 255, 255, 0.10);
+}

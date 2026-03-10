@@ -647,4 +647,5 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 - Fixed a UI bug that prevented interventions from being clickable.
 - Fixed similar bug with suggestions as well.
 - Identified a bug of the intervention tab staying open even when switching to a normal pixel analysis after having a intervention group of pixels open and fixed it by explicitly toggling intervention mode and setting proper values for anchor pixels.
+- Added a Hint notification to show shift + click property for intervention.
 - 
