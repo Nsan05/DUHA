@@ -28,6 +28,9 @@ export default function MapView() {
     setSelectedPixel,
     interventionMode,
     setInterventionMode,
+    setActiveInterventions,
+    setModifiedFeatures,
+    setPredictedAnomalies,
     selectedPixels,
     setSelectedPixels,
     addSelectedPixel,
@@ -712,6 +715,9 @@ export default function MapView() {
             // Clear any multi-selection we had
             setSelectedPixels([]);
             setInterventionMode(false);
+            setActiveInterventions([]);
+            setModifiedFeatures(null);
+            setPredictedAnomalies(null);
             
             // Clear previous selection visually
             if (clickedPixelId !== null) {

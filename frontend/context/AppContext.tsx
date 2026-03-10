@@ -140,7 +140,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSelectedPixels(prev => {
       // Only keeping items that do not match the id to be removed
       const next = prev.filter(p => p.id !== id);
-      if (next.length === 0) setInterventionMode(false);
+      if (next.length === 0) {
+        setInterventionMode(false);
+        setActiveInterventions([]);
+        setModifiedFeatures(null);
+        setPredictedAnomalies(null);
+      }
       return next;
     });
   };
