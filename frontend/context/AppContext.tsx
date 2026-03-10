@@ -83,6 +83,9 @@ interface AppContextState {
   predictedAnomalies: { morning: number; afternoon: number; night: number } | null;
   setPredictedAnomalies: (a: { morning: number; afternoon: number; night: number } | null) => void;
 
+  perPixelAnomalies: number[] | null;
+  setPerPixelAnomalies: (arr: number[] | null) => void;
+
   activeInterventions: Array<{ templateId: InterventionId; params?: InterventionParams }>;
   setActiveInterventions: (i: Array<{ templateId: InterventionId; params?: InterventionParams }>) => void;
 
@@ -123,29 +126,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedPixels, setSelectedPixels] = useState<Array<{ id: string | number; lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }>>([]);
   const [modifiedFeatures, setModifiedFeatures] = useState<FeatureVector | null>(null);
   const [predictedAnomalies, setPredictedAnomalies] = useState<{ morning: number; afternoon: number; night: number } | null>(null);
+  const [perPixelAnomalies, setPerPixelAnomalies] = useState<number[] | null>(null);
   const [activeInterventions, setActiveInterventions] = useState<Array<{ templateId: InterventionId; params?: InterventionParams }>>([]);
   const [expertMode, setExpertMode] = useState<boolean>(false);
 
   const addSelectedPixel = (pixel: { id: string | number; lat: number; lng: number; anomaly: number; features: FeatureVector; anomalies: { morning: number; afternoon: number; night: number } }) => {
-    // prev selected pixels
     setSelectedPixels(prev => {
-      // Check if already exactly present in selected pixels or not by ID
       if (prev.some(p => p.id === pixel.id)) return prev;
       return [...prev, pixel];
     });
     setInterventionMode(true);
+    
+    // Any change in selection invalidates current predictions
+    setActiveInterventions([]);
+    setModifiedFeatures(null);
+    setPredictedAnomalies(null);
+    setPerPixelAnomalies(null);
   };
 
   const removeSelectedPixel = (id: string | number) => {
     setSelectedPixels(prev => {
-      // Only keeping items that do not match the id to be removed
       const next = prev.filter(p => p.id !== id);
       if (next.length === 0) {
         setInterventionMode(false);
-        setActiveInterventions([]);
-        setModifiedFeatures(null);
-        setPredictedAnomalies(null);
       }
+      
+      // Any change in selection invalidates current predictions
+      setActiveInterventions([]);
+      setModifiedFeatures(null);
+      setPredictedAnomalies(null);
+      setPerPixelAnomalies(null);
+      
       return next;
     });
   };
@@ -360,6 +371,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addSelectedPixel, removeSelectedPixel,
     modifiedFeatures, setModifiedFeatures,
     predictedAnomalies, setPredictedAnomalies,
+    perPixelAnomalies, setPerPixelAnomalies,
     activeInterventions, setActiveInterventions,
     expertMode, setExpertMode
   };
