@@ -137,6 +137,7 @@ class PredictionRequest(BaseModel):
 
 class PredictionBatchRequest(BaseModel):
     pixels: List[Dict[str, float]]
+    time_of_day: str = "afternoon"
 
 # --- UTILS ---
 def sample_rasters(lon: float, lat: float) -> tuple[Dict[str, float], Dict[str, float]]:
@@ -243,7 +244,7 @@ async def predict_anomaly(req: PredictionRequest):
 
 @app.post("/api/predict-batch")
 async def predict_batch(req: PredictionBatchRequest):
-    """Runs a batch of feature override vectors through all 3 ML models and returns average new anomalies."""
+    """Runs a batch of feature override vectors through all 3 ML models and returns average new anomalies + per-pixel predictions for the active time."""
     # If no pixels, return 
     if not req.pixels:
         raise HTTPException(status_code=400, detail="Empty pixels array")
@@ -258,6 +259,9 @@ async def predict_batch(req: PredictionBatchRequest):
             ordered_rows.append([feature_dict[f] for f in FEATURE_ORDER]) # Added the values of each each of each pixel into one row
         except KeyError as e:
             raise HTTPException(status_code=400, detail=f"Missing feature in request: {e}")
+    
+    # Per-pixel predictions for the currently active time of day (for live map recoloring)
+    per_pixel_predictions: List[float] = []
             
     # contains the average predictions for all the times of day
     avg_predictions = {}
@@ -274,6 +278,10 @@ async def predict_batch(req: PredictionBatchRequest):
             # get sum of predictions and total num
             predictions_sum[time_of_day] = float(np.sum(vals))
             valid_counts[time_of_day] = len(vals)
+            
+            # Store per-pixel results for the active time slot
+            if time_of_day == req.time_of_day:
+                per_pixel_predictions = [float(v) for v in vals]
         except Exception as e:
             print(f"Batch prediction failed for {time_of_day}: {e}")
             
@@ -283,7 +291,10 @@ async def predict_batch(req: PredictionBatchRequest):
         else:
             avg_predictions[tod] = None
             
-    return {"predicted_anomalies": avg_predictions}
+    return {
+        "predicted_anomalies": avg_predictions,
+        "per_pixel": per_pixel_predictions
+    }
 
 @app.post("/api/shap")
 async def get_shap_explanation(req: CoordinateRequest):
