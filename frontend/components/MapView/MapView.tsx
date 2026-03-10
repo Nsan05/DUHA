@@ -607,6 +607,12 @@ export default function MapView() {
         // PREVENT the event from bubbling down to the community polygon click handler
         e.originalEvent.stopPropagation();
         
+        // If the global state considers no pixel as active (e.g., navigated back to Community View), 
+        // silently flush the stale active pixel ID from the map event closure state.
+        if (selectedPixelRef.current === null) {
+          clickedPixelId = null;
+        }
+
         if (e.features && e.features.length > 0) {
           const feature = e.features[0];
           const pixelId = feature.id!;
