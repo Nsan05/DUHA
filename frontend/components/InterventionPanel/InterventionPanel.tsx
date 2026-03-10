@@ -24,6 +24,7 @@ export default function InterventionPanel() {
     setModifiedFeatures,
     predictedAnomalies,
     setPredictedAnomalies,
+    setPerPixelAnomalies,
     expertMode,
     setExpertMode,
     timeOfDay,
@@ -130,11 +131,12 @@ export default function InterventionPanel() {
       const res = await fetch(`${API_BASE_URL}/api/predict-batch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pixels: batchCurrentV })
+        body: JSON.stringify({ pixels: batchCurrentV, time_of_day: timeOfDay })
       });
       if (res.ok) {
         const data = await res.json();
         setPredictedAnomalies(data.predicted_anomalies);
+        setPerPixelAnomalies(data.per_pixel);
         setActiveInterventions(newActiveList);
       } else {
         alert("Prediction failed.");
@@ -160,6 +162,7 @@ export default function InterventionPanel() {
       setActiveInterventions([]);
       setModifiedFeatures(null);
       setPredictedAnomalies(null);
+      setPerPixelAnomalies(null);
     } else {
       recalculateAndPredict(newList);
     }
@@ -200,11 +203,12 @@ export default function InterventionPanel() {
       const res = await fetch(`${API_BASE_URL}/api/predict-batch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pixels: batchExpertV })
+        body: JSON.stringify({ pixels: batchExpertV, time_of_day: timeOfDay })
       });
       if (res.ok) {
         const data = await res.json();
         setPredictedAnomalies(data.predicted_anomalies);
+        setPerPixelAnomalies(data.per_pixel);
         // Clear normal active interventions since we are manually overriding now
         setActiveInterventions([]);
       }
@@ -441,6 +445,7 @@ export default function InterventionPanel() {
                 setExpertSliders({...originalFeatures});
                 setModifiedFeatures(null);
                 setPredictedAnomalies(null);
+                setPerPixelAnomalies(null);
                 setActiveInterventions([]);
              }}>Reset</button>
              <button className={`${styles.expertBtn} ${styles.primary}`} onClick={handleExpertPredict} disabled={predicting}>

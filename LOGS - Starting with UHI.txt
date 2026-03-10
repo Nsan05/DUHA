@@ -652,4 +652,5 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 - Noticed a bug where the interventions remain applied when switching between interventions and not intervention modes.
 - Added an appropriate colour change for the selected pixels when an intervention is applied. The suggestion shown is the delta and the new anomaly colour is displayed on the map.
 - Added the predicted anomaly changes within the mapview script and the associated updates that need to be made within the map when the values change as well.
+- Added the time of day passing to the backend batch predict endpoint and also displayed the feature values in the panel as well.
 - 
