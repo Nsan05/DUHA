@@ -26,7 +26,9 @@ export default function RightSidebar() {
 
   // Auto-switch tabs based on multi-pixel selection
   useEffect(() => {
-    if (!interventionMode || (selectedPixels && selectedPixels.length <= 1)) {
+    // If we have selected pixels but the count drops back to 1 (or 0) via a normal click,
+    // or if intervention mode is fully off, force the sidebar back to the inspector tab.
+    if (!interventionMode || !selectedPixels || selectedPixels.length <= 1) {
       setActiveTab('inspector');
     } else if (selectedPixels && selectedPixels.length > 1) {
       setActiveTab('intervention');

@@ -27,6 +27,7 @@ export default function MapView() {
     selectedPixel,
     setSelectedPixel,
     interventionMode,
+    setInterventionMode,
     selectedPixels,
     setSelectedPixels,
     addSelectedPixel,
@@ -710,6 +711,7 @@ export default function MapView() {
             
             // Clear any multi-selection we had
             setSelectedPixels([]);
+            setInterventionMode(false);
             
             // Clear previous selection visually
             if (clickedPixelId !== null) {
