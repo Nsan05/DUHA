@@ -58,7 +58,7 @@ export async function suggestInterventions(
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ pixels: modifiedFeaturesBatch }),
+        body: JSON.stringify({ pixels: modifiedFeaturesBatch, time_of_day: timeOfDay }),
       });
 
       if (!response.ok) {
