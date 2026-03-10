@@ -667,6 +667,31 @@ export default function MapView() {
                 });
                 updateActive3DPixels();
               }
+              
+              // If NO pixel was previously active, shift-clicking essentially starts the pixel mode.
+              // We must set it as the anchor selectedPixel so the the UI transitions from Community to Pixel.
+              if (selectedPixelsRef.current.length === 0 && clickedPixelId === null) {
+                // Mark pixel as new anchor
+                clickedPixelId = pixelId;
+                // Trigger the global state to switch the Right Sidebar over to the Pixel view
+                setSelectedPixel({
+                  lat: e.lngLat.lat,
+                  lng: e.lngLat.lng,
+                  anomaly: feature.properties!.anomaly
+                });
+                // Also update the view on the map with 3D structure
+                activePixelsRef.current.selected = {
+                  type: "Feature",
+                  geometry: feature.geometry,
+                  properties: feature.properties,
+                  id: clickedPixelId
+                } as any;
+                map.setFeatureState(
+                  { source: "pixel-grid", id: clickedPixelId },
+                  { selected: true }
+                );
+              }
+
               map.getCanvas().style.cursor = "crosshair";
             })
             .catch(err => {
