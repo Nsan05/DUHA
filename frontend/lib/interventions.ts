@@ -65,7 +65,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
     apply: (features) => ({
       ...features,
       sand_mask_fraction: 0,
-      ndvi_mean: 0.3965,
+      ndvi_mean: 0.3991,
       albedo_mean: 0.3222,
     }),
     conflictsWith: ["water_feature", "construct_building"],
@@ -88,7 +88,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
       ),
     }),
     conflictsWith: [],
-    defaultCostPerSqM: 50, // AED
+    defaultCostPerSqM: 70, // AED
   },
   {
     id: "cool_roof",
@@ -107,7 +107,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
       ),
     }),
     conflictsWith: ["green_roof"],
-    defaultCostPerSqM: 40, // AED
+    defaultCostPerSqM: 3, // AED
   },
   {
     id: "green_roof",
@@ -177,7 +177,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
       };
     },
     conflictsWith: ["park", "water_feature"],
-    defaultCostPerSqM: 4000, // AED
+    defaultCostPerSqM: 5000, // AED
   },
 ];
 
