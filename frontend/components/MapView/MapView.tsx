@@ -143,6 +143,23 @@ export default function MapView() {
     }
   }, [timeOfDay, mapLoaded]);
 
+  // Clear active pixels overlay and states when selected community changes
+  useEffect(() => {
+    activePixelsRef.current = { hovered: null, selected: null, multiSelected: [] };
+    if (mapLoaded && mapRef.current) {
+      const activeSrc = mapRef.current.getSource("active-pixels") as mapboxgl.GeoJSONSource;
+      if (activeSrc) {
+        activeSrc.setData({ type: "FeatureCollection", features: [] });
+      }
+      
+      // CRITICAL: Mapbox remembers feature-state by ID even if the source data is swapped or hidden.
+      // We must explicitly wipe all feature states (hover, selected, multiSelected) from the pixel grid. - clearing memory so that the grid is not loaded in from cache
+      if (mapRef.current.getSource("pixel-grid")) {
+        mapRef.current.removeFeatureState({ source: "pixel-grid" });
+      }
+    }
+  }, [selectedCommunity, mapLoaded]);
+
   // 3. Render Community Polygons and Handle Interactions
   useEffect(() => {
     const map = mapRef.current;
