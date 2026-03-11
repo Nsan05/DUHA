@@ -12,6 +12,7 @@ import {
 } from "../../lib/interventions";
 import { suggestInterventions, Suggestion } from "../../lib/suggestions";
 import BudgetEstimator from "../BudgetEstimator/BudgetEstimator";
+import ReportGenerator from "../ReportGenerator/ReportGenerator";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -400,6 +401,9 @@ export default function InterventionPanel() {
 
       {/* Budget Estimator */}
       <BudgetEstimator />
+
+      {/* Report Generator */}
+      <ReportGenerator />
 
       {/* Expert Mode */}
       <div className={styles.expertToggle}>

@@ -669,4 +669,5 @@ F12 — Expert Mode
 - Green Roofs: https://www.homeland.ae/blogs/cost-of-landscaping-in-dubai-factors-budgeting-more
 - Water feature and building added suitable value.
 - Identified a logic error where cost is being applied to the enitre pixel area for cool roofs and cool roads even if the roads only compirses of a bit of the pixel area. - Added a fix to consider only fraction of the area if it is one of the above features and added area affected to the returned output.
+- Added a report generator component that generates reports contiaing key information to be quickly exported and shared across teams by planners.
 - 
