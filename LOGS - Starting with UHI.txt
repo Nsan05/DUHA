@@ -653,4 +653,19 @@ https://link.springer.com/article/10.1007/s12273-022-0940-x
 - Added an appropriate colour change for the selected pixels when an intervention is applied. The suggestion shown is the delta and the new anomaly colour is displayed on the map.
 - Added the predicted anomaly changes within the mapview script and the associated updates that need to be made within the map when the values change as well.
 - Added the time of day passing to the backend batch predict endpoint and also displayed the feature values in the panel as well.
-- 
+- Finished Phase 4 with the following features implemented:
+F11 — Smart Suggestions
+F9 — Intervention Templates
+F10 — Constraint Engine: Animated stacked bar showing current pixel composition. 
+F12 — Expert Mode
+
+----
+11/03/2026:
+- Added a BudgetEstimator component to calculate the total cost that would be spent on the intervention project making it a full end to end tool.
+- Researched the costs for interventions to set default prices (which can be changed if needed).
+- Parks (AED 200 Est.): https://estimatorflorida.com/recreational-park-facility-construction-costs/
+- Cool Roadsv (AED 70): https://static1.squarespace.com/static/5b104d0b365f02ddb7b29576/t/61bb7657724c224b8cd36323/1639675479988/Caroline+Zepecki-+Market+Analysis+of+Reflective+Pavements+and+Potential+for+City-wide+Applications.pdf
+- Cool Roofs (AED 3 Est.): https://www.desertcart.ae/products/168838925-luminx-solar-reflective-roof-coating-summer-cool-roof-heat-resistance
+- Green Roofs: https://www.homeland.ae/blogs/cost-of-landscaping-in-dubai-factors-budgeting-more
+- Water feature and building added suitable value.
+-  

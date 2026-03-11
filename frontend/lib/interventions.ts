@@ -24,6 +24,7 @@ export interface InterventionTemplate {
   canApply: (features: FeatureVector) => boolean;
   apply: (features: FeatureVector, params?: InterventionParams) => FeatureVector;
   conflictsWith: InterventionId[];
+  defaultCostPerSqM: number;
 }
 
 export const FEATURE_KEYS = [
@@ -68,6 +69,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
       albedo_mean: 0.3222,
     }),
     conflictsWith: ["water_feature", "construct_building"],
+    defaultCostPerSqM: 200, // AED
   },
   {
     id: "cool_road",
@@ -86,6 +88,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
       ),
     }),
     conflictsWith: [],
+    defaultCostPerSqM: 50, // AED
   },
   {
     id: "cool_roof",
@@ -104,6 +107,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
       ),
     }),
     conflictsWith: ["green_roof"],
+    defaultCostPerSqM: 40, // AED
   },
   {
     id: "green_roof",
@@ -127,6 +131,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
       ),
     }),
     conflictsWith: ["cool_roof"],
+    defaultCostPerSqM: 300, // AED
   },
   {
     id: "water_feature",
@@ -144,6 +149,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
       albedo_mean: 0.142,
     }),
     conflictsWith: ["park", "construct_building"],
+    defaultCostPerSqM: 1500, // AED
   },
   {
     id: "construct_building",
@@ -171,6 +177,7 @@ export const INTERVENTION_TEMPLATES: InterventionTemplate[] = [
       };
     },
     conflictsWith: ["park", "water_feature"],
+    defaultCostPerSqM: 4000, // AED
   },
 ];
 
