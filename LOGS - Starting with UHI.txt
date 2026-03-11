@@ -672,4 +672,10 @@ F12 — Expert Mode
 - Added a report generator component that generates reports contiaing key information to be quickly exported and shared across teams by planners.
 - Changed the report format into a more professional structure.
 - Noticed a bug where selectedpixels are not cleared when a community changes. Added the appropriate fix. (cleared feature state so that the pixel grid is not loaded in from cache)
+- Finished Phase 5 with the follwoing features:
+F16: Budget Estimator
+F15 — Report Generator: 
+
+-----
+12/03/2026:
 - 
