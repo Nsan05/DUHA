@@ -1,15 +1,15 @@
 PHASE 3B METRICS (750m scale validation)
 Test Pixels:   10,646
-Mean Bias:     -0.321 K
-MAE:           1.139 K
-RMSE:          1.439 K
-R²:            0.490
-Pearson r:     0.718 (p=0.00e+00)
+Mean Bias:     -0.322 K
+MAE:           1.138 K
+RMSE:          1.438 K
+R²:            0.491
+Pearson r:     0.719 (p=0.00e+00)
 
 
 --- Distance to Coast ---
 coast_bin     rmse      bias  count
-     <2km 1.442535  0.302877   1002
+     <2km 1.436084  0.291393   1002
     2-5km 1.326837 -0.165362   2413
    5-10km 1.529199 -0.719199   3313
   10-20km 1.422479 -0.238452   3891
@@ -18,14 +18,14 @@ coast_bin     rmse      bias  count
 
 --- Building Density ---
   density_bin     rmse      bias  count
-   Low (<10%) 1.347645 -0.110061   5141
- Med (10-30%) 1.541510 -0.645613   4734
+   Low (<10%) 1.346829 -0.110819   5141
+ Med (10-30%) 1.541010 -0.647221   4734
 High (30-60%) 1.368907  0.267734    771
 
 
 --- Sand Fraction ---
    sand_bin     rmse      bias  count
-  <10% Sand 1.343461  0.069542   1812
+  <10% Sand 1.339634  0.063192   1812
 10-50% Sand 1.515718 -0.505418   4653
 50-90% Sand 1.432201 -0.467640   2474
   >90% Sand 1.324776 -0.019388   1707

@@ -677,5 +677,13 @@ F16: Budget Estimator
 F15 — Report Generator: 
 
 -----
-12/03/2026:
+13/03/2026:
+- Added a GBA data doc to the google drive.
+- Analyzed all the evaluation scripts to identify performance and focus on which one to improve.
+- Analyzed once again the details regarding each metric so as to get more insight where to focus on.
+ 1. R^2: R² tells us what percentage of the actual temperature variance (the ups and downs across the city) our model can successfully explain using its features.
+ 2. RMSE: RMSE is the standard deviation of the prediction errors. It tells us, on average, how far off our predictions are from the true satellite temperature.
+ 3. MAE: MAE is the literal average of our errors (Different from RMSE as that penalizes outliers and large errors much more).
+ 4. Mean Bias: The direction to which the model predicts (hot/cold). 
+ 5. Pearson r: It explains when the temp actually rises, how often and how accurately does the model predict the temp goes up.
 - 
