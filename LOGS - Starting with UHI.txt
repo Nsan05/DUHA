@@ -709,4 +709,9 @@ F15 — Report Generator:
 - Slightly modified the tuning script to include both Rmse and R2 in the outputs to measure it more easily.
 - Ran the tuning script and got values of (RMSE: 2.403 and R^2: 0.532) and updated train to use those parameters if available.
 - Made a script to generate 30m std rasters for the features to aid in downscaling to build the 30m lst anomaly map.
--  
+
+-  Reran downscaling and consistency and improved the metrics slightly to (RMSE:               2.145 K and R²:                 0.520)
+
+----
+15/03/2026:
+- 

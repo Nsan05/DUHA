@@ -22,10 +22,15 @@ OUTPUT_PATH = OUTPUT_DIR / "lst_anomaly_30m.tif"
 # Feature rasters in the SAME ORDER as the training features
 FEATURE_FILES = {
     'ndvi_mean':                DATA_DIR / "ndvi_30m.tif",
+    'ndvi_std':                 DATA_DIR / "ndvi_std_30m.tif",
     'albedo_mean':              DATA_DIR / "albedo_30m.tif",
+    'albedo_std':               DATA_DIR / "albedo_std_30m.tif",
     'building_density_mean':    DATA_DIR / "building_density_30m.tif",
+    'building_density_std':     DATA_DIR / "building_density_std_30m.tif",
     'height_mean':              DATA_DIR / "height_30m.tif",
+    'height_std':               DATA_DIR / "height_std_30m.tif",
     'road_density_mean':        DATA_DIR / "road_density_30m.tif",
+    'road_density_std':         DATA_DIR / "road_density_std_30m.tif",
     'sand_mask_fraction':       DATA_DIR / "sand_mask_30m.tif",
     'water_mask_full_fraction': DATA_DIR / "water_mask_full_30m.tif",
     'dist_to_coast_m':          DATA_DIR / "dist_to_coast_30m.tif",
@@ -58,7 +63,7 @@ def main():
     logger.info(f"Grid: {height}x{width}, CRS: {ref_crs}")
     
     # 2. Load all feature rasters
-    logger.info("Loading 8 feature rasters...")
+    logger.info(f"Loading {len(FEATURE_FILES)} feature rasters...")
     feature_names = list(FEATURE_FILES.keys())
     # creating a 3D map
     feature_stack = np.zeros((len(feature_names), height, width), dtype=np.float32)
@@ -66,7 +71,7 @@ def main():
     valid_mask = np.ones((height, width), dtype=bool)
     
     for i, (name, path) in enumerate(FEATURE_FILES.items()):
-        logger.info(f"  [{i+1}/8] {name}: {path.name}")
+        logger.info(f"  [{i+1}/{len(FEATURE_FILES)}] {name}: {path.name}")
         
         with rasterio.open(path) as src:
             data = src.read(1).astype(np.float32)
@@ -75,20 +80,29 @@ def main():
             # Only NDVI/Albedo and Density/Roads define the study area boundary.
             # Height, Sand, Water, Coast use 0 as a valid value (no buildings, no sand, etc.)
             
-            if nodata == -9999.0:
-                # NDVI, Albedo: -9999 means outside study area
-                outside = (data <= -9000)
-                valid_mask &= ~outside
-                data[outside] = 0  # Replace sentinel with 0 for model input
+            if name.endswith('_std'):
+                # Std Dev rasters have NaN where the 750m window had absolutely 0 valid data
+                # (e.g., 0 buildings, 0 roads). This means 0 variation. 
+                # Do NOT erode the valid_mask. Just fill with 0.
+                if nodata is not None and np.isnan(nodata):
+                    data[np.isnan(data)] = 0.0
+                elif nodata is not None:
+                    data[data == nodata] = 0.0
+            else:
+                # Primary features: define the valid_mask geometry
+                if nodata == -9999.0:
+                    # NDVI, Albedo: -9999 means outside study area
+                    outside = (data <= -9000)
+                    valid_mask &= ~outside
+                    data[outside] = 0  # Replace sentinel with 0 for model input
+                    
+                elif nodata is not None and np.isnan(nodata):
+                    # Density, Roads: NaN means outside study area
+                    outside = np.isnan(data)
+                    valid_mask &= ~outside
+                    data[outside] = 0
                 
-            elif nodata is not None and np.isnan(nodata):
-                # Density, Roads: NaN means outside study area
-                outside = np.isnan(data)
-                valid_mask &= ~outside
-                data[outside] = 0
-            
-            # Height (nodata=0), Sand (nodata=0), Water (nodata=0), Coast (nodata=-1):
-            # 0 is a VALID value, do NOT mask these
+                # Height, Sand, Water, Coast: 0 is a VALID value, do NOT mask these
             
             feature_stack[i] = data
     
