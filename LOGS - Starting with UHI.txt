@@ -702,4 +702,7 @@ F15 — Report Generator:
  -After finetuning got the scores of (RMSE:  2.208 K, R2: 0.491) from the previous (RMSE: 2.204 K, R2: 0.493).
 - Tried switching to LightGBM to extract more performance. 
 - Improved metrics from (RMSE: 2.208 K, R²: 0.491) to (RMSE: 2.207 K, R2: 0.492).
+- Adding std deviation to the columns to capture an additional layer of information and make the model more informed which will allow us to gain more context for a 30m prediction by taking into consideration the variation of the features around that area.
+- Needs an implementation that will dynamically construct mean and std dev values in a 750m box to give context to the model when a 30m pixel is considered.
+- Added mean and std to the phase 2 training table. Added the mean and std calculation to the height as well to get added to the enriched table for phase 2.
 - 

@@ -113,17 +113,23 @@ def aggregate_pixel(viirs_x, viirs_y, raster_handles):
         
         if valid_feature_data.size == 0:
             mean_val = np.nan
+            std_val = np.nan
         else:
             mean_val = np.mean(valid_feature_data)
+            # Std Dev = "How varied / mixed is this neighborhood?"
+            # High std = skyscrapers next to empty lots (intense hotspots)
+            # Low std  = uniform suburb (predictable temperature)
+            std_val = np.std(valid_feature_data)
         
         # Determine output name - # Turn a path like "data/ndvi_30m.tif" into "ndvi"
         base_name = fname.split("/")[-1].replace("_30m.tif", "")
         
         if "mask" in fname:
-            # For masks, mean = fraction
+            # For masks, mean = fraction (std dev is not meaningful for binary masks)
             results[f"{base_name}_fraction"] = mean_val
         else:
-            # Continuous vars
+            # Continuous vars: store both mean and std
             results[f"{base_name}_mean"] = mean_val
+            results[f"{base_name}_std"] = std_val
             
     return results
