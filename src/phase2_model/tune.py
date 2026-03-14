@@ -25,10 +25,15 @@ RANDOM_STATE = 42
 
 FEATURES = [
     'ndvi_mean',
+    'ndvi_std',
     'albedo_mean',
+    'albedo_std',
     'building_density_mean',
+    'building_density_std',
     'height_mean',
+    'height_std',
     'road_density_mean',
+    'road_density_std',
     'sand_mask_fraction',
     'water_mask_full_fraction',
     'dist_to_coast_m'
@@ -94,10 +99,11 @@ def create_spatial_cv_folds(df, n_folds=10):  # Expanded from 5 to 10 folds
 def evaluate_params(df, params):
     """
     Evaluates a single hyperparameter combination using Spatial CV.
-    Returns the mean R² across folds.
+    Returns the mean R² and mean RMSE across folds.
     """
     n_folds = df['fold'].nunique()
-    scores = []
+    r2_scores = []
+    rmse_scores = []
     
     active_folds = range(n_folds) 
     
@@ -109,12 +115,10 @@ def evaluate_params(df, params):
         X_val = df.loc[val_mask, FEATURES]
         y_val = df.loc[val_mask, TARGET_ANOMALY]
         
-        # Handle "None" for max_depth if sampled value is very high (optional, or just keep int)
-        # Using the params directly as they come from the distribution sample
-        
         model = lgb.LGBMRegressor(
             random_state=RANDOM_STATE,
             n_jobs=-1,
+            verbose=-1,
             **params
         )
         model.fit(
@@ -124,11 +128,10 @@ def evaluate_params(df, params):
         )
         
         y_pred = model.predict(X_val)
-        r2 = r2_score(y_val, y_pred)
-        scores.append(r2)
+        r2_scores.append(r2_score(y_val, y_pred))
+        rmse_scores.append(np.sqrt(mean_squared_error(y_val, y_pred)))
     
-    # Gives the average score for that set of parametres
-    return np.mean(scores)
+    return np.mean(r2_scores), np.mean(rmse_scores)
 
 def sample_params(n_samples):
     """Generates n_samples parameter dictionaries from distributions."""
@@ -154,9 +157,13 @@ def run_tuning():
     sampled_combos = sample_params(n_combos)
     
     logger.info(f"Starting Robust Randomized Search with {n_combos} iterations...")
+    logger.info(f"Using {len(FEATURES)} features (including _std texture features)")
     logger.info("Parameters are sampled from continuous distributions (not a fixed grid).")
+    logger.info("Default baseline: n_estimators=500, lr=0.05 | R²≈0.54, RMSE≈2.39 K")
+    logger.info("-" * 80)
     
-    best_score = -np.inf
+    best_r2 = -np.inf
+    best_rmse = np.inf
     best_params = None
     results = []
     
@@ -164,30 +171,38 @@ def run_tuning():
     for i, params in enumerate(sampled_combos):
         
         try:
-            # for each set of parametres find the R2 score
-            score = evaluate_params(df, params)
-            results.append((score, params))
+            # for each set of parametres find the R2 and RMSE score
+            r2, rmse = evaluate_params(df, params)
+            results.append((r2, rmse, params))
             
-            if score > best_score:
-                best_score = score
+            is_new_best = r2 > best_r2
+            if is_new_best:
+                best_r2 = r2
+                best_rmse = rmse
                 best_params = params
             
-            logger.info(f"[{i+1}/{n_combos}] R²={score:.4f} | {params}")
+            marker = " ★ NEW BEST" if is_new_best else ""
+            
+            # Compact param summary: only show the key hyperparams
+            short = f"lr={params['learning_rate']:.4f} trees={params['n_estimators']} depth={params['max_depth']} leaves={params['num_leaves']}"
+            logger.info(f"[{i+1:3d}/{n_combos}] R²={r2:.4f} | RMSE={rmse:.3f} K | {short}{marker}")
         except Exception as e:
-            logger.warning(f"[{i+1}/{n_combos}] FAILED: {e}")
+            logger.warning(f"[{i+1:3d}/{n_combos}] FAILED: {e}")
     
-    # Sort results
+    # Sort by R² descending
     results.sort(key=lambda x: x[0], reverse=True)
     
-    logger.info("=" * 60)
+    logger.info("=" * 80)
     logger.info("HYPERPARAMETER TUNING COMPLETE")
-    logger.info("=" * 60)
-    logger.info(f"Best CV R²: {best_score:.4f}")
-    logger.info(f"Best Params: {best_params}")
+    logger.info("=" * 80)
+    logger.info(f"Best CV R²:   {best_r2:.4f}")
+    logger.info(f"Best CV RMSE: {best_rmse:.3f} K")
     logger.info("")
     logger.info("Top 5 Configurations:")
-    for rank, (score, params) in enumerate(results[:5], 1):
-        logger.info(f"  #{rank}: R²={score:.4f} | {params}")
+    logger.info(f"  {'Rank':<6} {'R²':<10} {'RMSE':<10} {'LR':<10} {'Trees':<8} {'Depth':<8} {'Leaves':<8}")
+    logger.info(f"  {'-'*60}")
+    for rank, (r2, rmse, params) in enumerate(results[:5], 1):
+        logger.info(f"  #{rank:<5} {r2:<10.4f} {rmse:<10.3f} {params['learning_rate']:<10.4f} {params['n_estimators']:<8} {params['max_depth']:<8} {params['num_leaves']:<8}")
     
     # Final Retrain with Best Params on Full Train Set (70%)
     logger.info("=" * 60)
