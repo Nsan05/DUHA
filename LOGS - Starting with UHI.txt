@@ -686,4 +686,18 @@ F15 — Report Generator:
  3. MAE: MAE is the literal average of our errors (Different from RMSE as that penalizes outliers and large errors much more).
  4. Mean Bias: The direction to which the model predicts (hot/cold). 
  5. Pearson r: It explains when the temp actually rises, how often and how accurately does the model predict the temp goes up.
+
+- Looked into current metrics that are there for the afternoon model to have an aim for the metrics:
+1. https://www.sciencedirect.com/science/article/pii/S2210670725007693: At 600 m, SVR (Untuned) performed best (R^2 = 0.7955)
+2. https://www.mdpi.com/2072-4292/14/13/3038: RMSE: 1.66.
+
+----
+15/03/2026;
+- Ran a hyperparamter tuning script to try and improve the metrics of the model with 10 folds and 100 param combos.
+- Eventhough 5 fold gives a higher R^2 score decided to use the 10fold paramtres since it is more representative and a more honest reflection of the model performance.
+- RMSE changed to 2.42 K from 2.40 K. - Hence tuning did not give us a better output.
+- Tried a new approach for tuning that considers both RMSE and R^2. Using a combined score. (combined_score = r2 - (rmse * 0.2) ). Multiplied rmse with 0.2 to roughly bring it to the same scale as the R^2 value.
+- Got the same result during fine tuning as just the normal one just considering R2. 
+- Noticed that metrics worsened after finetuning so scaling back to the previous default approach. 
+ -After finetuning got the scores of (RMSE:  2.208 K, R2: 0.491) from the previous (RMSE: 2.204 K, R2: 0.493).
 - 
