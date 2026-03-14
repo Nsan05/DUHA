@@ -29,10 +29,15 @@ RANDOM_STATE = 42
 
 FEATURES = [
     'ndvi_mean',
+    'ndvi_std',
     'albedo_mean',
+    'albedo_std',
     'building_density_mean',
+    'building_density_std',
     'height_mean',
+    'height_std',
     'road_density_mean',
+    'road_density_std',
     'sand_mask_fraction',
     'water_mask_full_fraction',
     'dist_to_coast_m'

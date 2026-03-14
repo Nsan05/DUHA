@@ -705,4 +705,5 @@ F15 — Report Generator:
 - Adding std deviation to the columns to capture an additional layer of information and make the model more informed which will allow us to gain more context for a 30m prediction by taking into consideration the variation of the features around that area.
 - Needs an implementation that will dynamically construct mean and std dev values in a 750m box to give context to the model when a 30m pixel is considered.
 - Added mean and std to the phase 2 training table. Added the mean and std calculation to the height as well to get added to the enriched table for phase 2.
+- Ran the train.py script with the new features and got an RMS and R^2: Test RMSE: 2.39 K and Test R²:   0.54. (Noted no improvement but will get real answer on the consistency script)
 - 
