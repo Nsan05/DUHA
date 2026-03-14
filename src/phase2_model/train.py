@@ -146,14 +146,24 @@ def train_model(train_df, test_df):
     rmse_dummy = np.sqrt(mean_squared_error(y_test, y_pred_dummy))
     logger.info(f"Baseline (Mean) RMSE: {rmse_dummy:.2f} K")
     
-    # 2. LightGBM Default Baseline
-    logger.info("Training LGBMRegressor (n_estimators=500, lr=0.05)...")
-    gb = lgb.LGBMRegressor(
-        n_estimators=500,
-        learning_rate=0.05,
-        random_state=RANDOM_STATE,
-        n_jobs=-1
-    )
+    # 2. Train LightGBM Model
+    params_path = MODELS_DIR / "best_params.joblib"
+    if params_path.exists():
+        logger.info(f"Loading tuned hyperparameters from {params_path.name}...")
+        best_params = joblib.load(params_path)
+        gb = lgb.LGBMRegressor(
+            random_state=RANDOM_STATE,
+            n_jobs=-1,
+            **best_params
+        )
+    else:
+        logger.info("Training LGBMRegressor with DEFAULT parameters...")
+        gb = lgb.LGBMRegressor(
+            n_estimators=500,
+            learning_rate=0.05,
+            random_state=RANDOM_STATE,
+            n_jobs=-1
+        )
     # For LightGBM early stopping, split 10% of train for validation internally
     from sklearn.model_selection import train_test_split
     X_tr_inner, X_val_inner, y_tr_inner, y_val_inner = train_test_split(
