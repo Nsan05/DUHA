@@ -700,4 +700,6 @@ F15 — Report Generator:
 - Got the same result during fine tuning as just the normal one just considering R2. 
 - Noticed that metrics worsened after finetuning so scaling back to the previous default approach. 
  -After finetuning got the scores of (RMSE:  2.208 K, R2: 0.491) from the previous (RMSE: 2.204 K, R2: 0.493).
+- Tried switching to LightGBM to extract more performance. 
+- Improved metrics from (RMSE: 2.208 K, R²: 0.491) to (RMSE: 2.207 K, R2: 0.492).
 - 

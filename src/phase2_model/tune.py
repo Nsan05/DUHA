@@ -5,8 +5,7 @@ import logging
 from pathlib import Path
 import joblib
 from itertools import product
-
-from sklearn.ensemble import HistGradientBoostingRegressor
+import lightgbm as lgb
 from sklearn.metrics import mean_squared_error, r2_score
 
 # Setup Logging
@@ -45,14 +44,14 @@ from scipy.stats import uniform, randint, loguniform
 # Define distributions to sample from
 PARAM_DISTRIBUTIONS = {
     'learning_rate':    loguniform(0.01, 0.3),            # Explore small & large rates efficiently - log distfavours samller values
-    'max_iter':         randint(500, 3000),               # Trees: 500 to 3000
+    'n_estimators':     randint(500, 3000),               # Trees: 500 to 3000
     'max_depth':        randint(3, 16),                   # Depth: 3 to 15 (None handling done carefully)
-    'min_samples_leaf': randint(10, 100),                 # Smoothness
-    'max_leaf_nodes':   randint(31, 255),                 # Complexity
-    'l2_regularization':uniform(0, 10),                   # Regularization: 0.0 to 10.0
-    'validation_fraction': 0.1,                           # Fixed: 10% for internal validation
-    'n_iter_no_change': 20,                               # Fixed: Patience
-    'early_stopping': True                                # Fixed: Always Use
+    'min_child_samples':randint(10, 100),                 # Smoothness
+    'num_leaves':       randint(31, 255),                 # Complexity
+    'reg_lambda':       uniform(0, 10),                   # L2 Regularization
+    'reg_alpha':        uniform(0, 10),                   # L1 Regularization
+    'subsample':        uniform(0.5, 0.5),                # Bagging fraction (0.5 to 1.0)
+    'colsample_bytree': uniform(0.5, 0.5)                 # Feature fraction (0.5 to 1.0)
 }
 
 def load_data():
@@ -113,11 +112,16 @@ def evaluate_params(df, params):
         # Handle "None" for max_depth if sampled value is very high (optional, or just keep int)
         # Using the params directly as they come from the distribution sample
         
-        model = HistGradientBoostingRegressor(
+        model = lgb.LGBMRegressor(
             random_state=RANDOM_STATE,
+            n_jobs=-1,
             **params
         )
-        model.fit(X_train, y_train)
+        model.fit(
+            X_train, y_train,
+            eval_set=[(X_val, y_val)],
+            callbacks=[lgb.early_stopping(stopping_rounds=20, verbose=False)],
+        )
         
         y_pred = model.predict(X_val)
         r2 = r2_score(y_val, y_pred)
@@ -200,11 +204,20 @@ def run_tuning():
     train_df = df[~df['is_test']]
     test_df = df[df['is_test']]
     
-    final_model = HistGradientBoostingRegressor(
+    final_model = lgb.LGBMRegressor(
         random_state=RANDOM_STATE,
+        n_jobs=-1,
         **best_params
     )
-    final_model.fit(train_df[FEATURES], train_df[TARGET_ANOMALY])
+    # Re-split 10% for final early stopping
+    from sklearn.model_selection import train_test_split
+    X_f_tr, X_f_val, y_f_tr, y_f_val = train_test_split(train_df[FEATURES], train_df[TARGET_ANOMALY], test_size=0.1, random_state=RANDOM_STATE)
+    
+    final_model.fit(
+        X_f_tr, y_f_tr,
+        eval_set=[(X_f_val, y_f_val)],
+        callbacks=[lgb.early_stopping(stopping_rounds=20, verbose=False)]
+    )
     
     y_pred = final_model.predict(test_df[FEATURES])
     rmse = np.sqrt(mean_squared_error(test_df[TARGET_ANOMALY], y_pred))

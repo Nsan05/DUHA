@@ -4,6 +4,7 @@ import numpy as np
 import rasterio
 from rasterio.transform import Affine
 import joblib
+import lightgbm as lgb
 from pathlib import Path
 import logging
 

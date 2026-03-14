@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-from sklearn.ensemble import HistGradientBoostingRegressor
+import lightgbm as lgb
 from sklearn.dummy import DummyRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 import joblib
@@ -141,15 +141,25 @@ def train_model(train_df, test_df):
     rmse_dummy = np.sqrt(mean_squared_error(y_test, y_pred_dummy))
     logger.info(f"Baseline (Mean) RMSE: {rmse_dummy:.2f} K")
     
-    # 2. HistGradientBoosting (The "XGBoost" equivalent)
-    logger.info("Training HistGradientBoostingRegressor (max_iter=500, lr=0.05)...")
-    gb = HistGradientBoostingRegressor(
-        max_iter=500,
+    # 2. LightGBM Default Baseline
+    logger.info("Training LGBMRegressor (n_estimators=500, lr=0.05)...")
+    gb = lgb.LGBMRegressor(
+        n_estimators=500,
         learning_rate=0.05,
         random_state=RANDOM_STATE,
-        early_stopping=True
+        n_jobs=-1
     )
-    gb.fit(X_train, y_train)
+    # For LightGBM early stopping, split 10% of train for validation internally
+    from sklearn.model_selection import train_test_split
+    X_tr_inner, X_val_inner, y_tr_inner, y_val_inner = train_test_split(
+        X_train, y_train, test_size=0.1, random_state=RANDOM_STATE
+    )
+    
+    gb.fit(
+        X_tr_inner, y_tr_inner,
+        eval_set=[(X_val_inner, y_val_inner)],
+        callbacks=[lgb.early_stopping(stopping_rounds=20, verbose=False)]
+    )
     
     # 3. Evaluate
     y_pred = gb.predict(X_test)
