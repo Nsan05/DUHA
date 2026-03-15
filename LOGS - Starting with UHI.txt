@@ -714,4 +714,15 @@ F15 — Report Generator:
 
 ----
 15/03/2026:
+- Got more data from 2024 to try and increase the performance of the model.
+- Tried to tune the water mask but decided against it as it was raising false positives.
+- Added data from 2024 for the afternoon model.
+- Added data from 2024 for the nighttime model as well.
+- Reevaluated the naming discrepancy for the distance_to_coast_m vs distance_to_coast_mean.
+
+- The nighttime model with normal histgradient boosting has these metrics (Test RMSE: 1.24 K, Test R²:   0.62). - NORMAL TRAINING METRICS
+- Nighttime model aggregated metrics - (RMSE: 1.438 K, R²: 0.491)
+- The landsat model with the normal HistGradientboosting has these metrics (Test RMSE: 2.83 K, Test R²:   0.91)
+
+- Finished building the table of training data for both the afternoon and night models.
 - 
