@@ -159,7 +159,7 @@ def run_tuning():
     logger.info(f"Starting Robust Randomized Search with {n_combos} iterations...")
     logger.info(f"Using {len(FEATURES)} features (including _std texture features)")
     logger.info("Parameters are sampled from continuous distributions (not a fixed grid).")
-    logger.info("Default baseline: n_estimators=500, lr=0.05 | R²≈0.54, RMSE≈2.39 K")
+    logger.info("Default baseline: n_estimators=500, lr=0.05 | R²≈0.50, RMSE≈2.24 K")
     logger.info("-" * 80)
     
     best_r2 = -np.inf
