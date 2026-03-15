@@ -725,4 +725,8 @@ F15 — Report Generator:
 - The landsat model with the normal HistGradientboosting has these metrics (Test RMSE: 2.83 K, Test R²:   0.91)
 
 - Finished building the table of training data for both the afternoon and night models.
+- Did train.py and got the metrics (R²≈0.50, RMSE≈2.24 K).
+- Ran tuning of the script to try and extract better metrics.
+- The metrics in the case of the afternoon script slightly reduced but this would be preffered because the data is modelled across two seperate years rather than just one.
+- Consistency after addign more data is given as: (RMSE:               2.245 K, R²:                 0.504)
 - 
