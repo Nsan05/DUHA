@@ -125,7 +125,7 @@ def evaluate_params(df, params):
 
 def run_tuning():
     df = load_data()
-    df = create_spatial_cv_folds(df, n_folds=5)
+    df = create_spatial_cv_folds(df, n_folds=10)
     
     n_combos = 100
     sampled_combos = sample_params(n_combos)
