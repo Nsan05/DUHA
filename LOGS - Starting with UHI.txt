@@ -761,4 +761,5 @@ The extra year you added didn't give the model new spatial information — the b
 - Colab was too restrecitve with GPU usage so decided to run it locally with 5 folds and 70 combinations with 10% sampling.
 - After tuning script, got the following metrics for landsat (RMSE: 2.71 , R2: 0.92) - with 10% subsampling
 
+- Included ndi std in eval script of landsat.
 - 

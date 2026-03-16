@@ -87,11 +87,12 @@ def create_block_split(df):
     n_test_blocks = int(len(blocks) * TEST_RATIO)
     test_blocks_df = shuffled_blocks.iloc[:n_test_blocks]
     
-    # Create Mask
-    test_blocks_set = set(zip(test_blocks_df['block_x'], test_blocks_df['block_y']))
-        
-    # Apply mask
-    df['is_test'] = df.apply(lambda row: (row['block_x'], row['block_y']) in test_blocks_set, axis=1)
+    # Create Mask array using incredibly fast vectorized merge
+    test_blocks_df = test_blocks_df.copy()
+    test_blocks_df['is_test'] = True
+    
+    df = df.merge(test_blocks_df, on=['block_x', 'block_y'], how='left')
+    df['is_test'] = df['is_test'].fillna(False)
     
     train_df = df[~df['is_test']].copy()
     test_df = df[df['is_test']].copy()

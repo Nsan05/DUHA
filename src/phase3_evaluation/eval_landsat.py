@@ -57,7 +57,7 @@ def load_data():
     # Load all 24M rows, but only required columns, explicitly typed to save memory
     df = pd.read_csv(TRAINING_CSV, 
                      usecols=['pixel_x', 'pixel_y', 'scene_id', 'landsat_lst',
-                              'building_density_mean', 'dist_to_coast_m', 'sand_mask_fraction'],
+                              'building_density_mean', 'dist_to_coast_m', 'sand_mask_fraction', 'ndvi_std'],
                      dtype={
                          'pixel_x': np.float32, 
                          'pixel_y': np.float32, 
@@ -65,7 +65,8 @@ def load_data():
                          'landsat_lst': np.float32,
                          'building_density_mean': np.float32,
                          'dist_to_coast_m': np.float32,
-                         'sand_mask_fraction': np.float32
+                         'sand_mask_fraction': np.float32,
+                         'ndvi_std': np.float32
                      })
     
     # Calculate truth anomaly
@@ -87,15 +88,17 @@ def analyze_feature_strata(df):
     df['coast_bin'] = pd.cut(df['dist_to_coast_m'], bins=[-1, 2000, 5000, 10000, 20000, 100000], labels=['<2km', '2-5km', '5-10km', '10-20km', '>20km'])
     df['density_bin'] = pd.cut(df['building_density_mean'], bins=[-0.1, 0.1, 0.3, 0.6, 1.1], labels=['Low (<10%)', 'Med (10-30%)', 'High (30-60%)', 'Very High (>60%)'])
     df['sand_bin'] = pd.cut(df['sand_mask_fraction'], bins=[-0.1, 0.1, 0.5, 0.9, 1.1], labels=['<10% Sand', '10-50% Sand', '50-90% Sand', '>90% Sand'])
+    df['ndvi_std_bin'] = pd.cut(df['ndvi_std'], bins=[-0.1, 0.01, 0.05, 0.1, 1.0], labels=['Uniform', 'Low Var.', 'Med Var.', 'High Var.'])
     
     metrics_path = OUTPUT_DIR / "landsat_30m_metrics.txt"
     with open(metrics_path, "a") as f:
         # Generate Plots
-        fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+        fig, axes = plt.subplots(1, 4, figsize=(24, 5))
         
         for i, (col, title) in enumerate([('coast_bin', 'Distance to Coast'), 
                                           ('density_bin', 'Building Density'), 
-                                          ('sand_bin', 'Sand Fraction')]):
+                                          ('sand_bin', 'Sand Fraction'),
+                                          ('ndvi_std_bin', 'NDVI Variance')]):
             
             stats = df.groupby(col, observed=True)['error'].agg(
                 rmse=lambda x: np.sqrt(np.mean(x**2)),
@@ -118,7 +121,7 @@ def analyze_feature_strata(df):
             ax2.bar(x + width/2, stats['bias'], width, label='Bias (K)', color='skyblue')
             
             ax1.set_ylabel('RMSE (K)')
-            if i == 2:
+            if i == 3:
                 ax2.set_ylabel('Mean Bias (K)')
             
             ax1.set_title(title)
