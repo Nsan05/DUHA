@@ -5,9 +5,10 @@ from pathlib import Path
 import json
 import matplotlib.pyplot as plt
 
-from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.dummy import DummyRegressor
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
+import lightgbm as lgb
 import joblib
 
 # Setup Logging
@@ -30,13 +31,18 @@ RANDOM_STATE = 42
 
 FEATURES = [
     'ndvi_mean',
+    'ndvi_std',
     'albedo_mean',
+    'albedo_std',
     'building_density_mean',
+    'building_density_std',
     'height_mean',
+    'height_std',
     'road_density_mean',
+    'road_density_std',
     'sand_mask_fraction',
     'water_mask_full_fraction',
-    'dist_to_coast_mean' 
+    'dist_to_coast_mean'
 ]
 
 TARGET_RAW = 'nighttime_lst'
@@ -152,33 +158,36 @@ def train_model(train_df, test_df):
     rmse_dummy = np.sqrt(mean_squared_error(y_test, y_pred_dummy))
     logger.info(f"Baseline (Mean) RMSE: {rmse_dummy:.2f} K")
     
-    # 2. HistGradientBoosting
-    # Use standard hyperparameters mimicking Phase 2 and Phase 3A
-    logger.info("Training HistGradientBoostingRegressor (max_iter=500, lr=0.05)...")
-    gb = HistGradientBoostingRegressor(
-        max_iter=500,
-        learning_rate=0.05,
-        random_state=RANDOM_STATE,
-        early_stopping=True
-    )
-    gb.fit(X_train, y_train)
+    # 2. Train LightGBM Model
+    params_path = MODELS_DIR / "best_params_nighttime.joblib"
+    if params_path.exists():
+        logger.info(f"Loading tuned hyperparameters from {params_path.name}...")
+        best_params = joblib.load(params_path)
+        gb = lgb.LGBMRegressor(
+            random_state=RANDOM_STATE,
+            n_jobs=-1,
+            verbose=-1,
+            **best_params
+        )
+    else:
+        logger.info("Training LGBMRegressor with DEFAULT parameters (no tuned params found)...")
+        gb = lgb.LGBMRegressor(
+            n_estimators=500,
+            learning_rate=0.05,
+            random_state=RANDOM_STATE,
+            n_jobs=-1,
+            verbose=-1
+        )
     
-    # 2.5 Plot Training Loss
-    plt.figure(figsize=(10, 6))
-    # HistGradientBoostingRegressor stores the negative of the loss in train_score_ and validation_score_
-    # We multiply by -1 to plot the actual loss which will go down over iterations.
-    plt.plot(-np.array(gb.train_score_), label='Training Loss', color='blue', linewidth=2)
-    if hasattr(gb, 'validation_score_') and len(gb.validation_score_) > 0:
-        plt.plot(-np.array(gb.validation_score_), label='Validation Loss', color='orange', linewidth=2)
-    plt.xlabel('Iteration (Number of Trees)')
-    plt.ylabel('Loss')
-    plt.title('Nighttime Model Training - Loss over Iterations')
-    plt.legend()
-    plt.grid(True)
-    loss_plot_path = OUTPUT_DIR / "nighttime_training_loss_curve.png"
-    plt.savefig(loss_plot_path)
-    logger.info(f"Training loss curve saved to {loss_plot_path}")
-    plt.close()
+    X_tr_inner, X_val_inner, y_tr_inner, y_val_inner = train_test_split(
+        X_train, y_train, test_size=0.1, random_state=RANDOM_STATE
+    )
+    
+    gb.fit(
+        X_tr_inner, y_tr_inner,
+        eval_set=[(X_val_inner, y_val_inner)],
+        callbacks=[lgb.early_stopping(stopping_rounds=20, verbose=False)]
+    )
     
     # 3. Evaluate
     y_pred = gb.predict(X_test)
@@ -195,7 +204,6 @@ def train_model(train_df, test_df):
     # Save Model
     joblib.dump(gb, MODELS_DIR / "gb_model_nighttime.joblib")
     logger.info(f"Model saved to {MODELS_DIR / 'gb_model_nighttime.joblib'}")
-    
     logger.info(f"Model used {gb.n_features_in_} features.")
     
     return gb

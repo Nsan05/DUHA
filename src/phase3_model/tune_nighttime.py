@@ -4,8 +4,9 @@ import logging
 from pathlib import Path
 import joblib
 
-from sklearn.ensemble import HistGradientBoostingRegressor
+import lightgbm as lgb
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
 from scipy.stats import uniform, randint, loguniform
 
 # Setup Logging
@@ -24,10 +25,15 @@ RANDOM_STATE = 42
 
 FEATURES = [
     'ndvi_mean',
+    'ndvi_std',
     'albedo_mean',
+    'albedo_std',
     'building_density_mean',
+    'building_density_std',
     'height_mean',
+    'height_std',
     'road_density_mean',
+    'road_density_std',
     'sand_mask_fraction',
     'water_mask_full_fraction',
     'dist_to_coast_mean'
@@ -38,14 +44,14 @@ TARGET_ANOMALY = 'lst_anomaly_nighttime'
 
 PARAM_DISTRIBUTIONS = {
     'learning_rate':    loguniform(0.01, 0.3),
-    'max_iter':         randint(300, 1500),
+    'n_estimators':     randint(500, 3000),
     'max_depth':        randint(3, 16),
-    'min_samples_leaf': randint(10, 80),
-    'max_leaf_nodes':   randint(31, 150),
-    'l2_regularization':uniform(0, 10),
-    'validation_fraction':[0.1],
-    'n_iter_no_change': [20],
-    'early_stopping':   [True]
+    'min_child_samples':randint(10, 100),
+    'num_leaves':       randint(31, 255),
+    'reg_lambda':       uniform(0, 10),
+    'reg_alpha':        uniform(0, 10),
+    'subsample':        uniform(0.5, 0.5),
+    'colsample_bytree': uniform(0.5, 0.5)
 }
 
 def load_data():
@@ -104,8 +110,12 @@ def evaluate_params(df, params):
         X_val = df.loc[val_mask, FEATURES]
         y_val = df.loc[val_mask, TARGET_ANOMALY]
         
-        model = HistGradientBoostingRegressor(random_state=RANDOM_STATE, **params)
-        model.fit(X_train, y_train)
+        model = lgb.LGBMRegressor(random_state=RANDOM_STATE, n_jobs=-1, verbose=-1, **params)
+        model.fit(
+            X_train, y_train,
+            eval_set=[(X_val, y_val)],
+            callbacks=[lgb.early_stopping(stopping_rounds=20, verbose=False)]
+        )
         
         y_pred = model.predict(X_val)
         scores_r2.append(r2_score(y_val, y_pred))
@@ -117,7 +127,7 @@ def run_tuning():
     df = load_data()
     df = create_spatial_cv_folds(df, n_folds=5)
     
-    n_combos = 50
+    n_combos = 100
     sampled_combos = sample_params(n_combos)
     
     logger.info(f"Starting Randomized Search with {n_combos} iterations...")
@@ -144,7 +154,8 @@ def run_tuning():
     logger.info(f"Best CV R²: {best_score_r2:.4f} (RMSE: {best_score_rmse:.3f} K)")
     logger.info(f"Best Params: {best_params}")
     
-    # Update train_nighttime.py automatically with best params? We will just print them and I'll update it.
+    joblib.dump(best_params, MODELS_DIR / "best_params_nighttime.joblib")
+    logger.info(f"Best parameters saved to {MODELS_DIR / 'best_params_nighttime.joblib'}")
 
 if __name__ == "__main__":
     run_tuning()
