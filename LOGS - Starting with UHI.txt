@@ -693,7 +693,7 @@ F15 — Report Generator:
 
 ----
 15/03/2026;
-- Ran a hyperparamter tuning script to try and improve the metrics of the model with 10 folds and 100 param combos.
+- Ran a hyperparameter tuning script to try and improve the metrics of the model with 10 folds and 100 param combos.
 - Eventhough 5 fold gives a higher R^2 score decided to use the 10fold paramtres since it is more representative and a more honest reflection of the model performance.
 - RMSE changed to 2.42 K from 2.40 K. - Hence tuning did not give us a better output.
 - Tried a new approach for tuning that considers both RMSE and R^2. Using a combined score. (combined_score = r2 - (rmse * 0.2) ). Multiplied rmse with 0.2 to roughly bring it to the same scale as the R^2 value.
@@ -728,5 +728,18 @@ F15 — Report Generator:
 - Did train.py and got the metrics (R²≈0.50, RMSE≈2.24 K).
 - Ran tuning of the script to try and extract better metrics.
 - The metrics in the case of the afternoon script slightly reduced but this would be preffered because the data is modelled across two seperate years rather than just one.
-- Consistency after addign more data is given as: (RMSE:               2.245 K, R²:                 0.504)
+
+- Consistency after adding more data is given as: (RMSE:               2.245 K, R²:                 0.504)
+
+- Decided to go back to data only from 2025 alone rather than taking data from 2024 as well since it adds too much unnecessary weather variation which is not needed for the core intervention task.
+" The model needs to understand the physical cooling relationship between land cover and temperature across different parts of Dubai. It does NOT need to understand how Dubai's temperature varied between a windy August 2024 and a humid August 2025.
+
+The extra year you added didn't give the model new spatial information — the buildings and parks didn't move. What it added is more examples of weather variation, which is exactly the noise your model cannot and should not try to explain."
+
+- Reran the entire pipeline for the afternoon model from assemble -> train -> tune -> train -> downscale -> consistency, and got back the metrics:
+ . RMSE: 2.145 K
+ . R2: 0.520
+
+----
+16/03/2026:
 - 
