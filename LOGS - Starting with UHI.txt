@@ -744,4 +744,8 @@ The extra year you added didn't give the model new spatial information — the b
 16/03/2026:
 - Reran the nighttime assembly script.
 - Added the std features to the tune script to obtain the new hyperparametres.
+- The train metrics on the standard model increased to (RMSE: 1.21K and R2: 0.64)
+- Notices that the eval script of night time model only peforms evaluation on the test set points alone and not the entire map. Made this change to the script to evaluate agaianst the entire table pixels instead of just the normal test area alone.
+- Ran the evaluation nightime script and got these values for the metrics: (RMSE: RMSE:          1.308 K, R²:            0.588).
+
 - 

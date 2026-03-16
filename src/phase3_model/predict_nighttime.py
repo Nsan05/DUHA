@@ -20,10 +20,15 @@ OUTPUT_PATH = OUTPUT_DIR / "lst_anomaly_nighttime_30m.tif"
 # Feature rasters in the EXACT SAME ORDER as the training features array
 FEATURE_FILES = {
     'ndvi_mean':                DATA_DIR / "ndvi_30m.tif",
+    'ndvi_std':                 DATA_DIR / "ndvi_std_30m.tif",
     'albedo_mean':              DATA_DIR / "albedo_30m.tif",
+    'albedo_std':               DATA_DIR / "albedo_std_30m.tif",
     'building_density_mean':    DATA_DIR / "building_density_30m.tif",
+    'building_density_std':     DATA_DIR / "building_density_std_30m.tif",
     'height_mean':              DATA_DIR / "height_30m.tif",
+    'height_std':               DATA_DIR / "height_std_30m.tif",
     'road_density_mean':        DATA_DIR / "road_density_30m.tif",
+    'road_density_std':         DATA_DIR / "road_density_std_30m.tif",
     'sand_mask_fraction':       DATA_DIR / "sand_mask_30m.tif",
     'water_mask_full_fraction': DATA_DIR / "water_mask_full_30m.tif",
     'dist_to_coast_mean':       DATA_DIR / "dist_to_coast_30m.tif",
@@ -53,14 +58,14 @@ def main():
     logger.info(f"Grid: {height}x{width}, CRS: {ref_crs}")
     
     # 2. Load all feature rasters
-    logger.info("Loading 8 feature rasters...")
+    logger.info(f"Loading {len(FEATURE_FILES)} feature rasters...")
     feature_names = list(FEATURE_FILES.keys())
     
     feature_stack = np.zeros((len(feature_names), height, width), dtype=np.float32)
     valid_mask = np.ones((height, width), dtype=bool)
     
     for i, (name, path) in enumerate(FEATURE_FILES.items()):
-        logger.info(f"  [{i+1}/8] {name}: {path.name}")
+        logger.info(f"  [{i+1}/{len(FEATURE_FILES)}] {name}: {path.name}")
         
         with rasterio.open(path) as src:
             data = src.read(1).astype(np.float32)
@@ -68,11 +73,13 @@ def main():
             
             if nodata == -9999.0:
                 outside = (data <= -9000)
-                valid_mask &= ~outside
+                if not name.endswith('_std'):
+                    valid_mask &= ~outside
                 data[outside] = 0
             elif nodata is not None and np.isnan(nodata):
                 outside = np.isnan(data)
-                valid_mask &= ~outside
+                if not name.endswith('_std'):
+                    valid_mask &= ~outside
                 data[outside] = 0
             
             feature_stack[i] = data

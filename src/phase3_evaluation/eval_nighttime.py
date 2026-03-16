@@ -24,33 +24,6 @@ BLOCK_SIZE = 5000
 TEST_RATIO = 0.3
 RANDOM_STATE = 42
 
-def recreate_test_split(df):
-    """
-    Recreates the exact same spatial block split used during training
-    to extract ONLY the Test subset for unbiased evaluation.
-    """
-    logger.info(f"Recreating {BLOCK_SIZE}m spatial split to extract Test set...")
-    
-    # Assign Block IDs
-    df['block_x'] = (df['pixel_x'] // BLOCK_SIZE).astype(int)
-    df['block_y'] = (df['pixel_y'] // BLOCK_SIZE).astype(int)
-    
-    blocks = df[['block_x', 'block_y']].drop_duplicates()
-    
-    np.random.seed(RANDOM_STATE)
-    shuffled_blocks = blocks.sample(frac=1, random_state=RANDOM_STATE).reset_index(drop=True)
-    
-    n_test_blocks = int(len(blocks) * TEST_RATIO)
-    test_blocks_df = shuffled_blocks.iloc[:n_test_blocks]
-    
-    test_blocks_set = set(zip(test_blocks_df['block_x'], test_blocks_df['block_y']))
-    
-    is_test = df.apply(lambda row: (row['block_x'], row['block_y']) in test_blocks_set, axis=1)
-    
-    test_df = df[is_test].copy()
-    logger.info(f"Recovered {len(test_df):,} test pixels.")
-    return test_df
-
 def load_data():
     logger.info(f"Loading CSV: {TRAINING_CSV.name}")
     df = pd.read_csv(TRAINING_CSV)
@@ -59,8 +32,8 @@ def load_data():
     scene_means = df.groupby('scene_id')['nighttime_lst'].transform('mean')
     df['true_anomaly'] = df['nighttime_lst'] - scene_means
     
-    test_df = recreate_test_split(df)
-    return test_df
+    logger.info(f"Loaded {len(df):,} total observations for evaluation.")
+    return df
 
 def analyze_feature_strata(df):
     """
@@ -137,8 +110,8 @@ def main():
         logger.error("Missing required input files!")
         return
         
-    # 1. Load Ground Truth (Test set only)
-    test_df = load_data()
+    # 1. Load Ground Truth (Full dataset for consistency check)
+    full_df = load_data()
     
     logger.info("Sampling predicted 30m TIF and aggregating to 750m windows...")
     
@@ -167,15 +140,15 @@ def main():
                 return np.nan
             return np.mean(valid_pixels)
             
-        test_df['predicted_anomaly'] = test_df.apply(lambda row: get_window_mean(row['pixel_x'], row['pixel_y']), axis=1)
+        full_df['predicted_anomaly'] = full_df.apply(lambda row: get_window_mean(row['pixel_x'], row['pixel_y']), axis=1)
         
-    # Drop any NaNs (pixels outside geometry but somehow in test set)
-    test_df = test_df.dropna(subset=['true_anomaly', 'predicted_anomaly'])
-    logger.info(f"Final valid comparison pairs: {len(test_df):,}")
+    # Drop any NaNs (pixels outside geometry but somehow in dataset)
+    full_df = full_df.dropna(subset=['true_anomaly', 'predicted_anomaly'])
+    logger.info(f"Final valid comparison pairs: {len(full_df):,}")
     
     # 3. Calculate Metrics
-    y_true = test_df['true_anomaly']
-    y_pred = test_df['predicted_anomaly']
+    y_true = full_df['true_anomaly']
+    y_pred = full_df['predicted_anomaly']
     
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     mae = mean_absolute_error(y_true, y_pred)
@@ -184,9 +157,9 @@ def main():
     mean_bias = np.mean(y_pred - y_true)
     
     logger.info("=" * 50)
-    logger.info("PHASE 3B METRICS (750m scale validation)")
+    logger.info("PHASE 3B METRICS (Full Dataset Consistency Check)")
     logger.info("=" * 50)
-    logger.info(f"  Test Pixels:   {len(test_df):,}")
+    logger.info(f"  All Pixels:    {len(full_df):,}")
     logger.info(f"  Mean Bias:     {mean_bias:+.3f} K")
     logger.info(f"  MAE:           {mae:.3f} K")
     logger.info(f"  RMSE:          {rmse:.3f} K")
@@ -197,8 +170,8 @@ def main():
     # 4. Save results string
     metrics_path = OUTPUT_DIR / "nighttime_30m_metrics.txt"
     with open(metrics_path, "w") as f:
-        f.write("PHASE 3B METRICS (750m scale validation)\n")
-        f.write(f"Test Pixels:   {len(test_df):,}\n")
+        f.write("PHASE 3B METRICS (Full Dataset Consistency Check)\n")
+        f.write(f"All Pixels:    {len(full_df):,}\n")
         f.write(f"Mean Bias:     {mean_bias:+.3f} K\n")
         f.write(f"MAE:           {mae:.3f} K\n")
         f.write(f"RMSE:          {rmse:.3f} K\n")
@@ -221,7 +194,7 @@ def main():
     
     # Formatting
     plt.title('VIIRS 1:30 AM Slot: Predicted vs Observed LST Anomaly\n' + 
-              f'(RMSE={rmse:.2f}K, R²={r2:.2f}, N={len(test_df):,})', fontsize=14)
+              f'(RMSE={rmse:.2f}K, R²={r2:.2f}, N={len(full_df):,})', fontsize=14)
     plt.xlabel('Observed VIIRS Nighttime LST Anomaly (K)', fontsize=12)
     plt.ylabel('Aggregated 30m Predicted LST Anomaly (K)', fontsize=12)
     plt.grid(True, linestyle=':', alpha=0.6)
@@ -232,7 +205,7 @@ def main():
     logger.info(f"Saved scatter plot to {plot_path}")
     
     # 6. Feature Strata Analysis
-    analyze_feature_strata(test_df)
+    analyze_feature_strata(full_df)
 
 if __name__ == "__main__":
     main()
