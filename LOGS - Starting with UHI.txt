@@ -747,10 +747,18 @@ The extra year you added didn't give the model new spatial information — the b
 - The train metrics on the standard model increased to (RMSE: 1.21K and R2: 0.64)
 - Notices that the eval script of night time model only peforms evaluation on the test set points alone and not the entire map. Made this change to the script to evaluate agaianst the entire table pixels instead of just the normal test area alone.
 - Ran the evaluation nightime script and got these values for the metrics: (RMSE: RMSE:          1.308 K, R²:            0.588).
+- NEW CHANGE: Changed the CV fold number from 5 to 10 and compared metrics and obtained these as the metrics: (RMSE:, R2: )
 
 - The border effect: if std value is NaN, do not mark it as invalid instead just assign a value of 0.
 - Updated the assemble Landsat script to also contain the new std features.
 - Added new feature names to the train_landsat script as well and used the new LightGBM model.
 - After initial training, got the error metrics as follows: (RMSE: 2.71 K, R2: 0.92)
+
+- Ran tuning script to try and extract better metrics from landsat model.
+- Increase cv folds from 5 to 10 for both landsat and nighttime tune scripts.
+
+- The tune landsat script was too heavy to run locally on the laptop so instead decided to run it using 20% sampling on colab to obtain the best parameters from running on colab.
+- Colab was too restrecitve with GPU usage so decided to run it locally with 5 folds and 70 combinations with 10% sampling.
+- After tuning script, got the following metrics for landsat (RMSE: 2.71 , R2: 0.92) - with 10% subsampling
 
 - 
