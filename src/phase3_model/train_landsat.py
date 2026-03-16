@@ -5,9 +5,10 @@ from pathlib import Path
 import json
 import matplotlib.pyplot as plt
 
-from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.dummy import DummyRegressor
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+import lightgbm as lgb
 import joblib
 
 # Setup Logging
@@ -30,10 +31,15 @@ RANDOM_STATE = 42
 
 FEATURES = [
     'ndvi_mean',
+    'ndvi_std',
     'albedo_mean',
+    'albedo_std',
     'building_density_mean',
+    'building_density_std',
     'height_mean',
+    'height_std',
     'road_density_mean',
+    'road_density_std',
     'sand_mask_fraction',
     'water_mask_full_fraction',
     'dist_to_coast_m'
@@ -110,10 +116,15 @@ def load_data(input_file):
         'scene_id': str,
         'landsat_lst': np.float32,
         'ndvi_mean': np.float32,
+        'ndvi_std': np.float32,
         'albedo_mean': np.float32,
+        'albedo_std': np.float32,
         'building_density_mean': np.float32,
+        'building_density_std': np.float32,
         'height_mean': np.float32,
+        'height_std': np.float32,
         'road_density_mean': np.float32,
+        'road_density_std': np.float32,
         'sand_mask_fraction': np.float32,
         'water_mask_full_fraction': np.float32,
         'dist_to_coast_m': np.float32
@@ -161,16 +172,37 @@ def train_model(train_df, test_df):
     rmse_dummy = np.sqrt(mean_squared_error(y_test, y_pred_dummy))
     logger.info(f"Baseline (Mean) RMSE: {rmse_dummy:.2f} K")
     
-    # 2. HistGradientBoosting
-    # Use standard hyperparameters mimicking Phase 2
-    logger.info("Training HistGradientBoostingRegressor (max_iter=500, lr=0.05)...")
-    gb = HistGradientBoostingRegressor(
-        max_iter=500,
-        learning_rate=0.05,
-        random_state=RANDOM_STATE,
-        early_stopping=True
+    # 2. Train LightGBM Model
+    params_path = MODELS_DIR / "best_params_landsat.joblib"
+    if params_path.exists():
+        logger.info(f"Loading tuned hyperparameters from {params_path.name}...")
+        best_params = joblib.load(params_path)
+        gb = lgb.LGBMRegressor(
+            random_state=RANDOM_STATE,
+            n_jobs=-1,
+            verbose=-1,
+            **best_params
+        )
+    else:
+        logger.info("Training LGBMRegressor with DEFAULT parameters (no tuned params found)...")
+        gb = lgb.LGBMRegressor(
+            n_estimators=500,
+            learning_rate=0.05,
+            random_state=RANDOM_STATE,
+            n_jobs=-1,
+            verbose=-1
+        )
+    
+    # Inner split for early stopping
+    X_tr_inner, X_val_inner, y_tr_inner, y_val_inner = train_test_split(
+        X_train, y_train, test_size=0.1, random_state=RANDOM_STATE
     )
-    gb.fit(X_train, y_train)
+    
+    gb.fit(
+        X_tr_inner, y_tr_inner,
+        eval_set=[(X_val_inner, y_val_inner)],
+        callbacks=[lgb.early_stopping(stopping_rounds=20, verbose=False)]
+    )
     
     # 3. Evaluate
     y_pred = gb.predict(X_test)

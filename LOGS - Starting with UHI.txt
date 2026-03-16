@@ -750,4 +750,7 @@ The extra year you added didn't give the model new spatial information — the b
 
 - The border effect: if std value is NaN, do not mark it as invalid instead just assign a value of 0.
 - Updated the assemble Landsat script to also contain the new std features.
+- Added new feature names to the train_landsat script as well and used the new LightGBM model.
+- After initial training, got the error metrics as follows: (RMSE: 2.71 K, R2: 0.92)
+
 - 
