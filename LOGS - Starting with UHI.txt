@@ -748,4 +748,6 @@ The extra year you added didn't give the model new spatial information — the b
 - Notices that the eval script of night time model only peforms evaluation on the test set points alone and not the entire map. Made this change to the script to evaluate agaianst the entire table pixels instead of just the normal test area alone.
 - Ran the evaluation nightime script and got these values for the metrics: (RMSE: RMSE:          1.308 K, R²:            0.588).
 
+- The border effect: if std value is NaN, do not mark it as invalid instead just assign a value of 0.
+- Updated the assemble Landsat script to also contain the new std features.
 - 

@@ -24,10 +24,15 @@ REF_GRID_META = BASE_DIR / "data" / "intermediate" / "grids" / "reference_grid_m
 
 FEATURE_FILES = {
     'ndvi_mean':                PHASE1_DIR / "ndvi_30m.tif",
+    'ndvi_std':                 PHASE1_DIR / "ndvi_std_30m.tif",
     'albedo_mean':              PHASE1_DIR / "albedo_30m.tif",
+    'albedo_std':               PHASE1_DIR / "albedo_std_30m.tif",
     'building_density_mean':    PHASE1_DIR / "building_density_30m.tif",
+    'building_density_std':     PHASE1_DIR / "building_density_std_30m.tif",
     'height_mean':              PHASE1_DIR / "height_30m.tif",
+    'height_std':               PHASE1_DIR / "height_std_30m.tif",
     'road_density_mean':        PHASE1_DIR / "road_density_30m.tif",
+    'road_density_std':         PHASE1_DIR / "road_density_std_30m.tif",
     'sand_mask_fraction':       PHASE1_DIR / "sand_mask_30m.tif",
     'water_mask_full_fraction': PHASE1_DIR / "water_mask_full_30m.tif",
     'dist_to_coast_m':          PHASE1_DIR / "dist_to_coast_30m.tif",
@@ -69,11 +74,13 @@ def main():
             if nodata == -9999.0:
                 # captures floating point errors for 9999 and used 9000 as a safety net.
                 outside = (data <= -9000)
-                base_valid &= ~outside
+                if not name.endswith('_std'):
+                    base_valid &= ~outside
                 data[outside] = 0
             elif nodata is not None and np.isnan(nodata):
                 outside = np.isnan(data)
-                base_valid &= ~outside
+                if not name.endswith('_std'):
+                    base_valid &= ~outside
                 data[outside] = 0
                 
             feature_stack[name] = data
