@@ -130,10 +130,16 @@ export default function InterventionPanel() {
     setPredicting(true);
 
     try {
+      const pixelsWithCoords = selectedPixels.map((p, i) => ({
+        lat: p.lat,
+        lon: p.lng,
+        features: batchCurrentV[i]
+      }));
+
       const res = await fetch(`${API_BASE_URL}/api/predict-batch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pixels: batchCurrentV, time_of_day: timeOfDay })
+        body: JSON.stringify({ pixels: pixelsWithCoords, time_of_day: timeOfDay })
       });
       if (res.ok) {
         const data = await res.json();
@@ -199,7 +205,11 @@ export default function InterventionPanel() {
     setPredicting(true);
     
     // Clone expert settings onto all pixels for batch operation
-    const batchExpertV = selectedPixels.map(() => expertSliders);
+    const batchExpertV = selectedPixels.map((p) => ({
+      lat: p.lat,
+      lon: p.lng,
+      features: expertSliders
+    }));
     
     try {
       const res = await fetch(`${API_BASE_URL}/api/predict-batch`, {

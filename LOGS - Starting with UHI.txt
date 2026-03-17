@@ -771,4 +771,5 @@ The extra year you added didn't give the model new spatial information — the b
 - Changed fallback SHAP explainer size to 1,13.
 - Added the new STD recomputation function for intervention pixels to dynamically return the new std for all modified pixels.
 - Updated the predict batch endpoint to dynamcially compute the std values using the new fucntion.
+- Changed the structure of the input passed to the endpoints within the InterventionPanel script.
 - 
