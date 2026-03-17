@@ -81,10 +81,14 @@ export default function MapView() {
     }
     if (mapRef.current) return;
 
-    // Default to dark-v11 initially
+    // Generate the correct initial style URL based on timeOfDay prop to prevent flashing
+    let initialStyle = "mapbox://styles/mapbox/dark-v11";
+    if (timeOfDay === "morning") initialStyle = "mapbox://styles/mapbox/navigation-day-v1";
+    if (timeOfDay === "afternoon") initialStyle = "mapbox://styles/mapbox/outdoors-v12";
+
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/dark-v11",
+      style: initialStyle,
       center: [55.27, 25.2], // Dubai
       zoom: 11,
       minZoom: 9, 
