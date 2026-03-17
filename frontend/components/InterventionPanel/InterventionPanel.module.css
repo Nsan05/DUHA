@@ -351,8 +351,9 @@ button.card {
 }
 
 .resultChip.active {
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.35);
+  border-left: 3px solid var(--accent-blue, #0a84ff);
 }
 
 .resultTimes {
