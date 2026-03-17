@@ -55,7 +55,11 @@ export default function InterventionPanel() {
     if (pixelInspectorData?.features && selectedPixels.length > 0) {
       setSuggestionsLoading(true);
       
-      const allFeaturesBatch = selectedPixels.map(p => p.features);
+      const allFeaturesBatch = selectedPixels.map(p => ({
+        lat: p.lat,
+        lng: p.lng,
+        features: p.features
+      }));
       const avgCurrentAnomalies = {
         morning: selectedPixels.reduce((sum, p) => sum + p.anomalies.morning, 0) / selectedPixels.length,
         afternoon: selectedPixels.reduce((sum, p) => sum + p.anomalies.afternoon, 0) / selectedPixels.length,

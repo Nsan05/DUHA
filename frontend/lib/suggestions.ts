@@ -21,7 +21,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
  * Generates smart suggestions by simulating each applicable intervention.
  */
 export async function suggestInterventions(
-  originalFeaturesBatch: FeatureVector[],
+  originalPixels: Array<{lat: number; lng: number; features: FeatureVector}>,
   currentAnomalies: { morning: number; afternoon: number; night: number },
   timeOfDay: "morning" | "afternoon" | "night",
   activeInterventions: InterventionId[]
@@ -30,7 +30,7 @@ export async function suggestInterventions(
   // We check canApply against ALL pixels to ensure the intervention is valid for the entire selected region
   const candidates = INTERVENTION_TEMPLATES.filter((template) => {
     // If NO pixels in the selection support this intervention, discard the template
-    const isValidForSome = originalFeaturesBatch.some(pixelFeatures => template.canApply(pixelFeatures));
+    const isValidForSome = originalPixels.some(p => template.canApply(p.features));
     if (!isValidForSome) return false;
     
     if (activeInterventions.includes(template.id)) return false; // Don't suggest if already active
@@ -50,7 +50,12 @@ export async function suggestInterventions(
     }
 
     // Dry-run the intervention (only applying to pixels that actually satisfy it, mirroring UI behavior)
-    const modifiedFeaturesBatch = originalFeaturesBatch.map(f => template.canApply(f) ? template.apply(f, params) : f);
+    // We also include the lat/lon because the new backend needs coordinates to do accurate 750m _std recalculations
+    const modifiedPixelsBatch = originalPixels.map(p => ({
+      lat: p.lat,
+      lon: p.lng,
+      features: template.canApply(p.features) ? template.apply(p.features, params) : p.features
+    }));
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/predict-batch`, {
@@ -58,7 +63,7 @@ export async function suggestInterventions(
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ pixels: modifiedFeaturesBatch, time_of_day: timeOfDay }),
+        body: JSON.stringify({ pixels: modifiedPixelsBatch, time_of_day: timeOfDay }),
       });
 
       if (!response.ok) {

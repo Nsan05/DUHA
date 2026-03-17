@@ -772,4 +772,6 @@ The extra year you added didn't give the model new spatial information — the b
 - Added the new STD recomputation function for intervention pixels to dynamically return the new std for all modified pixels.
 - Updated the predict batch endpoint to dynamcially compute the std values using the new fucntion.
 - Changed the structure of the input passed to the endpoints within the InterventionPanel script.
+- Made changes in the suggestions.ts script to accommodate the new format for passing the pixels.
+- Also fixed an error where the panel was still passing the old data format to the suggestions engine.
 - 
