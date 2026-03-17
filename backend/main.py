@@ -43,10 +43,15 @@ MODEL_PATHS = {
 RASTER_PATHS = {
     "features": {
         "ndvi_mean": os.path.join(DATA_DIR, "final", "phase1_features", "ndvi_30m.tif"),
+        "ndvi_std": os.path.join(DATA_DIR, "final", "phase1_features", "ndvi_std_30m.tif"),
         "albedo_mean": os.path.join(DATA_DIR, "final", "phase1_features", "albedo_30m.tif"),
+        "albedo_std": os.path.join(DATA_DIR, "final", "phase1_features", "albedo_std_30m.tif"),
         "building_density_mean": os.path.join(DATA_DIR, "final", "phase1_features", "building_density_30m.tif"),
+        "building_density_std": os.path.join(DATA_DIR, "final", "phase1_features", "building_density_std_30m.tif"),
         "height_mean": os.path.join(DATA_DIR, "final", "phase1_features", "height_30m.tif"),
+        "height_std": os.path.join(DATA_DIR, "final", "phase1_features", "height_std_30m.tif"),
         "road_density_mean": os.path.join(DATA_DIR, "final", "phase1_features", "road_density_30m.tif"),
+        "road_density_std": os.path.join(DATA_DIR, "final", "phase1_features", "road_density_std_30m.tif"),
         "sand_mask_fraction": os.path.join(DATA_DIR, "final", "phase1_features", "sand_mask_30m.tif"),
         "water_mask_full_fraction": os.path.join(DATA_DIR, "final", "phase1_features", "water_mask_full_30m.tif"),
         "dist_to_coast_m": os.path.join(DATA_DIR, "final", "phase1_features", "dist_to_coast_30m.tif")
@@ -60,9 +65,19 @@ RASTER_PATHS = {
 
 # Ensure features list order accurately matches the model training exactly
 FEATURE_ORDER = [
-    'ndvi_mean', 'albedo_mean', 'building_density_mean', 'height_mean',
-    'road_density_mean', 'sand_mask_fraction', 'water_mask_full_fraction', 'dist_to_coast_m'
+    'ndvi_mean', 'ndvi_std', 'albedo_mean', 'albedo_std', 
+    'building_density_mean', 'building_density_std', 'height_mean', 'height_std',
+    'road_density_mean', 'road_density_std', 'sand_mask_fraction', 'water_mask_full_fraction', 'dist_to_coast_m'
 ]
+
+STD_WINDOW = 25  # 25x25 = 750m
+STD_PAIRS = {
+    'ndvi_std': 'ndvi_mean',
+    'albedo_std': 'albedo_mean',
+    'building_density_std': 'building_density_mean',
+    'height_std': 'height_mean',
+    'road_density_std': 'road_density_mean',
+}
 
 # --- GLOBAL APP STATE ---
 class AppState:
@@ -89,11 +104,10 @@ async def lifespan(app: FastAPI):
         if os.path.exists(path):
             state.models[time_of_day] = joblib.load(path)
             try:
-                # TreeExplainer is ideal for HistGradientBoosting
                 state.explainers[time_of_day] = shap.TreeExplainer(state.models[time_of_day])
             except Exception as e:
                 print(f"Failed to initialize SHAP for {time_of_day}: {e}. Creating generic explainer fallback.")
-                state.explainers[time_of_day] = shap.Explainer(state.models[time_of_day].predict, np.zeros((1, 8)))
+                state.explainers[time_of_day] = shap.Explainer(state.models[time_of_day].predict, np.zeros((1, 13)))
         else:
             print(f"Warning: Model not found at {path}")
             
@@ -136,7 +150,7 @@ class PredictionRequest(BaseModel):
     features: Dict[str, float]
 
 class PredictionBatchRequest(BaseModel):
-    pixels: List[Dict[str, float]]
+    pixels: List[Dict[str, Any]]
     time_of_day: str = "afternoon"
 
 # --- UTILS ---
@@ -242,6 +256,83 @@ async def predict_anomaly(req: PredictionRequest):
             
     return {"predicted_anomalies": predictions}
 
+def recompute_std_for_batch(pixel_coords: List[tuple], modified_features_batch: List[Dict[str, float]]) -> List[Dict[str, float]]:
+    """
+    For each pixel, read the 25x25 window from the _mean raster,
+    substitute any modified pixels in the window, recompute std.
+    """
+    # Helps tp define window range
+    half = STD_WINDOW // 2
+    
+    # Build a lookup of modified pixels by (row, col) : modified features
+    modified_lookup = {}
+    handle = state.raster_handles["features"].get("ndvi_mean")
+    if not handle:
+        return [{} for _ in pixel_coords]
+
+    # row,col list for each pixel    
+    pixel_indices = []
+    for i, (lon, lat) in enumerate(pixel_coords):
+        # Converts geogrpahic coords to raster coords (m)
+        x, y = state.transformer.transform(lon, lat)
+        try:
+            row, col = handle.index(x, y)
+            # Log modififed pixel value and location
+            modified_lookup[(row, col)] = modified_features_batch[i]
+            pixel_indices.append((row, col))
+        except Exception:
+            pixel_indices.append(None)
+            
+    results = []
+    # processing each modified pixel
+    for target_indices in pixel_indices:
+        pixel_stds = {}
+        
+        if target_indices is None:
+            results.append(pixel_stds)
+            continue
+            
+        target_row, target_col = target_indices
+
+        # Going over each of the std supported features
+        for std_key, mean_key in STD_PAIRS.items():
+            feat_handle = state.raster_handles["features"].get(mean_key)
+            if not feat_handle:
+                pixel_stds[std_key] = 0.0
+                continue
+                
+            try:
+                # Read 25x25 window - around the specified pixel
+                window = feat_handle.read(1, window=rasterio.windows.Window(
+                    target_col - half, target_row - half, STD_WINDOW, STD_WINDOW
+                ))
+                
+                # Make a writable copy
+                window = window.astype(np.float64, copy=True)
+                
+                # Substitute modified pixels within the selected target pixel window with their new values
+                for (mr, mc), mfeats in modified_lookup.items():
+                    # window coordinates row, col not global [25x25] around the modified pixel
+                    # target pixel = (100, 200)
+                    # half = 12
+                    # window = 100-12, 200-12= 88, 188
+                    wr, wc = mr - (target_row - half), mc - (target_col - half)
+                    # If a modified pixel is present inside the windoe of another modified pixel, add the new value to it instead of the original value
+                    if 0 <= wr < STD_WINDOW and 0 <= wc < STD_WINDOW:
+                        if mean_key in mfeats:
+                            window[0, wr, wc] = mfeats[mean_key] # Handle read returns 3D array (bands, rows, cols)
+                
+                # Compute new std (ignoring nodata)
+                valid = window[~np.isnan(window) & (window != feat_handle.nodata) & (window > -9000)]
+                pixel_stds[std_key] = float(np.std(valid)) if len(valid) > 0 else 0.0
+            except Exception as e:
+                print(f"Error computing std for {std_key}: {e}")
+                pixel_stds[std_key] = 0.0
+                
+        results.append(pixel_stds)
+        
+    return results
+
 @app.post("/api/predict-batch")
 async def predict_batch(req: PredictionBatchRequest):
     """Runs a batch of feature override vectors through all 3 ML models and returns average new anomalies + per-pixel predictions for the active time."""
@@ -256,11 +347,33 @@ async def predict_batch(req: PredictionBatchRequest):
     predictions_sum = {"morning": 0.0, "afternoon": 0.0, "night": 0.0}
     valid_counts = {"morning": 0, "afternoon": 0, "night": 0}
     
+    # Extract coords and modified features for std recomputation
+    pixel_coords = []
+    modified_features_batch = []
+    
+    for item in req.pixels:
+        try:
+            feats = item["features"]
+            lat = item.get("lat")
+            lon = item.get("lon")
+            if lat is not None and lon is not None:
+                pixel_coords.append((lon, lat))
+                modified_features_batch.append(feats)
+        except KeyError as e:
+            raise HTTPException(status_code=400, detail=f"Missing feature in request: {e}")
+
+    # Recompute _std features if we have coordinates
+    if pixel_coords:
+        new_stds_batch = recompute_std_for_batch(pixel_coords, modified_features_batch)
+        for feats, new_stds in zip(modified_features_batch, new_stds_batch):
+            feats.update(new_stds)
+
     # We can optimize by compiling all rows into a single pandas DataFrame
     ordered_rows = []
-    for feature_dict in req.pixels:
+    for item in req.pixels:
         try:
-            ordered_rows.append([feature_dict[f] for f in FEATURE_ORDER]) # Added the values of each each of each pixel into one row
+            feats = item["features"]
+            ordered_rows.append([feats[f] for f in FEATURE_ORDER]) # Added the values of each each of each pixel into one row
         except KeyError as e:
             raise HTTPException(status_code=400, detail=f"Missing feature in request: {e}")
     
@@ -335,10 +448,15 @@ async def get_shap_explanation(req: CoordinateRequest):
     # Clean up feature names for reading
     friendly_names = {
         "ndvi_mean": "vegetation cover",
+        "ndvi_std": "vegetation variance",
         "albedo_mean": "surface reflectivity",
+        "albedo_std": "reflectivity variance",
         "building_density_mean": "building density",
+        "building_density_std": "building density variance",
         "height_mean": "building height",
+        "height_std": "height variance",
         "road_density_mean": "asphalt streets",
+        "road_density_std": "road density variance",
         "sand_mask_fraction": "open sand",
         "water_mask_full_fraction": "water bodies",
         "dist_to_coast_m": "distance from the coast",
@@ -353,10 +471,15 @@ async def get_shap_explanation(req: CoordinateRequest):
     # Units for displaying raw feature values
     friendly_units = {
         "ndvi_mean": "",
+        "ndvi_std": "",
         "albedo_mean": "",
+        "albedo_std": "",
         "building_density_mean": "",
+        "building_density_std": "",
         "height_mean": "m",
+        "height_std": "",
         "road_density_mean": "",
+        "road_density_std": "",
         "sand_mask_fraction": "",
         "water_mask_full_fraction": "",
         "dist_to_coast_m": "m",

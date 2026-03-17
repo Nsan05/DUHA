@@ -762,4 +762,13 @@ The extra year you added didn't give the model new spatial information — the b
 - After tuning script, got the following metrics for landsat (RMSE: 2.71 , R2: 0.92) - with 10% subsampling
 
 - Included ndvi std in eval script of landsat.
+	
+----
+17/03/2026:
+- Looked into the necessary modifications that are needed in the frontend now to also process the additonal features added to the models.
+- Added the 5 _std  TIFF paths to  RASTER_PATHS so the backend can load them into memory.
+- Updated FEATURE_ORDER from 8 to 13 features, ensuring they exactly match the column order seen by the models during training.
+- Changed fallback SHAP explainer size to 1,13.
+- Added the new STD recomputation function for intervention pixels to dynamically return the new std for all modified pixels.
+- Updated the predict batch endpoint to dynamcially compute the std values using the new fucntion.
 - 
