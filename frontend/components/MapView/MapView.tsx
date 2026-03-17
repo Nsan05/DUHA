@@ -340,6 +340,8 @@ export default function MapView() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded || !computedCommunities) return;
+    // Ensure map is actually completely loaded with our custom sources
+    if (!map.getSource("communities")) return;
     
     // Clear 'selected' feature state for all communities
     computedCommunities.features.forEach((f: any) => {
