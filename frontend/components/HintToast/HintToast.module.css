@@ -34,6 +34,37 @@
     transform 350ms var(--ease-spring, cubic-bezier(0.25, 1, 0.5, 1));
 }
 
+/* Light override for morning map */
+.toast.light {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0,0,0,0.04) inset;
+  color: #1a1a2e;
+}
+
+.toast.light .text {
+  color: #444;
+}
+
+.toast.light .text strong {
+  color: #1a1a2e;
+}
+
+.toast.light .icon {
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: #1a1a2e;
+}
+
+.toast.light .dismiss {
+  color: #666;
+}
+
+.toast.light .dismiss:hover {
+  color: #1a1a2e;
+  background: rgba(0, 0, 0, 0.07);
+}
+
 .toast.visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);

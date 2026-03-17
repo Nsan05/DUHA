@@ -5,7 +5,7 @@ import { useAppContext } from "../../context/AppContext";
 import styles from "./HintToast.module.css";
 
 export default function HintToast() {
-  const { selectedCommunity } = useAppContext();
+  const { selectedCommunity, timeOfDay } = useAppContext();
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Track how many distinct communities have been selected
@@ -39,8 +39,10 @@ export default function HintToast() {
     };
   }, [selectedCommunity]);
 
+  const isLight = timeOfDay === "morning";
+
   return (
-    <div className={`${styles.toast} ${visible ? styles.visible : ""}`} role="status" aria-live="polite">
+    <div className={`${styles.toast} ${visible ? styles.visible : ""} ${isLight ? styles.light : ""}`} role="status" aria-live="polite">
       <span className={styles.icon}>⇧</span>
       <span className={styles.text}>
         <strong>Shift + Click</strong> pixels to enter Intervention Mode
