@@ -119,7 +119,28 @@ export default function MapView() {
         mapRef.current.remove();
         mapRef.current = null;
       }
+      window.removeEventListener("duha:resetView", handleResetView as EventListener);
     };
+  }, []);
+
+  // Listener for the DUHA logo reset — defined outside the useEffect so it stays stable
+  const handleResetView = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.flyTo({
+      center: [55.27, 25.2],
+      zoom: 11,
+      pitch: 30,
+      bearing: 0,
+      duration: 1200,
+      essential: true,
+    });
+  };
+
+  // Attach the reset listener once on mount
+  React.useEffect(() => {
+    window.addEventListener("duha:resetView", handleResetView as EventListener);
+    return () => window.removeEventListener("duha:resetView", handleResetView as EventListener);
   }, []);
 
   // 2. Respond to Time of Day changes by swapping Basemap
