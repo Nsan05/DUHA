@@ -780,4 +780,4 @@ The extra year you added didn't give the model new spatial information — the b
 - Changed the morning map style to make it more readable.
 - Added an additonal check in Mapview to prevent crashes that occured sometimes when the time toggle was shifted and before the communites data was loaded in, it would get called.
 - Fixed small error of nightime map laoding in at first.
-- 
+- Changed the layout heading from deafult text.
