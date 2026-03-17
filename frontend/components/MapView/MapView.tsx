@@ -496,13 +496,18 @@ export default function MapView() {
             "interpolate",
             ["linear"],
             ["get", "anomaly"],
-            -4, "#1E90FF",   // Very Cool (Dark Blue)
-            -2, "#87CEEB",   // Cool (Light Blue)
-            -0.5, "#E0F7FA", // Slightly Cool
+            -8, "#0D47A1",   // Extreme Cool (Deep Navy)
+            -5, "#1565C0",   // Very Cool (Dark Blue)
+            -3, "#1E90FF",   // Cool (Blue)
+            -1.5, "#64B5F6", // Mildly Cool (Mid Blue)
+            -0.5, "#B3E5FC", // Slightly Cool (Pale Blue)
             0, "#F5F5F5",    // Neutral
-            0.5, "#FFF9C4",  // Slightly Warm
-            2, "#FFA500",    // Hot (Orange)
-            4, "#FF4500"     // Very Hot (Red)
+            0.5, "#FFF9C4",  // Slightly Warm (Pale Yellow)
+            2, "#FFD54F",    // Warm (Gold)
+            3, "#FFA726",    // Hot (Orange)
+            5, "#F4511E",    // Very Hot (Deep Orange)
+            7, "#C62828",    // Extreme (Deep Red)
+            10, "#4A0072"    // Severe (Dark Purple)
           ],
           "fill-opacity": [
             "case",
@@ -535,13 +540,18 @@ export default function MapView() {
                 "interpolate",
                 ["linear"],
                 ["get", "anomaly"],
-                -4, "#1E90FF",
-                -2, "#87CEEB",
-                -0.5, "#E0F7FA",
+                -8, "#0D47A1",
+                -5, "#1565C0",
+                -3, "#1E90FF",
+                -1.5, "#64B5F6",
+                -0.5, "#B3E5FC",
                 0, "#F5F5F5",
                 0.5, "#FFF9C4",
-                2, "#FFA500",
-                4, "#FF4500"
+                2, "#FFD54F",
+                3, "#FFA726",
+                5, "#F4511E",
+                7, "#C62828",
+                10, "#4A0072"
               ],
               // Else, use normal selection colours
               // The pixel is both selected and multiselcted, adding a dark cyan color
@@ -554,13 +564,18 @@ export default function MapView() {
                 "interpolate",
                 ["linear"],
                 ["get", "anomaly"],
-                -4, "#1E90FF",
-                -2, "#87CEEB",
-                -0.5, "#E0F7FA",
+                -8, "#0D47A1",
+                -5, "#1565C0",
+                -3, "#1E90FF",
+                -1.5, "#64B5F6",
+                -0.5, "#B3E5FC",
                 0, "#F5F5F5",
                 0.5, "#FFF9C4",
-                2, "#FFA500",
-                4, "#FF4500"
+                2, "#FFD54F",
+                3, "#FFA726",
+                5, "#F4511E",
+                7, "#C62828",
+                10, "#4A0072"
               ]
             ],
             "fill-extrusion-opacity": 0.70, // Solid opaque column!

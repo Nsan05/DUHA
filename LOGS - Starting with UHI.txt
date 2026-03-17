@@ -785,4 +785,4 @@ The extra year you added didn't give the model new spatial information — the b
 ---
 18/03/026:
 - Added a new logo with the associated conenctions within different componenets for it.
-- 
+- Added better interpolation to distinguish differences within the rasters mroe easily.
