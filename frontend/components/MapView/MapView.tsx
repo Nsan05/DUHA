@@ -124,7 +124,7 @@ export default function MapView() {
 
     let newStyle = "mapbox://styles/mapbox/dark-v11"; // Default Night
     if (timeOfDay === "morning") {
-      newStyle = "mapbox://styles/mapbox/light-v11";
+      newStyle = "mapbox://styles/mapbox/navigation-day-v1"; // Cool pale blue-grey — crisp dawn feel, distinct from afternoon
     } else if (timeOfDay === "afternoon") {
       newStyle = "mapbox://styles/mapbox/outdoors-v12"; // Warm, sandy look suited for afternoon
     }

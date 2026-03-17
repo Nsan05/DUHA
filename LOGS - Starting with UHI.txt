@@ -777,4 +777,5 @@ The extra year you added didn't give the model new spatial information — the b
 - Added the std features for the pixelinspector as well and removed them from the radar chart.
 - Updated the hint toast theme for the morning.
 - Added a lightoverride for the morning map for the hint toast.
+- Changed the morning map style to make it more readable.
 - 
