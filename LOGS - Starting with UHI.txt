@@ -774,4 +774,5 @@ The extra year you added didn't give the model new spatial information — the b
 - Changed the structure of the input passed to the endpoints within the InterventionPanel script.
 - Made changes in the suggestions.ts script to accommodate the new format for passing the pixels.
 - Also fixed an error where the panel was still passing the old data format to the suggestions engine.
+- Added the std features for the pixelinspector as well and removed them from the radar chart.
 - 

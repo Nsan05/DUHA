@@ -9,10 +9,15 @@ import { CommunityFeature } from "../../lib/types";
 
 const FRIENDLY_NAMES: Record<string, string> = {
   ndvi_mean: "🌿 Vegetation",
+  ndvi_std: "🌿 Veg. Variance",
   albedo_mean: "☀️ Reflectivity",
+  albedo_std: "☀️ Reflectivity Var.",
   building_density_mean: "🏢 Buildings",
+  building_density_std: "🏢 Bldg. Variance",
   height_mean: "🏗️ Height",
+  height_std: "🏗️ Height Variance",
   road_density_mean: "🛣️ Roads",
+  road_density_std: "🛣️ Road Variance",
   sand_mask_fraction: "🏜️ Sand",
   water_mask_full_fraction: "💧 Water",
   dist_to_coast_m: "🌊 Coast Dist",
@@ -66,7 +71,7 @@ export default function PixelInspector() {
   const isHot = currentAnom > 0;
   
   // -- RADAR CHART LOGIC --
-  const radarFeatures = Object.keys(shap_values);
+  const radarFeatures = Object.keys(shap_values).filter(f => !f.endsWith('_std'));
   const numAxes = radarFeatures.length;
   const radarRadius = 100;
   const cx = 150, cy = 150;
