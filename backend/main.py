@@ -320,7 +320,7 @@ def recompute_std_for_batch(pixel_coords: List[tuple], modified_features_batch: 
                     # If a modified pixel is present inside the windoe of another modified pixel, add the new value to it instead of the original value
                     if 0 <= wr < STD_WINDOW and 0 <= wc < STD_WINDOW:
                         if mean_key in mfeats:
-                            window[0, wr, wc] = mfeats[mean_key] # Handle read returns 3D array (bands, rows, cols)
+                            window[wr, wc] = mfeats[mean_key] # Handle read(1) returns a 2D array (rows, cols)
                 
                 # Compute new std (ignoring nodata)
                 valid = window[~np.isnan(window) & (window != feat_handle.nodata) & (window > -9000)]
