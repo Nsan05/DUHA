@@ -786,3 +786,7 @@ The extra year you added didn't give the model new spatial information — the b
 18/03/026:
 - Added a new logo with the associated conenctions within different componenets for it.
 - Added better interpolation to distinguish differences within the rasters mroe easily.
+- Added the std features in interventions.ts to update the values.
+- Fixed a backend dimensionality bug that returned mutliple errors. Fixed it by passing the right values.
+- Modified the intervention panel to also include and display the std values by adding the avg_std to the response of the predcit batch api endpoint.
+- 

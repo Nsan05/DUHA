@@ -363,10 +363,20 @@ async def predict_batch(req: PredictionBatchRequest):
             raise HTTPException(status_code=400, detail=f"Missing feature in request: {e}")
 
     # Recompute _std features if we have coordinates
+    avg_stds = {}
     if pixel_coords:
         new_stds_batch = recompute_std_for_batch(pixel_coords, modified_features_batch)
         for feats, new_stds in zip(modified_features_batch, new_stds_batch):
             feats.update(new_stds)
+        
+        # Average the recomputed stds across all pixels for the frontend UI display
+        if new_stds_batch:
+            all_std_keys = set()
+            for s in new_stds_batch:
+                all_std_keys.update(s.keys())
+            for sk in all_std_keys:
+                vals = [s.get(sk, 0.0) for s in new_stds_batch]
+                avg_stds[sk] = float(np.mean(vals))
 
     # We can optimize by compiling all rows into a single pandas DataFrame
     ordered_rows = []
@@ -410,7 +420,8 @@ async def predict_batch(req: PredictionBatchRequest):
             
     return {
         "predicted_anomalies": avg_predictions,
-        "per_pixel": per_pixel_predictions
+        "per_pixel": per_pixel_predictions,
+        "avg_stds": avg_stds
     }
 
 @app.post("/api/shap")

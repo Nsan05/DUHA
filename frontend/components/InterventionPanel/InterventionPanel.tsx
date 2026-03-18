@@ -125,11 +125,15 @@ export default function InterventionPanel() {
       return;
     }
 
-    // Set the averaged modified feature vector strictly for visual Composition UI purposes so each feature name has its mean value 
+    // Set the averaged modified feature vector strictly for visual Composition UI purposes
     const avgModifiedVector: any = {};
-    for (const key of FEATURE_KEYS) {
+    const meanKeys = FEATURE_KEYS.filter(k => !k.endsWith('_std'));
+
+    // Calculate Means (instant UI feedback)
+    for (const key of meanKeys) {
       avgModifiedVector[key] = batchCurrentV.reduce((sum, v) => sum + (v[key] as number), 0) / batchCurrentV.length;
     }
+
     setModifiedFeatures(avgModifiedVector as FeatureVector);
     setPredicting(true);
 
@@ -149,6 +153,12 @@ export default function InterventionPanel() {
         const data = await res.json();
         setPredictedAnomalies(data.predicted_anomalies);
         setPerPixelAnomalies(data.per_pixel);
+
+        // Merge the backend's accurate recomputed _std values into the modified features for display
+        if (data.avg_stds) {
+          setModifiedFeatures({ ...avgModifiedVector, ...data.avg_stds } as FeatureVector);
+        }
+
         setActiveInterventions(newActiveList);
       } else {
         alert("Prediction failed.");
@@ -315,6 +325,17 @@ export default function InterventionPanel() {
               <div className={styles.chip}>Albedo: {activeFeaturesVector.albedo_mean.toFixed(2)}</div>
               <div className={styles.chip}>Height: {Math.round(activeFeaturesVector.height_mean)}m</div>
               <div className={styles.chip}>Dist2Coast: {Math.round(activeFeaturesVector.dist_to_coast_m)}m</div>
+            </div>
+            
+            <div style={{ borderTop: "1px dashed var(--border-light)", margin: "12px 0 8px 0" }} />
+            <div style={{ fontSize: "10px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Spatial Context (Variance)</div>
+            
+            <div className={styles.chipRow}>
+              <div className={styles.chip}>Veg Std: {activeFeaturesVector.ndvi_std?.toFixed(3) ?? '0.000'}</div>
+              <div className={styles.chip}>Bldg Std: {activeFeaturesVector.building_density_std?.toFixed(3) ?? '0.000'}</div>
+              <div className={styles.chip}>Road Std: {activeFeaturesVector.road_density_std?.toFixed(3) ?? '0.000'}</div>
+              <div className={styles.chip}>Water Std: {activeFeaturesVector.water_mask_full_std?.toFixed(3) ?? '0.000'}</div>
+              <div className={styles.chip}>Albedo Std: {activeFeaturesVector.albedo_std?.toFixed(3) ?? '0.000'}</div>
             </div>
           </div>
 

@@ -36,6 +36,11 @@ export const FEATURE_KEYS = [
   "sand_mask_fraction",
   "water_mask_full_fraction",
   "dist_to_coast_m",
+  "ndvi_std",
+  "albedo_std",
+  "building_density_std",
+  "road_density_std",
+  "water_mask_full_std",
 ];
 
 // Based on observed min/max in training rasters
