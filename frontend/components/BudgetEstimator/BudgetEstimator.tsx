@@ -35,9 +35,13 @@ export default function BudgetEstimator() {
     const costPerSqM = costs[active.templateId] || 0;
     
     // Calculate the actual area affected by this intervention
+    // Only count pixels where the intervention can actually be applied
     let actualAreaAffected = 0;
     
     selectedPixels.forEach(pixel => {
+      // Skip pixels where this intervention doesn't apply
+      if (!template.canApply(pixel.features)) return;
+      
       let fraction = 1.0; // By default (e.g., Park, Water Feature, Construct Building), it affects the whole 900m2
       
       if (template.id === "cool_roof" || template.id === "green_roof") {
