@@ -790,3 +790,9 @@ The extra year you added didn't give the model new spatial information — the b
 - Fixed a backend dimensionality bug that returned mutliple errors. Fixed it by passing the right values.
 - Modified the intervention panel to also include and display the std values by adding the avg_std to the response of the predcit batch api endpoint.
 - Fixed bug with budget estimator calulating output for the entire area.
+
+---
+21/03/2026:
+- Going over final things within the script for final enhancements.
+- Updated the feature importance script for Landsat and nighttime to include the std features.
+- 

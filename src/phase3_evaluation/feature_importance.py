@@ -18,11 +18,16 @@ def get_landsat_data():
     
     # Selecting the exact columns used by the model
     features = [
-        'ndvi_mean', 'albedo_mean', 'building_density_mean', 'height_mean',
-        'road_density_mean', 'sand_mask_fraction', 'water_mask_full_fraction', 'dist_to_coast_m'
+        'ndvi_mean', 'ndvi_std', 
+        'albedo_mean', 'albedo_std', 
+        'building_density_mean', 'building_density_std', 
+        'height_mean', 'height_std',
+        'road_density_mean', 'road_density_std', 
+        'sand_mask_fraction', 'water_mask_full_fraction', 
+        'dist_to_coast_m'
     ]
     
-    # Load efficiently
+    # Load efficiently - forces data to be float32 to save memory
     dtypes = {f: np.float32 for f in features}
     dtypes['landsat_lst'] = np.float32
     dtypes['scene_id'] = str
@@ -45,8 +50,13 @@ def get_night_data():
     logger.info(f"Loading {csv_path.name}...")
     
     features = [
-        'ndvi_mean', 'albedo_mean', 'building_density_mean', 'height_mean',
-        'road_density_mean', 'sand_mask_fraction', 'water_mask_full_fraction', 'dist_to_coast_mean'
+        'ndvi_mean', 'ndvi_std', 
+        'albedo_mean', 'albedo_std', 
+        'building_density_mean', 'building_density_std', 
+        'height_mean', 'height_std',
+        'road_density_mean', 'road_density_std', 
+        'sand_mask_fraction', 'water_mask_full_fraction', 
+        'dist_to_coast_mean'
     ]
     
     df = pd.read_csv(csv_path)
@@ -66,6 +76,7 @@ def get_night_data():
 def plot_importance(result, features, ax, title):
     # Sort features by importance
     sorted_idx = result.importances_mean.argsort()
+    # Orders features from least → most important
     labels = np.array(features)[sorted_idx]
     
     # Clean up labels for display
