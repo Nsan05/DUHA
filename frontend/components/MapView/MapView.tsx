@@ -57,7 +57,28 @@ export default function MapView() {
   
   useEffect(() => {
     selectedPixelRef.current = selectedPixel;
-  }, [selectedPixel]);
+    
+    // Clear Mapbox memory if the active pixel is deactivated (e.g. Back to Community click)
+    if (selectedPixel === null && mapLoaded && mapRef.current) {
+      if (activePixelsRef.current.selected) {
+        mapRef.current.setFeatureState(
+          { source: "pixel-grid", id: activePixelsRef.current.selected.id },
+          { selected: false, multiSelected: false }
+        );
+        activePixelsRef.current.selected = null;
+        
+        const source = mapRef.current.getSource("active-pixels") as mapboxgl.GeoJSONSource;
+        if (source) {
+          const feats = [];
+          if (activePixelsRef.current.hovered) {
+             feats.push({ ...activePixelsRef.current.hovered, properties: { ...activePixelsRef.current.hovered.properties, isSelected: false } });
+          }
+          activePixelsRef.current.multiSelected.forEach(f => feats.push(f));
+          source.setData({ type: "FeatureCollection", features: feats as any });
+        }
+      }
+    }
+  }, [selectedPixel, mapLoaded]);
   useEffect(() => {
     timeOfDayRef.current = timeOfDay;
   }, [timeOfDay]);

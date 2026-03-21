@@ -799,4 +799,4 @@ The extra year you added didn't give the model new spatial information — the b
 ---
 22/03/2026:
 - Identified and fixed a bug where cost per C calcualtion was done on the entire pixel area and not just the area that canApply and due to a rounding error within the script.
-- 
+- Fixed the error of selected pixel causing a hole in the map when selected pixel is no longer active. : Add a new useEffect that listens specifically to selectedPixel, When selectedPixel === null, proactively find the internally stored Active Pixel and explicitly set its mapbox feature-state selected and multiSelected to false
