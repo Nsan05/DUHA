@@ -795,4 +795,8 @@ The extra year you added didn't give the model new spatial information — the b
 21/03/2026:
 - Going over final things within the script for final enhancements.
 - Updated the feature importance script for Landsat and nighttime to include the std features.
+
+---
+22/03/2026:
+- Identified and fixed a bug where cost per C calcualtion was done on the entire pixel area and not just the area that canApply and due to a rounding error within the script.
 - 

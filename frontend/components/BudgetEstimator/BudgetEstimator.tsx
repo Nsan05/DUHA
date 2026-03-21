@@ -76,9 +76,10 @@ export default function BudgetEstimator() {
     const after = predictedAnomalies[timeOfDay];
     const deltaT = after - before;
 
+    const roundedDeltaT = parseFloat(deltaT.toFixed(2));
     // If the intervention is effective (deltaT < 0) and the total cost is positive, calculate the cost effectiveness
-    if (deltaT < 0 && totalCost > 0) {
-      costEffectiveness = totalCost / Math.abs(deltaT);
+    if (deltaT < 0 && roundedDeltaT !== 0 && totalCost > 0) {
+      costEffectiveness = totalCost / Math.abs(roundedDeltaT);
     }
   }
 

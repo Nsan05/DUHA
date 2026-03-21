@@ -43,6 +43,7 @@ export default function ReportGenerator() {
     const costPerSqM = template.defaultCostPerSqM;
     let actualArea = 0;
     selectedPixels.forEach(pixel => {
+      if (!template.canApply(pixel.features)) return;
       let fraction = 1.0;
       if (template.id === "cool_roof" || template.id === "green_roof") {
         fraction = pixel.features.building_density_mean;
@@ -58,7 +59,8 @@ export default function ReportGenerator() {
 
   // Cost effectiveness
   const deltaT = predictedAnomalies[timeOfDay] - currentAnomalies[timeOfDay];
-  const costEffectiveness = deltaT < 0 && totalCost > 0 ? totalCost / Math.abs(deltaT) : null;
+  const roundedDeltaT = parseFloat(deltaT.toFixed(2));
+  const costEffectiveness = deltaT < 0 && roundedDeltaT !== 0 && totalCost > 0 ? totalCost / Math.abs(roundedDeltaT) : null;
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("en-AE", { style: "currency", currency: "AED", maximumFractionDigits: 0 }).format(val);
