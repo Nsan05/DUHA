@@ -800,3 +800,18 @@ The extra year you added didn't give the model new spatial information — the b
 22/03/2026:
 - Identified and fixed a bug where cost per C calcualtion was done on the entire pixel area and not just the area that canApply and due to a rounding error within the script.
 - Fixed the error of selected pixel causing a hole in the map when selected pixel is no longer active. : Add a new useEffect that listens specifically to selectedPixel, When selectedPixel === null, proactively find the internally stored Active Pixel and explicitly set its mapbox feature-state selected and multiSelected to false
+
+- Training Errors:
+
+Final Model Performance Summary
+Model Time	Satellite	Baseline Error (Std Dev)	Final Model RMSE	Absolute Improvement	Final $R^2$ Score
+Morning (10:30 AM)	Landsat 8/9	9.58 K	2.71 K	6.87 K	0.92
+Afternoon (1:30 PM)	VIIRS	3.51 K	2.40 K	1.11 K	0.53
+Nighttime (1:30 AM)	VIIRS	2.05 K	1.21 K	0.84 K	0.64
+
+- Consistency Errors:
+Metric	Afternoon Model (1:30 PM)	Nighttime Model (1:15 AM)
+RMSE (Error)	 2.145 K                 	1.308 K
+R² (Accuracy) 	0.520	               0.588
+Pearson r (Correlation)	0.731	       0.780
+Mean Bia      −0.269 K	           +0.12 K
