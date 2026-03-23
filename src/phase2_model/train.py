@@ -154,7 +154,8 @@ def train_model(train_df, test_df):
         gb = lgb.LGBMRegressor(
             random_state=RANDOM_STATE,
             n_jobs=-1,
-            **best_params
+            **best_params,
+            verbose=-1
         )
     else:
         logger.info("Training LGBMRegressor with DEFAULT parameters...")
@@ -162,7 +163,8 @@ def train_model(train_df, test_df):
             n_estimators=500,
             learning_rate=0.05,
             random_state=RANDOM_STATE,
-            n_jobs=-1
+            n_jobs=-1,
+            verbose=-1
         )
     # For LightGBM early stopping, split 10% of train for validation internally
     from sklearn.model_selection import train_test_split

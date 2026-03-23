@@ -815,3 +815,29 @@ RMSE (Error)	 2.145 K                 	1.308 K
 R² (Accuracy) 	0.520	               0.588
 Pearson r (Correlation)	0.731	       0.780
 Mean Bia      −0.269 K	           +0.12 K
+
+---
+23/03/2026:
+- Identified a flaw of the viirs model being trained on lesser urban fractions but using the features only from the urban sections which results in the introduction of nosie. Making a change of introdcuing urban_fraction weighting to make sure that those readings are priortised less in the training process so as to reduce the introdcution of noise.
+- Changed the aggregation script to only consider the pure urban pixels rather than taking into consideration the min urban fraction.
+- Did the running of scripts and got the new metrics for the afternoon model as follows:
+
+Training:
+2026-03-23 18:28:58,703 - INFO - FINAL RESULTS (LST ANOMALY - GRADIENT BOOSTING)
+2026-03-23 18:28:58,703 - INFO - Test RMSE: 2.10 K
+2026-03-23 18:28:58,703 - INFO - Test R²:   0.48
+2026-03-23 18:28:58,703 - INFO - Improvement over Baseline: 0.83 K
+
+Consistency:
+2026-03-23 18:33:13,741 - INFO - ==================================================
+2026-03-23 18:33:13,741 - INFO - STATISTICAL CONSISTENCY METRICS
+2026-03-23 18:33:13,742 - INFO - ==================================================
+2026-03-23 18:33:13,742 - INFO -   Observations:       39693
+2026-03-23 18:33:13,742 - INFO -   Mean Bias:          -0.186 K
+2026-03-23 18:33:13,742 - INFO -   MAE:                1.505 K
+2026-03-23 18:33:13,742 - INFO -   RMSE:               2.055 K
+2026-03-23 18:33:13,742 - INFO -   R²:                 0.520
+2026-03-23 18:33:13,742 - INFO -   Pearson r:          0.732 (p=0.00e+00)
+
+
+- 

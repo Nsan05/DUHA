@@ -10,7 +10,7 @@ VIIRS_RES = 750  # meters
 SUB_RES = 30     # meters
 WINDOW_SIZE = int(VIIRS_RES / SUB_RES) # 25 pixels
 HALF_WINDOW = WINDOW_SIZE // 2
-MIN_URBAN_FRACTION = 0.3 # 30%
+MIN_URBAN_FRACTION = 0.99 # 99% (Pure urban pixels only)
 
 def get_window(x, y, transform):
     """

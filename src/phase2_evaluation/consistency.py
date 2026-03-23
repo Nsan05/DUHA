@@ -115,8 +115,8 @@ def main():
     logger.info(f"  R²:                 {r2:.3f}")
     logger.info(f"  Pearson r:          {pearson_r:.3f} (p={p_val:.2e})")
     logger.info("=" * 50)
-    logger.info(f"  Training R²:        0.534  (for comparison)")
-    logger.info(f"  Training RMSE:      2.40 K (for comparison)")
+    logger.info(f"  Training R²:        0.48  (for comparison)")
+    logger.info(f"  Training RMSE:      2.10 K (for comparison)")
     logger.info("=" * 50)
     
     # 6. Scatter plot: Aggregated Prediction vs Actual VIIRS
