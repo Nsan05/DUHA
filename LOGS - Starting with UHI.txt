@@ -814,7 +814,7 @@ Metric	Afternoon Model (1:30 PM)	Nighttime Model (1:15 AM)
 RMSE (Error)	 2.145 K                 	1.308 K
 R² (Accuracy) 	0.520	               0.588
 Pearson r (Correlation)	0.731	       0.780
-Mean Bia      −0.269 K	           +0.12 K
+Mean Bias      −0.269 K	           +0.12 K
 
 ---
 23/03/2026:
@@ -839,5 +839,26 @@ Consistency:
 2026-03-23 18:33:13,742 - INFO -   R²:                 0.520
 2026-03-23 18:33:13,742 - INFO -   Pearson r:          0.732 (p=0.00e+00)
 
+
+- Did the running of script and got the new metrics for the night time model:
+
+Training:
+2026-03-23 20:37:35,648 - INFO - ------------------------------
+2026-03-23 20:37:35,648 - INFO - FINAL RESULTS (NIGHTTIME LST ANOMALY - GRADIENT BOOSTING)
+2026-03-23 20:37:35,648 - INFO - Test RMSE: 1.25 K
+2026-03-23 20:37:35,648 - INFO - Test R²:   0.58
+2026-03-23 20:37:35,649 - INFO - Improvement over Baseline: 0.71 K
+
+Consistency:
+2026-03-23 20:39:53,761 - INFO - ==================================================
+2026-03-23 20:39:53,761 - INFO - PHASE 3B METRICS (Full Dataset Consistency Check)
+2026-03-23 20:39:53,761 - INFO - ==================================================
+2026-03-23 20:39:53,762 - INFO -   All Pixels:    35,968
+2026-03-23 20:39:53,762 - INFO -   Mean Bias:     -0.164 K
+2026-03-23 20:39:53,762 - INFO -   MAE:           1.009 K
+2026-03-23 20:39:53,762 - INFO -   RMSE:          1.303 K
+2026-03-23 20:39:53,762 - INFO -   R²:            0.592
+2026-03-23 20:39:53,762 - INFO -   Pearson r:     0.785 (p=0.00e+00)
+2026-03-23 20:39:53,762 - INFO - ==================================================
 
 - 

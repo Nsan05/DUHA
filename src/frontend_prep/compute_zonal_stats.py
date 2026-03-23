@@ -170,7 +170,7 @@ def main():
             nodata=nodata_val
         )
         
-        # Adding all the stat data to the gdf
+        # Adding all the stat data to all the communities in the gdf for the selected raster
         for stat_name in info["stats"]:
             col_name = f"{key}_{stat_name}"
             gdf[col_name] = [s[stat_name] for s in stats]
