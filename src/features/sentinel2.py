@@ -19,7 +19,7 @@ OUTPUT_DIR = BASE_DIR / "data" / "intermediate" / "sentinel2_30m"
 # Processing Block Size (Dimensions in 10m pixels)
 BLOCK_SIZE = 2052 # 684 * 3
 
-# SCL Classes to KEEP
+# SCL Classes to KEEP - [Dark Area, Vegetation, Bare Soil, Water, Unclassified]
 VALID_SCL = [2, 4, 5, 6, 7] 
 
 logging.basicConfig(level=logging.INFO)
@@ -141,7 +141,8 @@ def process_block(window_10m, relevant_granules, master_meta):
                 arr = get_windowed_reprojection(p, master_meta, window_10m)
                 arr[~valid_mask] = np.nan
                 stack[b].append(arr)
-                
+
+    # Taking the median of all the values for each band             
     medians = {}
     for b, arrays in stack.items():
         if not arrays:

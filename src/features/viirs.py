@@ -32,8 +32,7 @@ def load_viirs_scene(nc_path):
         # Adjust based on standard VNP21 format:
         # /HDFEOS/SWATHS/VNP_21_Swath/Geolocation Fields/Latitude
         # /HDFEOS/SWATHS/VNP_21_Swath/Data Fields/LST
-        
-        # Robustly find groups (sometimes paths differ slightly in versions)
+    
         
         if 'VIIRS_Swath_LSTE' in ds.groups:
             swath = ds.groups['VIIRS_Swath_LSTE']

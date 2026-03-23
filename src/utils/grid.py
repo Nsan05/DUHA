@@ -17,7 +17,7 @@ OUTPUT_FILE = OUTPUT_DIR / "master_grid_30m.tif"
 META_FILE = OUTPUT_DIR / "reference_grid_meta.json"
 
 def find_landsat_reference():
-    # Recursive search for *ST_B10.TIF in the Landsat directory
+    # Recursive search for *ST_B10.TIF in the Landsat directory - used because it is consistently present and is 30m
     files = list(RAW_LANDSAT_DIR.rglob("*ST_B10.TIF"))
     if not files:
         raise FileNotFoundError(f"No *ST_B10.TIF file found in {RAW_LANDSAT_DIR}")
@@ -68,6 +68,8 @@ def create_master_grid():
         print(f"   Origin: {transform[2]}, {transform[5]}")
 
         # Metadata JSON (for future reference)
+        # Transform is a 6-element tuple: (a, b, c, d, e, f)
+        # (pixel_width, row_rotation, x_origin, column_rotation, pixel_height, y_origin)
         meta_dict = {
             "crs": PROJECT_CRS,
             "transform": [transform[0], transform[1], transform[2], 

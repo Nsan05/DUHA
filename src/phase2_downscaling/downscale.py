@@ -44,7 +44,7 @@ def main():
     a city-wide high-resolution LST anomaly map.
     
     Steps:
-    1. Load all 8 feature rasters (30m).
+    1. Load all 13 feature rasters (30m).
     2. Build a valid-pixel mask (no NoData in any feature).
     3. Run model.predict() on all valid pixels.
     4. Save the output as a GeoTIFF.
@@ -118,7 +118,7 @@ def main():
     logger.info("Preparing feature matrix for inference...")
     # Extract valid pixels: shape (n_valid, 8)
     valid_rows = valid_mask.ravel()
-    X = feature_stack.reshape(len(feature_names), -1).T  # (n_pixels, 8)
+    X = feature_stack.reshape(len(feature_names), -1).T  # (n_pixels, 13)
     X_valid = X[valid_rows]
     
     logger.info(f"Running inference on {X_valid.shape[0]:,} pixels...")

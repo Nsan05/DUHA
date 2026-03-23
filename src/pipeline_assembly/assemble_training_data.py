@@ -36,7 +36,7 @@ FEATURE_FILES = [
     "building_density_30m.tif",
     "road_density_30m.tif",
     "sand_mask_30m.tif",
-    "water_mask_full_30m.tif" # Used as feature? Or just mask? Plan said "Water_fraction"
+    "water_mask_full_30m.tif"
 ]
 
 def process_viirs_scene(nc_path, raster_handles, urban_src):
