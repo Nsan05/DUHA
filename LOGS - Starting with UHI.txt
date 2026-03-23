@@ -861,4 +861,8 @@ Consistency:
 2026-03-23 20:39:53,762 - INFO -   Pearson r:     0.785 (p=0.00e+00)
 2026-03-23 20:39:53,762 - INFO - ==================================================
 
+-  The number of rows in the phase2 enriched dataset is now: 39693
+- The number of rows in the phase 3b dataset is now: 35968
+
+- ran the front end prep scripts once again to account for the change in rasters.
 - 
