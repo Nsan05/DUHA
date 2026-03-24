@@ -193,6 +193,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setActiveInterventions([]);
       setInterventionMode(false);
 
+      // Before API runs and loads the grid, the user clicks away, so we clear the grid data
       if (!selectedCommunity) {
         setPixelGridData(null);
         setPixelGridLoading(false);

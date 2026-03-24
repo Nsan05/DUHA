@@ -328,7 +328,7 @@ export default function MapView() {
     };
 
     const onMouseLeave = () => {
-      if (hoveredStateId !== null) {
+      if (hoveredStateId !== null && map.isStyleLoaded()) {
         map.setFeatureState(
           { source: "communities", id: hoveredStateId },
           { hover: false }
