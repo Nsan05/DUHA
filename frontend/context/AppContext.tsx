@@ -339,9 +339,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Weights: 40% Anomaly, 30% Population, 30% Extreme Heat Pixels
       const hvi = (0.4 * nAnom) + (0.3 * nPop) + (0.3 * nExtr);
       props.hvi = Math.round(hvi * 100); // 0 to 100 integer scale
+    });
 
-      // Priority Exposure flag: HVI > 60 (Top 40% roughly) AND Population > Median
-      props.priorityExposure = props.hvi > 60 && pop > medianPop;
+    // 3. Extract and sort all HVI scores to find the dynamic percentile threshold
+    const allHviScores = features.map(f => f.properties.hvi || 0).sort((a, b) => a - b);
+    
+    // The score that represents the Top 15% most vulnerable (85th percentile)
+    const top15PercentileIndex = Math.floor(allHviScores.length * 0.95);
+    const hviThreshold = allHviScores[top15PercentileIndex] || 0;
+
+    // 4. Final Pass: Apply Priority Flag based on the dynamic threshold
+    features.forEach(f => {
+      const props = f.properties;
+      const pop = props.population || 0;
+
+      // Priority Exposure flag: HVI is in the Top 15% city-wide AND Population > Median
+      props.priorityExposure = (props.hvi || 0) >= hviThreshold && pop > medianPop;
 
       // Assign explicit top-level ID for MapBox feature state binding
       // Ensure it's a number (MapBox strongly prefers integer IDs for feature-state)

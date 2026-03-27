@@ -865,4 +865,8 @@ Consistency:
 - The number of rows in the phase 3b dataset is now: 35968
 
 - ran the front end prep scripts once again to account for the change in rasters.
+
+-----
+27/03/2026:
+- Added an improvement to community to consider the top 95th percentile HVI scores rather than a fixed 60.
 - 
