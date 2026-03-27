@@ -20,12 +20,18 @@ pyproj==3.6.1
 shapely==2.0.3
 geopandas==0.14.3
 rio-tiler==6.4.0
+rasterstats==0.19.0
 
 # --- Remote Sensing / Data Retrieval ---
 netCDF4==1.6.5
+h5py==3.10.0
 osmnx==1.9.3
+duckdb==0.10.0
 tqdm==4.66.2
 requests==2.31.0
+
+# --- Excel / Data Formats ---
+openpyxl==3.1.2
 
 # --- Visualisation (offline scripts & notebooks) ---
 matplotlib==3.8.3

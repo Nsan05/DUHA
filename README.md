@@ -64,9 +64,55 @@ FYP/
 
 ---
 
+## Prerequisites
+
+- **Python 3.10+** (tested with 3.10 and 3.11)
+- **Node.js 18+** and **npm**
+- A **Mapbox** account with an access token (free tier works)
+
+---
+
 ## Running Locally
 
-### Backend (FastAPI)
+### 1. Clone the Repository
+
+```bash
+git clone <repo-url>
+cd FYP
+```
+
+### 2. Set Up the Data Folder
+
+The `data/` directory is not tracked in Git due to its size. Download it from the project Google Drive and place it in the project root so it matches the structure below:
+
+```
+data/
+├── raw/                     <- Raw satellite & vector inputs
+│   ├── landsat/
+│   ├── sentinel2/scenes/
+│   ├── viirs/
+│   ├── GBA/OutputFiles/
+│   ├── overture/
+│   ├── boundaries/          <- Must contain urban_dubai_communities.geojson
+│   └── census/              <- Must contain Population_by_community.xlsx
+├── intermediate/
+├── final/
+│   ├── phase1_features/     <- All 13 aligned 30m feature rasters (.tif)
+│   ├── phase2_outputs/      <- lst_anomaly_30m.tif
+│   ├── phase3a_outputs/     <- lst_anomaly_landsat_30m.tif
+│   ├── phase3b_outputs/     <- lst_anomaly_nighttime_30m.tif
+│   ├── communities_enriched.geojson
+│   └── community_stats.json
+├── models/                  <- Trained LightGBM .joblib files
+│   ├── gb_model_anomaly.joblib
+│   ├── gb_model_landsat.joblib
+│   └── gb_model_nighttime.joblib
+└── model_outputs/
+```
+
+> **The backend requires `data/final/`, `data/models/`, and `data/final/communities_enriched.geojson` at a minimum to start.** See `data/README.md` for the full directory layout and the Google Drive link.
+
+### 3. Backend (FastAPI)
 
 ```bash
 cd backend
@@ -74,19 +120,29 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-The API will be available at `http://localhost:8000`.
+The API will be available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
 
-### Frontend (Next.js)
+### 4. Frontend (Next.js)
+
+Create a `.env.local` file in the `frontend/` directory with your Mapbox token:
 
 ```bash
 cd frontend
+echo "NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here" > .env.local
+```
+
+Then install and run:
+
+```bash
 npm install
 npm run dev
 ```
 
 The app will be available at `http://localhost:3000`.
 
-> **Note:** The `data/` directory containing the processed raster files and trained models is required for the backend to function. Ensure it is populated before starting the server.
+> **Environment Variables:**
+> - `NEXT_PUBLIC_MAPBOX_TOKEN` **(required)** — your Mapbox GL access token. The map will not render without it.
+> - `NEXT_PUBLIC_API_URL` *(optional)* — backend URL, defaults to `http://localhost:8000`.
 
 ---
 
