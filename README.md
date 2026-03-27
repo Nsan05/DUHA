@@ -1,6 +1,6 @@
 # Dubai Urban Heat Island Analysis
 
-### Final Year Project — Nithin Santhosh
+### Final Year Project - Nithin Santhosh
 
 > A high-resolution urban climate intelligence platform that maps, explains, and simulates the mitigation of the Urban Heat Island (UHI) effect across Dubai's communities.
 
@@ -54,13 +54,13 @@ FYP/
 
 ## Tech Stack
 
-| Layer        | Technology                                                 |
-| ------------ | ---------------------------------------------------------- |
-| Frontend     | Next.js 16, React 19, TypeScript, Mapbox GL JS, Recharts   |
-| Backend      | FastAPI, Python, Rasterio, rio-tiler                       |
-| ML Models    | LightGBM, SHAP, scikit-learn                               |
-| Geospatial   | EPSG:32640 (UTM Zone 40N), 30m resolution rasters          |
-| Data Sources | Sentinel-2, Landsat 9, VIIRS, Overture Maps, OpenStreetMap |
+| Layer        | Technology                                                                   |
+| ------------ | ---------------------------------------------------------------------------- |
+| Frontend     | Next.js 16, React 19, TypeScript, Mapbox GL JS, Recharts                     |
+| Backend      | FastAPI, Python, Rasterio, rio-tiler                                         |
+| ML Models    | LightGBM, SHAP, scikit-learn                                                 |
+| Geospatial   | EPSG:32640 (UTM Zone 40N), 30m resolution rasters                            |
+| Data Sources | Sentinel-2, Landsat 9, VIIRS, Overture Maps, OpenStreetMap, Dubai Pulse, GBA |
 
 ---
 
@@ -113,4 +113,4 @@ The app will be available at `http://localhost:3000`.
 
 ---
 
-_BSc Computer Science — Final Year Project, 2025–26_
+_BSc Computer Science - Final Year Project, 2025–26_
