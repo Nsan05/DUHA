@@ -7,6 +7,8 @@ import styles from "./MapView.module.css";
 import { useAppContext } from "../../context/AppContext";
 import LayerPanel from "../LayerPanel/LayerPanel";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 if (process.env.NEXT_PUBLIC_MAPBOX_TOKEN) {
   mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 }
@@ -778,7 +780,7 @@ export default function MapView() {
             map.getCanvas().style.cursor = "wait";
             
             // fetch features to add to multi-select for the selcted pixel
-            fetch(`http://localhost:8000/api/pixel`, {
+            fetch(`${API_BASE_URL}/api/pixel`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ lat: e.lngLat.lat, lon: e.lngLat.lng, time_of_day: timeOfDayRef.current }),

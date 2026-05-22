@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import styles from "./LayerPanel.module.css";
 import mapboxgl from "mapbox-gl";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 interface LayerConfig {
   id: string;
   name: string;
@@ -141,7 +143,7 @@ export default function LayerPanel({ map }: LayerPanelProps) {
           map.addSource(sourceId, {
             type: "raster",
             tiles: [
-              `http://localhost:8000/api/tiles/${config.backendId}/{z}/{x}/{y}.png?colormap=${config.cmap}&min_val=${config.min}&max_val=${config.max}&nodata=${config.nodata}`
+              `${API_BASE_URL}/api/tiles/${config.backendId}/{z}/{x}/{y}.png?colormap=${config.cmap}&min_val=${config.min}&max_val=${config.max}&nodata=${config.nodata}`
             ],
             tileSize: 256
           });

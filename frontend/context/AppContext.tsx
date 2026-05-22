@@ -14,6 +14,8 @@ import React, { createContext, useContext, useState, useEffect, useMemo, ReactNo
 import { CommunityFeatureCollection, TimeOfDay } from "../lib/types";
 import { FeatureVector, InterventionId, InterventionParams } from "../lib/interventions";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 // The shape of our global state - shared by all componeents
 interface AppContextState {
   timeOfDay: TimeOfDay;
@@ -166,7 +168,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async function fetchCommunities() {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:8000/api/communities");
+        const res = await fetch(`${API_BASE_URL}/api/communities`);
         if (!res.ok) throw new Error("Failed to fetch community data");
         const data: CommunityFeatureCollection = await res.json();
         setRawCommunities(data);
@@ -204,7 +206,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         setPixelGridData(null); // Instantly clear old grid while loading new one
         setPixelGridLoading(true);
-        const res = await fetch(`http://localhost:8000/api/community/${selectedCommunity}/pixels?time=${timeOfDay}`);
+        const res = await fetch(`${API_BASE_URL}/api/community/${selectedCommunity}/pixels?time=${timeOfDay}`);
         if (!res.ok) throw new Error("Failed to fetch pixel grid data");
         const data = await res.json();
         setPixelGridData(data);
@@ -231,12 +233,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         // Parallel fetch for speed
         const [pixelRes, shapRes] = await Promise.all([
-          fetch("http://localhost:8000/api/pixel", {
+          fetch(`${API_BASE_URL}/api/pixel`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ lat: selectedPixel.lat, lon: selectedPixel.lng, time_of_day: timeOfDay }),
           }),
-          fetch("http://localhost:8000/api/shap", {
+          fetch(`${API_BASE_URL}/api/shap`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ lat: selectedPixel.lat, lon: selectedPixel.lng, time_of_day: timeOfDay }),
