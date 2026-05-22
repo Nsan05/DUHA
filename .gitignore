@@ -16,8 +16,7 @@ data/raw/*
 !data/raw/.gitkeep
 data/intermediate/*
 !data/intermediate/.gitkeep
-data/final/*
-!data/final/.gitkeep
+data/final/phase1_features/
 
 # Ignore locally generated outputs
 outputs/figures/*
